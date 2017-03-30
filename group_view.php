@@ -141,7 +141,7 @@ function draw_userlist(groupid) {
     var out = "";
     for (var z in userlist) {
         out += "<tr>";
-        out += "<td class='user' uid="+userlist[z].userid+">"+userlist[z].username+"</td>";
+        out += "<td class='user' uid="+userlist[z].userid+"><a href='"+path+"group/setuser?groupid="+selected_groupid+"&userid="+userlist[z].userid+"'>"+userlist[z].username+"</a></td>";
         out += "<td>"+userlist[z].access+"</td>";
         out += "</tr>";
     }

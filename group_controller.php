@@ -34,6 +34,30 @@ function group_controller()
             $route->format = "json";
             $result = $group->add_user_auth($session["userid"],get("groupid"),get("username"),get("password"),get("access"));
         }
+        
+        // --------------------------------------------------------------------------
+        // SPECIAL USER SWITCHING FUNCTION
+        // --------------------------------------------------------------------------
+        if ($route->action == 'setuser' && $session['write'])
+        {
+            $route->format = "text";
+            $groupid = (int) get('groupid');
+            $userid = (int) get('userid');
+            
+            // 1. Check that session user is an administrator of the group requested
+            if ($group->is_group_admin($groupid,$session["userid"])===true) { 
+                // 2. Check that user requested is a member of group requested
+                if ($group->is_group_member($groupid,$userid)===true) {
+                    $_SESSION['userid'] = intval(get('userid'));
+                    header("Location: ../user/view");
+                } else {
+                    $result = "ERROR: User is not a member of group";
+                }
+            } else {
+                $result = "ERROR: You are not an administrator of this group";
+            }
+            
+        }
     }
 
     if ($session['read']) {

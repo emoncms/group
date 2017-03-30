@@ -199,7 +199,7 @@ class Group
         return true;
     }
     
-    private function is_group_member($groupid,$userid) 
+    public function is_group_member($groupid,$userid) 
     {
         // Input sanitisation
         $userid = (int) $userid;
@@ -214,7 +214,7 @@ class Group
         return true;
     }
     
-    private function is_group_admin($groupid,$userid) 
+    public function is_group_admin($groupid,$userid) 
     {
         // Input sanitisation
         $userid = (int) $userid;
