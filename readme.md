@@ -4,21 +4,21 @@ Multi-user administration module.
 
 ## API
 
-### emoncms/group/create?name=NAME&description=DESCRIPTION
+**emoncms/group/create?name=NAME&description=DESCRIPTION**
 
 Result:
 
     {"success":true,"groupid":1,"message":"Group 1 added"}
     
-### emoncms/group/adduserauth?groupid=1&username=USERNAME&password=PASSWORD&access=0
+**emoncms/group/adduserauth?groupid=1&username=USERNAME&password=PASSWORD&access=0**
 
-**Access:** 1: Add user as administrator. 0: Add user without administration access.
+*Access:* 1: Add user as administrator. 0: Add user without administration access.
 
 Result:
 
     {"success":true,"message":"User 1:USERNAME added"}
 
-### emoncms/group/grouplist
+**emoncms/group/grouplist**
 
 Result:
 
@@ -27,7 +27,7 @@ Result:
         {"groupid":2,"name":"Retrofits","description":"Retrofit projects"}
     ]
     
-### emoncms/group/userlist?groupid=1
+**emoncms/group/userlist?groupid=1**
 
 Result:
 
