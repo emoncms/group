@@ -1,6 +1,14 @@
 # Groups module
 
+Status: Prototype v1 in development
+
 Multi-user administration module.
+
+Administration and groups for multiple emoncms accounts on emoncms.org or other muti user emoncms installation. Providing administrator access to specific users/groups rather than global administration for all users – for which there is a basic implementation inbuilt in emoncms already.
+
+Concept design:
+
+![groups1.png](files/groups1.png)
 
 ## API
 
