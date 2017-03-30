@@ -5,6 +5,9 @@ $fullwidth = true;
 <link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
 <script language="javascript" type="text/javascript" src="<?php echo $path;?>Modules/group/group.js"></script>
 
+<!-------------------------------------------------------------------------------------------
+  MAIN
+-------------------------------------------------------------------------------------------->
 <div id="wrapper">
     <div class="sidebar">
         <div style="padding-left:10px">
@@ -36,25 +39,105 @@ $fullwidth = true;
     </div>
 </div>
 
+<!-------------------------------------------------------------------------------------------
+  MODALS
+-------------------------------------------------------------------------------------------->
+<!-- GROUP CREATE -->
+<div id="group-create-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="group-create-modal-label" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="group-create-modal-label">Create New Group</h3>
+    </div>
+    <div class="modal-body">
+
+    <p>Group Name:<br>
+    <input id="group-create-name" type="text"></p>
+
+    <p>Group Description:<br>
+    <input id="group-create-description" type="text"></p>
+    
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="group-create-action" class="btn btn-primary">Create</button>
+    </div>
+</div>
+
+<!-- ADD USER TO GROUP -->
+<div id="group-adduser-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="group-adduser-modal-label" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="group-adduser-modal-label">Add user to group</h3>
+    </div>
+    <div class="modal-body">
+
+    <p>Username:<br>
+    <input id="group-adduser-username" type="text"></p>
+
+    <p>Password:<br>
+    <input id="group-adduser-password" type="password"></p>
+
+    <p>Access:<br>
+    <select id="group-adduser-access">
+      <option val=0>Normal</option>
+      <option val=1>Administrator</option>
+    </select>
+    
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="group-adduser-action" class="btn btn-primary">Add</button>
+    </div>
+</div>
+
+<!-------------------------------------------------------------------------------------------
+  JAVASCRIPT
+-------------------------------------------------------------------------------------------->
 <script>
 var path = "<?php echo $path; ?>";
 sidebar_resize();
 
-var grouplist = group.grouplist();
+var selected_groupid = 0;
 
-var out = "";
-for (var z in grouplist) {
-    out += "<div class='group' gid="+grouplist[z].groupid+">"+grouplist[z].name+"</div>";
+// ----------------------------------------------------------------------------------------
+// Draw: grouplist
+// ----------------------------------------------------------------------------------------
+draw_grouplist();
+
+function draw_grouplist() {
+    var grouplist = group.grouplist();
+    var out = "";
+    for (var z in grouplist) {
+        out += "<div class='group' gid="+grouplist[z].groupid+">"+grouplist[z].name+"</div>";
+    }
+    $("#grouplist").html(out);
 }
-$("#grouplist").html(out);
 
+// ----------------------------------------------------------------------------------------
+// Action: click on group
+// ----------------------------------------------------------------------------------------
 $("#grouplist").on("click",".group",function(){
+    // Group selection CSS
     $(".group").removeClass('activated');
     $(this).addClass('activated');
+    // Get selected group from attributes
     var groupid = $(this).attr("gid");
     var groupname = $(this).html();
+    selected_groupid = groupid;
+    
+    draw_userlist(groupid);
+
+    $("#groupname").html(groupname);    // Place group name in title
+    $("#userlist-table").show();        // Show userlist table
+    $("#adduser").show();               // Show add user button
+    $("#nogroupselected").hide();       // Hide no group selected alert
+});
+
+function draw_userlist(groupid) {
+    // Load user list
     var userlist = group.userlist(groupid);
     
+    // Compile the user list html
     var out = "";
     for (var z in userlist) {
         out += "<tr>";
@@ -62,11 +145,42 @@ $("#grouplist").on("click",".group",function(){
         out += "<td>"+userlist[z].access+"</td>";
         out += "</tr>";
     }
-    $("#userlist").html(out);
-    $("#groupname").html(groupname);
-    $("#userlist-table").show();
-    $("#adduser").show();
-    $("#nogroupselected").hide();
+    $("#userlist").html(out);           // Place userlist html in userlist table
+}
+
+// ----------------------------------------------------------------------------------------
+// Action: Group creation
+// ----------------------------------------------------------------------------------------
+$("#groupcreate").click(function(){
+    $('#group-create-modal').modal('show');
+});
+
+$("#group-create-action").click(function() {
+    var name = $("#group-create-name").val();
+    var description = $("#group-create-description").val();
+    
+    var result = group.create(name,description);
+    $('#group-create-modal').modal('hide');
+    alert(JSON.stringify(result));
+    draw_grouplist();
+});
+
+// ----------------------------------------------------------------------------------------
+// Action: Add user
+// ----------------------------------------------------------------------------------------
+$("#adduser").click(function(){
+    $('#group-adduser-modal').modal('show');
+});
+
+$("#group-adduser-action").click(function() {
+    var username = $("#group-adduser-username").val();
+    var password = $("#group-adduser-password").val();
+    var access = $("#group-adduser-access").val();
+    
+    var result = group.adduserauth(selected_groupid,username,password,access);
+    $('#group-adduser-modal').modal('hide');
+    alert(JSON.stringify(result));
+    draw_userlist(selected_groupid);
 });
 
 // ----------------------------------------------------------------------------------------
