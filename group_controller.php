@@ -16,6 +16,11 @@ function group_controller()
     // API
     // ------------------------------------------------------------------------------------
     if ($session['write']) {
+    
+        if ($route->action == "") {
+            $route->format = "html";
+            $result = view("Modules/group/group_view.php",array());
+        }
         
         // group/create?name=test&description=test
         if ($route->action == "create") {
