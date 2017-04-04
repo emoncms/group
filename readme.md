@@ -26,7 +26,7 @@ Screenshots:
 
 An administration module would allow an initial emoncms user to add users to their administrator view. Making it possible to remotely manage multiple accounts without logging into each account individually.
 
-**Use case 2:** A research project monitoring 10-100s of sites. Requiring site status check’s to ensure monitoring is all operating ok. Alerts to signal a system going offline or measurment going outside of expected range. 
+**Use case 2:** A research project monitoring 10-100s of sites. Requiring site status check’s to ensure monitoring is all operating ok. Alerts to signal a system going offline or measurement going outside of expected range. 
 
 Advanced multi site data export tools for further data analysis
 
