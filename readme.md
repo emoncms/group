@@ -9,7 +9,7 @@ Administration and groups for multiple emoncms accounts on emoncms.org or other 
 **A group:**
 
 - Types of installation: "Air source heatpumps", "Solar + battery systems"
-• Particular research project, e.g "Heatpump Study", "Retrofit study"
+- Particular research project, e.g "Heatpump Study", "Retrofit study"
 - A group of users wishing to compare energy use and generation
 
 Concept design:
