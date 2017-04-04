@@ -10,6 +10,12 @@ Concept design:
 
 ![groups1.png](files/groups1.png)
 
+Screenshots:
+
+![groups2.png](files/groups2.png)
+
+![groups3.png](files/groups3.png)
+
 ## API
 
 **emoncms/group/create?name=NAME&description=DESCRIPTION**
