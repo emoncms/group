@@ -60,15 +60,14 @@ function group_controller()
             if ($group->is_group_admin($groupid,$session["userid"])===true) { 
                 // 2. Check that user requested is a member of group requested
                 if ($group->is_group_member($groupid,$userid)===true) {
-                    $_SESSION['userid'] = intval(get('userid'));
+                    $_SESSION['userid'] = $userid;
                     header("Location: ../user/view");
                 } else {
                     $result = "ERROR: User is not a member of group";
                 }
             } else {
                 $result = "ERROR: You are not an administrator of this group";
-            }
-            
+            } 
         }
     }
 

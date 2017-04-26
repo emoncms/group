@@ -82,8 +82,8 @@ $fullwidth = true;
 
     <p>Access:<br>
     <select id="group-adduser-access">
-      <option val=0>Normal</option>
-      <option val=1>Administrator</option>
+      <option value=0>Normal</option>
+      <option value=1>Administrator</option>
     </select>
     
     </div>
@@ -181,7 +181,9 @@ function draw_userlist(groupid) {
         for (var z in userlist) {
             out += "<tr>";
             out += "<td class='user' uid="+userlist[z].userid+"><a href='"+path+"group/setuser?groupid="+selected_groupid+"&userid="+userlist[z].userid+"'>"+userlist[z].username+"</a></td>";
-            out += "<td>"+userlist[z].access+"</td>";
+            var access = "MEMBER";
+            if (userlist[z].access==1) access = "ADMIN";
+            out += "<td>"+access+"</td>";
             out += "<td><i class='removeuser icon-trash' style='cursor:pointer' title='Remove User' uid="+userlist[z].userid+"></i></td>";
             out += "</tr>";
         }

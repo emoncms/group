@@ -240,7 +240,7 @@ class Group
         $stmt->bind_param("ii", $groupid, $userid);
         if (!$stmt->execute()) return false;
         $stmt->store_result();
-        if ($stmt->num_rows==0) return false;
+        if ($stmt->num_rows!=1) return false;
         return true;
     }
     
