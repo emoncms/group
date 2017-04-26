@@ -72,9 +72,6 @@ Result:
 
 **V1:** Basic groups, administrative user access and active feeds monitor
 
-- Remove users from group
-- Delete group
-- Show group description under group title when a group is selected
 - Edit group name and description
 - Show number of active feeds out of total feeds for each user
 - Show description for user access e.g: admin
