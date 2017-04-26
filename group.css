@@ -56,6 +56,10 @@
   padding:5px;
 }
 
+#groupdescription {
+  padding:5px;
+}
+
 #adduser {
   display:none;
   float:right;

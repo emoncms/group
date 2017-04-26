@@ -146,6 +146,20 @@ class Group
         // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;
+        
+        // Check that user is an admin of group
+        if (!$this->is_group_admin($groupid,$userid)) 
+            return array('success'=>false, 'message'=>_("User is not a member or does not have access to group"));
+
+        $stmt = $this->mysqli->prepare("DELETE FROM groups WHERE id=?");
+        $stmt->bind_param("i", $groupid);
+        if (!$stmt->execute()) return array('success'=>false, 'message'=>_("Query error, could not delete group"));
+                    
+        $stmt = $this->mysqli->prepare("DELETE FROM group_users WHERE groupid=?");
+        $stmt->bind_param("i", $groupid);
+        if (!$stmt->execute()) return array('success'=>false, 'message'=>_("Query error, could not delete users from group"));
+        
+        return array('success'=>true, 'message'=>_("Group deleted"));
     }
     
     public function remove_user($userid,$groupid,$userid_to_remove) 
@@ -153,6 +167,22 @@ class Group
         // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;
+        
+        // A user cant remove their own account
+        if ($userid==$userid_to_remove)
+            return array('success'=>false, 'message'=>_("Cannot remove own user from group, please delete group"));
+        
+        // Check that user is an admin of group
+        if (!$this->is_group_admin($groupid,$userid)) 
+            return array('success'=>false, 'message'=>_("User is not a member or does not have access to group"));
+        
+        // Check that user to remove is a member of group then delete
+        if ($this->is_group_member($groupid,$userid_to_remove)) {
+            $stmt = $this->mysqli->prepare("DELETE FROM group_users WHERE groupid=? AND userid=?");
+            $stmt->bind_param("ii", $groupid, $userid_to_remove);
+            if (!$stmt->execute()) return array('success'=>false, 'message'=>_("Query error"));
+            return array('success'=>true, 'message'=>_("User removed from group"));
+        }
     }
 
     // Basic check if group of id exists

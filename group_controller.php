@@ -35,6 +35,18 @@ function group_controller()
             $result = $group->add_user_auth($session["userid"],get("groupid"),get("username"),get("password"),get("access"));
         }
         
+        // group/removeuser?groupid=1&userid=1
+        if ($route->action == "removeuser") {
+            $route->format = "json";
+            $result = $group->remove_user($session["userid"],get("groupid"),get("userid"));
+        }
+        
+        // group/delete?groupid=1
+        if ($route->action == "delete") {
+            $route->format = "json";
+            $result = $group->delete($session["userid"],get("groupid"));
+        }
+        
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTION
         // --------------------------------------------------------------------------
