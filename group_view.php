@@ -30,7 +30,7 @@ $fullwidth = true;
         
         </div>
         <table id="userlist-table" class="table hide">
-            <tr><th>Username</th><th>Access</th><th></th></tr>
+            <tr><th>Username</th><th>Active Feeds</th><th>Access</th><th></th></tr>
             <tbody id="userlist"></tbody>
         </table>
         
@@ -174,6 +174,12 @@ $("#grouplist").on("click",".group",function(){
 function draw_userlist(groupid) {
     // Load user list
     var userlist = group.userlist(groupid);
+    
+    userlist.sort(function(a, b) {
+        return b.activefeeds-a.activefeeds;
+    });
+
+    
     if (userlist.success!=undefined) {
         alert(userlist.message); 
     } else {
@@ -182,9 +188,22 @@ function draw_userlist(groupid) {
         for (var z in userlist) {
             out += "<tr>";
             out += "<td class='user' uid="+userlist[z].userid+"><a href='"+path+"group/setuser?groupid="+selected_groupid+"&userid="+userlist[z].userid+"'>"+userlist[z].username+"</a></td>";
+            
+            // Active feds
+            
+            var prc = userlist[z].activefeeds / userlist[z].feeds;
+            var color = "#00aa00"; 
+            if (prc<0.5) color = "#aaaa00";
+            if (prc<0.1) color = "#aa0000";
+            if (userlist[z].feeds==0) color = "#000";
+            out += "<td><b><span style='color:"+color+"'>"+userlist[z].activefeeds+"</span>/"+userlist[z].feeds+"</b></td>";
+            
+            // Access
             var access = "MEMBER";
             if (userlist[z].access==1) access = "ADMIN";
             out += "<td>"+access+"</td>";
+            
+            // Actions
             out += "<td><i class='removeuser icon-trash' style='cursor:pointer' title='Remove User' uid="+userlist[z].userid+"></i></td>";
             out += "</tr>";
         }

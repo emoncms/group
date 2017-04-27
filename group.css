@@ -74,3 +74,12 @@
 #groupcreate:hover {
   background-color: #fafafa;
 }
+.afeed {
+    color:#00aa00;
+    font-weight:bold;
+}
+
+.nafeed {
+    color:#aa0000;
+    font-weight:bold;
+}

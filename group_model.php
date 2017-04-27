@@ -21,11 +21,15 @@ class Group
 {
     private $mysqli;
     private $user;
-
-    public function __construct($mysqli,$user)
+    private $feed;
+    private $redis;
+    
+    public function __construct($mysqli,$redis,$user,$feed)
     {
         $this->mysqli = $mysqli;
         $this->user = $user;
+        $this->feed = $feed;
+        $this->redis = $redis;
     }
     
     // Create group, add creator user as administrator
@@ -131,11 +135,27 @@ class Group
         $result = $this->mysqli->query("SELECT userid,access FROM group_users WHERE groupid = $groupid");
         while($row = $result->fetch_object())
         {
+            // Calculate number of active feeds
+            $active = 0;
+            $total = 0;
+            $now = time();
+            $result2 = $this->mysqli->query("SELECT id FROM feeds WHERE userid=".$row->userid);
+            while ($row2 = $result2->fetch_object()) {
+                $feedid = $row2->id;
+                $timevalue = $this->feed->get_timevalue_seconds($feedid);
+                $diff = $now - $timevalue['time'];
+                if ($diff<(3600*24*2)) $active++;
+                $total++;
+            }
+            
+            
             $u = $this->user->get($row->userid);
             $userlist[] = array(
                 "userid"=>(int) $row->userid,
                 "username"=>$u->username,
-                "access"=>(int) $row->access
+                "access"=>(int) $row->access,
+                "activefeeds"=>(int) $active,
+                "feeds"=>(int) $total
             );
         }
         return $userlist;
@@ -213,7 +233,7 @@ class Group
         return true;
     }
     
-    private function add_user($groupid,$userid,$access) 
+    public function add_user($groupid,$userid,$access) 
     {
         // Input sanitisation
         $userid = (int) $userid;
@@ -261,6 +281,44 @@ class Group
         $stmt->fetch();
         if ($access!=1) return false;
         return true;
+    }
+    
+    // --------------------------------------------------------------------
+    // Aggregation
+    // --------------------------------------------------------------------
+    public function aggregate($userid,$groupid,$feedname) 
+    {
+        // Input sanitisation
+        $userid = (int) $userid;
+        $groupid = (int) $groupid;
+        $feedname = preg_replace('/[^\w\s-:]/','',$feedname);
+
+        // 1. Check that user is a group administrator
+        if (!$this->is_group_admin($groupid,$userid)) 
+            return array('success'=>false, 'message'=>_("User is not a member or does not have access to group"));
+        
+        $now = time();
+        $total = 0;
+        $count = 0;
+        $result = $this->mysqli->query("SELECT userid,access FROM group_users WHERE groupid = $groupid");
+        while($row = $result->fetch_object())
+        {
+        
+            $userid = $row->userid;
+            $feedids = $this->redis->sMembers("user:feeds:$userid");
+            foreach ($feedids as $id)
+            {
+                $row = $this->redis->hGetAll("feed:$id");
+                if ($row["name"]==$feedname) {
+                    $lastvalue = $this->feed->get_timevalue($id);
+                    if ((time()-strtotime($lastvalue['time']))<60) {
+                        $total += $lastvalue['value'];
+                        $count ++;
+                    }
+                }
+            }
+        }
+        return array("result"=>$total,"count"=>$count);
     }
 }
 

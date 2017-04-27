@@ -5,12 +5,15 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 
 function group_controller()
 {
-    global $session,$route,$mysqli,$user;
+    global $session,$route,$mysqli,$redis,$user,$feed_settings;
 
     $result = false;
     
+    include "Modules/feed/feed_model.php";
+    $feed = new Feed($mysqli,$redis,$feed_settings);
+    
     include "Modules/group/group_model.php";
-    $group = new Group($mysqli,$user);
+    $group = new Group($mysqli,$redis,$user,$feed);
 
     // ------------------------------------------------------------------------------------
     // API
