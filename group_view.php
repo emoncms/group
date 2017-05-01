@@ -140,6 +140,26 @@ var grouplist = [];
 // ----------------------------------------------------------------------------------------
 draw_grouplist();
 
+// Startup group
+var selected_group = decodeURIComponent(window.location.hash).substring(1);
+console.log("Selectedgroup:"+selected_group)
+if (selected_group!="") {
+    for (var gindex in grouplist) {
+        if (grouplist[gindex].name==selected_group) {
+            $(".group[gindex="+gindex+"]").addClass('activated');
+            var groupid = grouplist[gindex].groupid;
+            selected_groupid = groupid;
+            draw_userlist(groupid);
+            $("#groupname").html(grouplist[gindex].name);                 // Place group name in title
+            $("#groupdescription").html(grouplist[gindex].description);   // Place group description in title
+            $("#userlist-table").show();                                  // Show userlist table
+            $("#deletegroup").show();
+            $("#adduser").show();                                         // Show add user button
+            $("#nogroupselected").hide();                                 // Hide no group selected alert
+        }
+    }
+}
+
 function draw_grouplist() {
     grouplist = group.grouplist();
     var out = "";
@@ -160,9 +180,9 @@ $("#grouplist").on("click",".group",function(){
     var gindex = $(this).attr("gindex");
     var groupid = grouplist[gindex].groupid;
     selected_groupid = groupid;
-    
     draw_userlist(groupid);
 
+    document.location.hash = grouplist[gindex].name
     $("#groupname").html(grouplist[gindex].name);                 // Place group name in title
     $("#groupdescription").html(grouplist[gindex].description);   // Place group description in title
     $("#userlist-table").show();                                  // Show userlist table
@@ -170,6 +190,10 @@ $("#grouplist").on("click",".group",function(){
     $("#adduser").show();                                         // Show add user button
     $("#nogroupselected").hide();                                 // Hide no group selected alert
 });
+
+function select_group(gindex) {
+
+}
 
 function draw_userlist(groupid) {
     // Load user list

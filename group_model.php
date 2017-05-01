@@ -312,7 +312,7 @@ class Group
                 if ($row["name"]==$feedname) {
                     $lastvalue = $this->feed->get_timevalue($id);
                     if ((time()-strtotime($lastvalue['time']))<60) {
-                        $total += $lastvalue['value'];
+                        $total += ($lastvalue['value']*1);
                         $count ++;
                     }
                 }
