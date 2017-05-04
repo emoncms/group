@@ -73,8 +73,6 @@ Result:
 **V1:** Basic groups, administrative user access and active feeds monitor
 
 - Edit group name and description
-- Show number of active feeds out of total feeds for each user
-- Show description for user access e.g: admin
 - Edit user access
 
 **V2:** User stats 
