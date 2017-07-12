@@ -1,78 +1,78 @@
 #wrapper {
-  padding:0px;
-  margin:0px;
-  padding-left: 250px;
+    padding:0px;
+    margin:0px;
+    padding-left: 250px;
 }
 
 .sidebar {
-  margin-top:0px;
-  margin-left: -250px;
-  left: 250px;
-  width: 250px;
-  background: #eee;
-  position: fixed;
-  overflow-y: auto;
-  z-index: 1000;
+    margin-top:0px;
+    margin-left: -250px;
+    left: 250px;
+    width: 250px;
+    background: #eee;
+    position: fixed;
+    overflow-y: auto;
+    z-index: 1000;
 }
 
 .page-content {
-  width: 100%;
-  padding-left:0px;
-  max-width:1280px
+    width: 100%;
+    padding-left:0px;
+    max-width:1280px
 }
 
 #sidebar-open {
-  float:left;
-  margin-right:10px;
+    float:left;
+    margin-right:10px;
 }
 
 #sidebar-close {
-  float:right; 
-  cursor:pointer; 
-  padding:10px;
+    float:right; 
+    cursor:pointer; 
+    padding:10px;
 }
 
 /*------------*/
 #grouplist {
-  background-color: #f3f3f3;
+    background-color: #f3f3f3;
 }
 
 .group {
-  padding:15px;
-  cursor:pointer;
+    padding:15px;
+    cursor:pointer;
 }
 
 .group:hover {
-  background-color: #f8f8f8;
+    background-color: #f8f8f8;
 }
 
 .group:active, .activated {
-  background-color: #fcfcfc;
+    background-color: #fcfcfc;
 }
 
 .userstitle {
-  font-size:22px;
-  font-weight:bold;
-  padding:5px;
+    font-size:22px;
+    font-weight:bold;
+    padding:5px;
 }
 
 #groupdescription {
-  padding:5px;
+    padding:5px;
 }
 
 #adduser {
-  display:none;
-  float:right;
-  cursor:pointer;
+    display:none;
+    float:right;
+    cursor:pointer;
 }
 
 #groupcreate {
-  padding:15px;
-  cursor:pointer;
+    padding:15px;
+    cursor:pointer;
 }
 
 #groupcreate:hover {
-  background-color: #fafafa;
+    background-color: #fafafa;
 }
 .afeed {
     color:#00aa00;
