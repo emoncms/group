@@ -24,7 +24,7 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open"><i class="icon-list"></i></button>
-            <div id="adduser"><i class="icon-plus"></i>Add Member</div>
+            <div id="addmember"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
 
@@ -71,24 +71,24 @@ MODALS
 </div>
 
 <!-- ADD MEMBER TO GROUP -->
-<div id="group-adduser-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="group-adduser-modal-label" aria-hidden="true" data-backdrop="static">
+<div id="group-addmember-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="group-addmember-modal-label" aria-hidden="true" data-backdrop="static">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="group-adduser-modal-label">Add member to group</h3>
+        <h3 id="group-addmember-modal-label">Add member to group</h3>
     </div>
     <div class="modal-body">
 
         <p>Username:<br>
-            <input id="group-adduser-username" type="text"></p>
+            <input id="group-addmember-username" type="text"></p>
 
         <p>Password:<br>
-            <input id="group-adduser-password" type="password"></p>
+            <input id="group-addmember-password" type="password"></p>
 
         <p>Access   <i title="- Passive member: no access to group. The aim of the user is to be managed by the group administrator
 - Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
 - Sub-administrator: access to the list of members, group dashboards and group graphs
 - Member: view access to dashboards" class=" icon-question-sign"></i>:</p>
-            <select id="group-adduser-access">
+            <select id="group-addmember-access">
                 <option value=0>Passive member</option>
                 <option value=1>Administrator</option>
                 <option value=2>Sub-dministrator</option>
@@ -98,7 +98,7 @@ MODALS
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-        <button id="group-adduser-action" class="btn btn-primary">Add</button>
+        <button id="group-addmember-action" class="btn btn-primary">Add</button>
     </div>
 </div>
 
@@ -159,7 +159,7 @@ JAVASCRIPT
                 $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
                 $("#userlist-table").show(); // Show userlist table
                 $("#deletegroup").show();
-                $("#adduser").show(); // Show add user button
+                $("#addmember").show(); // Show add user button
                 $("#nogroupselected").hide(); // Hide no group selected alert
             }
         }
@@ -191,7 +191,7 @@ JAVASCRIPT
         $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
         $("#userlist-table").show(); // Show userlist table
         $("#deletegroup").show();
-        $("#adduser").show(); // Show add user button
+        $("#addmember").show(); // Show add user button
         $("#nogroupselected").hide(); // Hide no group selected alert
     });
     function select_group(gindex) {
@@ -272,18 +272,18 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Add user
 // ----------------------------------------------------------------------------------------
-    $("#adduser").click(function () {
-        $('#group-adduser-modal').modal('show');
+    $("#addmember").click(function () {
+        $('#group-addmember-modal').modal('show');
     });
-    $("#group-adduser-action").click(function () {
-        var username = $("#group-adduser-username").val();
-        var password = $("#group-adduser-password").val();
-        var access = $("#group-adduser-access").val();
-        var result = group.adduserauth(selected_groupid, username, password, access);
+    $("#group-addmember-action").click(function () {
+        var username = $("#group-addmember-username").val();
+        var password = $("#group-addmember-password").val();
+        var access = $("#group-addmember-access").val();
+        var result = group.addmemberauth(selected_groupid, username, password, access);
         if (!result.success) {
             alert(result.message);
         } else {
-            $('#group-adduser-modal').modal('hide');
+            $('#group-addmember-modal').modal('hide');
             draw_userlist(selected_groupid);
         }
     });
@@ -322,7 +322,7 @@ JAVASCRIPT
             $("#groupdescription").html("");
             $("#userlist-table").hide(); // Show userlist table
             $("#deletegroup").hide();
-            $("#adduser").hide(); // Show add user button
+            $("#addmember").hide(); // Show add user button
             $("#nogroupselected").show(); // Hide no group selected alert
         }
     });

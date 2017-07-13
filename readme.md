@@ -42,7 +42,7 @@ Result:
 
     {"success":true,"groupid":1,"message":"Group 1 added"}
     
-**emoncms/group/adduserauth?groupid=1&username=USERNAME&password=PASSWORD&access=0**
+**emoncms/group/addmemberauth?groupid=1&username=USERNAME&password=PASSWORD&access=0**
 
 *Access:* 1: Add user as administrator. 0: Add user without administration access.
 

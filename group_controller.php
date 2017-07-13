@@ -30,9 +30,9 @@ function group_controller() {
             $result = $group->create($session["userid"], get("name"), get("description"), get("organization"), get("area"), get("visibility"), get("access"));
         }
 
-        // group/adduserauth?groupid=1&username=USERNAME&password=PASSWORD&access=1
+        // group/addmemberauth?groupid=1&username=USERNAME&password=PASSWORD&access=1
         // access 1: admin
-        if ($route->action == "adduserauth") {
+        if ($route->action == "addmemberauth") {
             $route->format = "json";
             $result = $group->add_user_auth($session["userid"], get("groupid"), get("username"), get("password"), get("access"));
         }
