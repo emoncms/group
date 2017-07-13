@@ -24,13 +24,16 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open"><i class="icon-list"></i></button>
-            <div id="adduser"><i class="icon-plus"></i>Add User</div>
+            <div id="adduser"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
 
         </div>
         <table id="userlist-table" class="table hide">
-            <tr><th>Username</th><th>Active Feeds</th><th>Access</th><th></th></tr>
+            <tr><th>Username</th><th>Active Feeds</th><th>Role  <i title="- Passive member: no access to group. The aim of the user is to be managed by the group administrator
+- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
+- Sub-administrator: access to the list of members, group dashboards and group graphs
+- Member: view access to dashboards" class=" icon-question-sign" /></th><th></th></tr>
             <tbody id="userlist"></tbody>
         </table>
 
@@ -67,11 +70,11 @@ MODALS
     </div>
 </div>
 
-<!-- ADD USER TO GROUP -->
+<!-- ADD MEMBER TO GROUP -->
 <div id="group-adduser-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="group-adduser-modal-label" aria-hidden="true" data-backdrop="static">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="group-adduser-modal-label">Add user to group</h3>
+        <h3 id="group-adduser-modal-label">Add member to group</h3>
     </div>
     <div class="modal-body">
 
@@ -81,10 +84,15 @@ MODALS
         <p>Password:<br>
             <input id="group-adduser-password" type="password"></p>
 
-        <p>Access:<br>
+        <p>Access   <i title="- Passive member: no access to group. The aim of the user is to be managed by the group administrator
+- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
+- Sub-administrator: access to the list of members, group dashboards and group graphs
+- Member: view access to dashboards" class=" icon-question-sign"></i>:</p>
             <select id="group-adduser-access">
-                <option value=0>Normal</option>
+                <option value=0>Passive member</option>
                 <option value=1>Administrator</option>
+                <option value=2>Sub-dministrator</option>
+                <option value=3>Member</option>
             </select>
 
     </div>
@@ -131,15 +139,12 @@ JAVASCRIPT
 <script>
     var path = "<?php echo $path; ?>";
     sidebar_resize();
-
     var selected_groupid = 0;
     var grouplist = [];
-
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
     draw_grouplist();
-
 // Startup group
     var selected_group = decodeURIComponent(window.location.hash).substring(1);
     console.log("Selectedgroup:" + selected_group)
@@ -150,12 +155,12 @@ JAVASCRIPT
                 var groupid = grouplist[gindex].groupid;
                 selected_groupid = groupid;
                 draw_userlist(groupid);
-                $("#groupname").html(grouplist[gindex].name);                 // Place group name in title
-                $("#groupdescription").html(grouplist[gindex].description);   // Place group description in title
-                $("#userlist-table").show();                                  // Show userlist table
+                $("#groupname").html(grouplist[gindex].name); // Place group name in title
+                $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
+                $("#userlist-table").show(); // Show userlist table
                 $("#deletegroup").show();
-                $("#adduser").show();                                         // Show add user button
-                $("#nogroupselected").hide();                                 // Hide no group selected alert
+                $("#adduser").show(); // Show add user button
+                $("#nogroupselected").hide(); // Hide no group selected alert
             }
         }
     }
@@ -181,16 +186,14 @@ JAVASCRIPT
         var groupid = grouplist[gindex].groupid;
         selected_groupid = groupid;
         draw_userlist(groupid);
-
         document.location.hash = grouplist[gindex].name
-        $("#groupname").html(grouplist[gindex].name);                 // Place group name in title
-        $("#groupdescription").html(grouplist[gindex].description);   // Place group description in title
-        $("#userlist-table").show();                                  // Show userlist table
+        $("#groupname").html(grouplist[gindex].name); // Place group name in title
+        $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
+        $("#userlist-table").show(); // Show userlist table
         $("#deletegroup").show();
-        $("#adduser").show();                                         // Show add user button
-        $("#nogroupselected").hide();                                 // Hide no group selected alert
+        $("#adduser").show(); // Show add user button
+        $("#nogroupselected").hide(); // Hide no group selected alert
     });
-
     function select_group(gindex) {
 
     }
@@ -198,12 +201,9 @@ JAVASCRIPT
     function draw_userlist(groupid) {
         // Load user list
         var userlist = group.userlist(groupid);
-
         userlist.sort(function (a, b) {
             return b.activefeeds - a.activefeeds;
         });
-
-
         if (userlist.success != undefined) {
             alert(userlist.message);
         } else {
@@ -212,7 +212,6 @@ JAVASCRIPT
             for (var z in userlist) {
                 out += "<tr>";
                 out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
-
                 // Active feds
 
                 var prc = userlist[z].activefeeds / userlist[z].feeds;
@@ -224,18 +223,28 @@ JAVASCRIPT
                 if (userlist[z].feeds == 0)
                     color = "#000";
                 out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].feeds + "</b></td>";
-
-                // Access
-                var access = "MEMBER";
-                if (userlist[z].access == 1)
-                    access = "ADMIN";
-                out += "<td>" + access + "</td>";
-
+                // Role
+                var role;
+                switch (userlist[z].role) {
+                    case 0:
+                        role = 'Passive member';
+                        break;
+                    case 1:
+                        role = 'Administrator';
+                        break;
+                    case 2:
+                        role = 'Sub-administrator';
+                        break;
+                    case 3:
+                        role = 'Anonymous member';
+                        break;
+                }
+                out += "<td>" + role + "</td>";
                 // Actions
                 out += "<td><i class='removeuser icon-trash' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + "></i></td>";
                 out += "</tr>";
             }
-            $("#userlist").html(out);           // Place userlist html in userlist table   
+            $("#userlist").html(out); // Place userlist html in userlist table   
         }
     }
 
@@ -245,7 +254,6 @@ JAVASCRIPT
     $("#groupcreate").click(function () {
         $('#group-create-modal').modal('show');
     });
-
     $("#group-create-action").click(function () {
         var name = $("#group-create-name").val();
         var description = $("#group-create-description").val();
@@ -253,7 +261,6 @@ JAVASCRIPT
         var area = $("#group-create-area").val() || 'N/A';
         var visibility = $("#group-create-visibility").val() || 'private';
         var access = $("#group-create-access").val() || 'closed';
-
         var result = group.create(name, description, organization, area, visibility, access);
         if (!result.success) {
             alert(result.message);
@@ -262,19 +269,16 @@ JAVASCRIPT
             draw_grouplist();
         }
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: Add user
 // ----------------------------------------------------------------------------------------
     $("#adduser").click(function () {
         $('#group-adduser-modal').modal('show');
     });
-
     $("#group-adduser-action").click(function () {
         var username = $("#group-adduser-username").val();
         var password = $("#group-adduser-password").val();
         var access = $("#group-adduser-access").val();
-
         var result = group.adduserauth(selected_groupid, username, password, access);
         if (!result.success) {
             alert(result.message);
@@ -283,7 +287,6 @@ JAVASCRIPT
             draw_userlist(selected_groupid);
         }
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
@@ -292,7 +295,6 @@ JAVASCRIPT
         var userid = $(this).attr("uid");
         $('#remove-user-modal').attr("uid", userid);
     });
-
     $("#remove-user-action").click(function () {
         $('#remove-user-modal').modal('hide');
         var userid = $('#remove-user-modal').attr("uid");
@@ -303,14 +305,12 @@ JAVASCRIPT
             draw_userlist(selected_groupid);
         }
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: Delete group
 // ----------------------------------------------------------------------------------------
     $("#deletegroup").click(function () {
         $('#delete-group-modal').modal('show');
     });
-
     $("#delete-group-action").click(function () {
         $('#delete-group-modal').modal('hide');
         var result = group.deletegroup(selected_groupid);
@@ -318,16 +318,14 @@ JAVASCRIPT
             alert(result.message);
         } else {
             draw_grouplist();
-
             $("#groupname").html("Users");
             $("#groupdescription").html("");
-            $("#userlist-table").hide();        // Show userlist table
+            $("#userlist-table").hide(); // Show userlist table
             $("#deletegroup").hide();
-            $("#adduser").hide();               // Show add user button
-            $("#nogroupselected").show();       // Hide no group selected alert
+            $("#adduser").hide(); // Show add user button
+            $("#nogroupselected").show(); // Hide no group selected alert
         }
     });
-
 // ----------------------------------------------------------------------------------------
 // Sidebar
 // ----------------------------------------------------------------------------------------
@@ -335,18 +333,15 @@ JAVASCRIPT
         $(".sidebar").css("left", "250px");
         $("#sidebar-close").show();
     });
-
     $("#sidebar-close").click(function () {
         $(".sidebar").css("left", "0");
         $("#sidebar-close").hide();
     });
-
     function sidebar_resize() {
         var width = $(window).width();
         var height = $(window).height();
         var nav = $(".navbar").height();
         $(".sidebar").height(height - nav - 40);
-
         if (width < 1024) {
             $(".sidebar").css("left", "0");
             $("#wrapper").css("padding-left", "0");

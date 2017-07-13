@@ -27,8 +27,8 @@ $schema['groups'] = array(
  *  - role:
  *       0 - passive member: just a normal user with no access to anything in the group. The aim of the user is to be managed by the group administrator
  *       1 - administrator: full access (create user, add member, create group feeds, dashboards graphs, etc)
- *       2 - community member: access to the list of members, group dashboards and group graphs modules.
- *       3 - anonymous member: view access to dashboards
+ *       2 - sub-administrator (community member): access to the list of members, group dashboards and group graphs modules.
+ *       3 - member: view access to dashboards
  *  - admin_rights: administrator's rights over user's data
  *      - full: Full access to member's account (login, change password, create feeds, etc)
  *      - read: Read and list access to member's public feeds
