@@ -1,8 +1,8 @@
 
 var group = {
-    'create': function (name, description) {
+    'create': function (name, description, organization, area, visibility, access) {
         var result = {};
-        $.ajax({url: path + "group/create", data: "name=" + name + "&description=" + description, dataType: 'json', async: false, success: function (data) {
+        $.ajax({url: path + "group/create", data: "name=" + name + "&description=" + description + "&organization=" + organization + '&area=' + area + '&visibility=' + visibility + '&access=' + access, dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});
         return result;

@@ -24,7 +24,7 @@ $schema['groups'] = array(
 /* * ******************************************************
  * group_users table
  * 
- *  - access:
+ *  - role:
  *       0 - passive member: just a normal user with no access to anything in the group. The aim of the user is to be managed by the group administrator
  *       1 - administrator: full access (create user, add member, create group feeds, dashboards graphs, etc)
  *       2 - community member: access to the list of members, group dashboards and group graphs modules.
@@ -38,6 +38,6 @@ $schema['groups'] = array(
 $schema['group_users'] = array(
     'groupid' => array('type' => 'int(11)'),
     'userid' => array('type' => 'int(11)'),
-    'access' => array('type' => 'int(1)'),
+    'role' => array('type' => 'int(1)'),
     'admin_rights' => array('type' => 'varchar(16)')
 );

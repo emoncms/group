@@ -55,10 +55,10 @@ MODALS
     <div class="modal-body">
 
         <p>Group Name:<br>
-            <input id="group-create-name" type="text"></p>
+            <input id="group-create-name" type="text" maxlength="64"></p>
 
         <p>Group Description:<br>
-            <input id="group-create-description" type="text"></p>
+            <input id="group-create-description" type="text" maxlength="256"></p>
 
     </div>
     <div class="modal-footer">
@@ -249,8 +249,12 @@ JAVASCRIPT
     $("#group-create-action").click(function () {
         var name = $("#group-create-name").val();
         var description = $("#group-create-description").val();
+        var organization = $("#group-create-organization").val() || 'N/A';
+        var area = $("#group-create-area").val() || 'N/A';
+        var visibility = $("#group-create-visibility").val() || 'private';
+        var access = $("#group-create-access").val() || 'closed';
 
-        var result = group.create(name, description);
+        var result = group.create(name, description, organization, area, visibility, access);
         if (!result.success) {
             alert(result.message);
         } else {

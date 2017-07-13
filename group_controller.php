@@ -27,7 +27,7 @@ function group_controller() {
         // group/create?name=test&description=test
         if ($route->action == "create") {
             $route->format = "json";
-            $result = $group->create($session["userid"], get("name"), get("description"));
+            $result = $group->create($session["userid"], get("name"), get("description"), get("organization"), get("area"), get("visibility"), get("access"));
         }
 
         // group/adduserauth?groupid=1&username=USERNAME&password=PASSWORD&access=1
