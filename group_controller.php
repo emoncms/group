@@ -30,11 +30,16 @@ function group_controller() {
             $result = $group->create($session["userid"], get("name"), get("description"), get("organization"), get("area"), get("visibility"), get("access"));
         }
 
-        // group/addmemberauth?groupid=1&username=USERNAME&password=PASSWORD&access=1
-        // access 1: admin
+        // group/addmemberauth?groupid=1&username=USERNAME&password=PASSWORD&role=1
         if ($route->action == "addmemberauth") {
             $route->format = "json";
-            $result = $group->add_user_auth($session["userid"], get("groupid"), get("username"), get("password"), get("access"));
+            $result = $group->add_user_auth($session["userid"], get("groupid"), get("username"), get("password"), get("role"));
+        }
+
+        // group/createuseraddtogroup?groupid=1&email=EMAIL&username=USERNAME&password=PASSWORD&role=1
+        if ($route->action == "createuseraddtogroup") {
+            $route->format = "json";
+            $result = $group->createuseraddtogroup($session["userid"], get("groupid"), get('email'), get("username"), get("password"), get("role"));
         }
 
         // group/removeuser?groupid=1&userid=1

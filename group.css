@@ -60,10 +60,11 @@
     padding:5px;
 }
 
-#addmember {
+#addmember, #createuseraddtogroup {
     display:none;
     float:right;
     cursor:pointer;
+    margin-left: 20px
 }
 
 #groupcreate {

@@ -58,6 +58,33 @@ class Group {
         return array('success' => true, 'groupid' => $groupid, 'message' => _("Group $groupid added"));
     }
 
+    public function createuseraddtogroup($admin_userid, $groupid, $email, $username, $password, $role) {
+        // Input sanitisation
+        $admin_userid = (int) $admin_userid;
+        $groupid = (int) $groupid;
+        $role = (int) $role;
+        // email, username and password checked within $user model
+
+        if (!$this->exists($groupid))
+            return array('success' => false, 'message' => _("Group does not exist"));
+
+        // 1. Check that user is a group administrator
+        if (!$this->is_group_admin($groupid, $admin_userid))
+            return array('success' => false, 'message' => _("You haven't got enough permissions to add a member to this group"));
+
+        // 2. Check username and password, return
+        $result = $this->user->register($username, $password, $email);
+        if (!$result["success"])
+            return $result;
+        $add_userid = $result["userid"];
+
+        // 3. Add user to group 
+        if (!$this->add_user($groupid, $add_userid, $role, $admin_rights = 'full'))
+            return array('success' => false, 'message' => _("Error adding user to group"));
+
+        return array('success' => true, 'message' => _("User $add_userid:$username added"));
+    }
+
     // Add user to a group if admin user knows account username and password
     public function add_user_auth($admin_userid, $groupid, $username, $password, $role) {
         // Input sanitisation
@@ -71,7 +98,7 @@ class Group {
 
         // 1. Check that user is a group administrator
         if (!$this->is_group_admin($groupid, $admin_userid))
-            return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+            return array('success' => false, 'message' => _("You haven't got enough permissions to add a member to this group"));
 
         // 2. Check username and password, return
         $result = $this->user->get_apikeys_from_login($username, $password);
