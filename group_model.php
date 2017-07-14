@@ -325,6 +325,27 @@ class Group {
             return false;
         return true;
     }
+    
+     public function administrator_rights_over_user($groupid, $userid) {
+        // Input sanitisation
+        $userid = (int) $userid;
+        $groupid = (int) $groupid;
+
+        $stmt = $this->mysqli->prepare("SELECT admin_rights FROM group_users WHERE groupid = ? AND userid = ?");
+        // 1. Check if user is a member of group
+        $stmt->bind_param("ii", $groupid, $userid);
+        if (!$stmt->execute())
+            return false;
+        $stmt->store_result();
+        if ($stmt->num_rows != 1)
+            return false;
+        // 2. If user is a member of group check if user is an administrator
+        $stmt->bind_result($admin_rights);
+        $stmt->fetch();
+        if ($admin_rights != 'full')
+            return false;
+        return true;
+    }
 
     public function getrole($userid, $groupid) {
         // Input sanitisation

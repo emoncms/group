@@ -66,8 +66,13 @@ function group_controller() {
             if ($group->is_group_admin($groupid, $session["userid"]) === true) {
                 // 2. Check that user requested is a member of group requested
                 if ($group->is_group_member($groupid, $userid) === true) {
-                    $_SESSION['userid'] = $userid;
-                    header("Location: ../user/view");
+                    // 3. Check that session user has full rights over user requested
+                    if ($group->administrator_rights_over_user($groupid, $userid) === true) {
+                        $_SESSION['userid'] = $userid;
+                        header("Location: ../user/view");
+                    }
+                    else
+                        $result = "ERROR: You haven't got rights to access this user";
                 } else {
                     $result = "ERROR: User is not a member of group";
                 }
@@ -91,7 +96,7 @@ function group_controller() {
             $route->format = "json";
             $result = $group->userlist($session["userid"], get("groupid"));
         }
-        
+
         // group/getrole?groupid=1
         // access 1: admin
         if ($route->action == "getrole") {
