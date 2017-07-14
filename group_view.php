@@ -24,17 +24,17 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open"><i class="icon-list"></i></button>
-            <div id="createuseraddtogroup"><i class="icon-plus"></i>Create User</div>
-            <div id="addmember"><i class="icon-plus"></i>Add Member</div>
+            <div id="createuseraddtogroup" class="if-admin"><i class="icon-plus"></i>Create User</div>
+            <div id="addmember" class="if-admin"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
 
         </div>
         <table id="userlist-table" class="table hide">
             <tr><th>Username</th><th>Active Feeds</th><th>Role  <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
-- Sub-administrator: access to the list of members, group dashboards and group graphs
-- Member: view access to dashboards
-- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th></th></tr>
+                                                                       - Sub-administrator: access to the list of members, group dashboards and group graphs
+                                                                       - Member: view access to dashboards
+                                                                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th></th></tr>
             <tbody id="userlist"></tbody>
         </table>
 
@@ -86,9 +86,9 @@ MODALS
             <input id="group-addmember-password" type="password"></p>
 
         <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
-- Sub-administrator: access to the list of members, group dashboards and group graphs
-- Member: view access to dashboards
-- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+                       - Sub-administrator: access to the list of members, group dashboards and group graphs
+                       - Member: view access to dashboards
+                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -119,9 +119,9 @@ MODALS
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
         <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
-- Sub-administrator: access to the list of members, group dashboards and group graphs
-- Member: view access to dashboards
-- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+                       - Sub-administrator: access to the list of members, group dashboards and group graphs
+                       - Member: view access to dashboards
+                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-createuseraddtogroup-role">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -176,6 +176,7 @@ JAVASCRIPT
     sidebar_resize();
     var selected_groupid = 0;
     var grouplist = [];
+    var user_role = 0;
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
@@ -199,6 +200,9 @@ JAVASCRIPT
                 $("#nogroupselected").hide(); // Hide no group selected alert
             }
         }
+        user_role = group.getrole(groupid);
+        if (user_role != 1)
+            $('.if-admin').hide();
     }
 
     function draw_grouplist() {
@@ -382,11 +386,11 @@ JAVASCRIPT
             draw_grouplist();
             $("#groupname").html("Users");
             $("#groupdescription").html("");
-            $("#userlist-table").hide(); 
+            $("#userlist-table").hide();
             $("#deletegroup").hide();
-            $("#addmember").hide(); 
-            $("#createuseraddtogroup").hide(); 
-            $("#nogroupselected").show(); 
+            $("#addmember").hide();
+            $("#createuseraddtogroup").hide();
+            $("#nogroupselected").show();
         }
     });
 // ----------------------------------------------------------------------------------------

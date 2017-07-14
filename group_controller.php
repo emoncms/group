@@ -91,6 +91,13 @@ function group_controller() {
             $route->format = "json";
             $result = $group->userlist($session["userid"], get("groupid"));
         }
+        
+        // group/getrole?groupid=1
+        // access 1: admin
+        if ($route->action == "getrole") {
+            $route->format = "json";
+            $result = $group->getrole($session["userid"], get("groupid"));
+        }
     }
 
     return array('content' => $result, 'fullwidth' => false);

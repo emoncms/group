@@ -48,6 +48,13 @@ var group = {
                 result = data;
             }});
         return result;
+    },
+    'getrole': function (groupid) {
+        var result = {};
+        $.ajax({url: path + "group/getrole", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
     }
 }
 

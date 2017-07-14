@@ -319,6 +319,25 @@ class Group {
         return true;
     }
 
+    public function getrole($userid, $groupid) {
+        // Input sanitisation
+        $userid = (int) $userid;
+        $groupid = (int) $groupid;
+
+        $stmt = $this->mysqli->prepare("SELECT role FROM group_users WHERE groupid = ? AND userid = ?");
+        // 1. Check if user is a member of group
+        $stmt->bind_param("ii", $groupid, $userid);
+        if (!$stmt->execute())
+            return false;
+        $stmt->store_result();
+        if ($stmt->num_rows != 1)
+            return false;
+        // 2. Return role
+        $stmt->bind_result($role);
+        $stmt->fetch();
+        return $role;
+    }
+
     // --------------------------------------------------------------------
     // Aggregation
     // --------------------------------------------------------------------
