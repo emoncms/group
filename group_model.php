@@ -120,44 +120,51 @@ class Group {
         $groupid = (int) $groupid;
     }
 
-    // Return list of groups for which $userid is an administrator
+    // Return list of groups which $userid belongs and has right to list 
     public function grouplist($userid) {
         // Input sanitisation
         $userid = (int) $userid;
 
-        $stmt = $this->mysqli->prepare("SELECT groupid FROM group_users WHERE userid = ? AND role=1");
+        $stmt = $this->mysqli->prepare("SELECT groupid, role FROM group_users WHERE userid = ?");
         $stmt->bind_param("i", $userid);
         if (!$stmt->execute())
             return false;
-        $stmt->bind_result($groupid);
+        $stmt->bind_result($groupid, $userrole);
 
         $groupids = array();
-        while ($stmt->fetch())
-            $groupids[] = $groupid;
+        $roleingroup = array();
+        while ($stmt->fetch()) {
+            if ($userrole != 0) { // if user is not a passive member
+                $groupids[] = $groupid;
+                $roleingroup[] = $userrole;
+            }
+        }
 
         $groups = array();
-        foreach ($groupids as $groupid) {
-            $result = $this->mysqli->query("SELECT * FROM groups WHERE id = $groupid");
+        for ($i = 0; $i < sizeof($groupids); $i++) {
+            $result = $this->mysqli->query("SELECT * FROM groups WHERE id = $groupids[$i]");
             $row = $result->fetch_object();
             $groups[] = array(
                 "groupid" => (int) $row->id,
                 "name" => $row->name,
-                "description" => $row->description
+                "description" => $row->description,
+                "role" => (int) $roleingroup[$i]
             );
         }
 
         return $groups;
     }
 
-    // Return list of groups for which $userid is an administrator
+    // Return list of users for which $userid is an administrator or subadministrator
     public function userlist($userid, $groupid) {
         // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;
 
         // 1. Check that user is a group administrator
-        if (!$this->is_group_admin($groupid, $userid))
-            return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+        $role = (int) $this->getrole($userid, $groupid);
+        if ($role != 1 && $role != 2)
+            return array('success' => false, 'message' => _("You have not got access to the list of users of this group"));
 
         $userlist = array();
         $result = $this->mysqli->query("SELECT userid,role FROM group_users WHERE groupid = $groupid");

@@ -198,11 +198,10 @@ JAVASCRIPT
                 $("#addmember").show(); // Show add user button
                 $("#createuseraddtogroup").show(); // Show create user button
                 $("#nogroupselected").hide(); // Hide no group selected alert
+                if (grouplist[gindex].role != 1)
+                    $('.if-admin').hide();
             }
         }
-        user_role = group.getrole(groupid);
-        if (user_role != 1)
-            $('.if-admin').hide();
     }
 
     function draw_grouplist() {
