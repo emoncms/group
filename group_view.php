@@ -27,6 +27,7 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
+            <div id="editgroup" class="if-admin"><i class="icon-edit"></i> Edit Group</div>
             <div id="createuseraddtogroup" class="if-admin"><i class="icon-plus"></i>Create User</div>
             <div id="addmember" class="if-admin"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
@@ -170,6 +171,23 @@ MODALS
     </div>
 </div>
 
+<!-- EDIT GROUP -->
+<div id="edit-group-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="edit-group-modal-label" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="edit-group-modal-label">Edit group</h3>
+    </div>
+    <div class="modal-body">
+        <p>Group Name:<br>
+            <input id="edit-group-name" type="text" maxlength="64"></p>
+        <p>Group Description:<br>
+            <input id="edit-group-description" type="text" maxlength="256"></p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="edit-group-action" class="btn btn-primary">Done</button>
+    </div>
+</div>
 
 <!-------------------------------------------------------------------------------------------
 JAVASCRIPT
@@ -178,6 +196,7 @@ JAVASCRIPT
     var path = "<?php echo $path; ?>";
     sidebar_resize();
     var selected_groupid = 0;
+    var selected_groupindex = 0;
     var grouplist = [];
     var user_role = 0;
 
@@ -194,11 +213,13 @@ JAVASCRIPT
                 $(".group[gindex=" + gindex + "]").addClass('activated');
                 var groupid = grouplist[gindex].groupid;
                 selected_groupid = groupid;
+                selected_groupindex = gindex;
                 draw_userlist(groupid);
                 $("#groupname").html(grouplist[gindex].name); // Place group name in title
                 $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
                 $("#userlist-table").show(); // Show userlist table
                 $("#deletegroup").show();
+                $('#editgroup').show();
                 $("#addmember").show(); // Show add user button
                 $("#createuseraddtogroup").show(); // Show create user button
                 $("#nogroupselected").hide(); // Hide no group selected alert
@@ -228,6 +249,7 @@ JAVASCRIPT
         var gindex = $(this).attr("gindex");
         var groupid = grouplist[gindex].groupid;
         selected_groupid = groupid;
+        selected_groupindex = gindex;
         draw_userlist(groupid);
         document.location.hash = grouplist[gindex].name
         $("#groupname").html(grouplist[gindex].name); // Place group name in title
@@ -238,9 +260,6 @@ JAVASCRIPT
         $("#createuseraddtogroup").show();
         $("#nogroupselected").hide(); // Hide no group selected alert
     });
-    function select_group(gindex) {
-
-    }
 
     function draw_userlist(groupid) {
         // Load user list
@@ -312,6 +331,37 @@ JAVASCRIPT
         } else {
             $('#group-create-modal').modal('hide');
             draw_grouplist();
+        }
+    });
+
+    // ----------------------------------------------------------------------------------------
+// Action: Edit group
+// ----------------------------------------------------------------------------------------
+    $("#editgroup").click(function () {
+        $("#edit-group-name").val(grouplist[selected_groupindex].name);
+        $("#edit-group-description").val(grouplist[selected_groupindex].description);
+        $("#edit-group-organization").val(grouplist[selected_groupindex].organization);
+        $("#edit-group-area").val(grouplist[selected_groupindex].area);
+        $("#edit-group-visibility").val(grouplist[selected_groupindex].visibility);
+        $("#edit-group-access").val(grouplist[selected_groupindex].access);
+        $('#edit-group-modal').modal('show');
+    });
+
+    $('#edit-group-action').click(function () {
+        var name = $("#edit-group-name").val();
+        var description = $("#edit-group-description").val();
+        var organization = $("#edit-group-organization").val() || 'N/A';
+        var area = $("#edit-group-area").val() || 'N/A';
+        var visibility = $("#edit-group-visibility").val() || 'private';
+        var access = $("#edit-group-access").val() || 'closed';
+        var result = group.editgroup(selected_groupid, name, description, organization, area, visibility, access);
+        if (!result.success) {
+            alert(result.message);
+        } else {
+            draw_grouplist();
+            $('#groupname').html(grouplist[selected_groupindex].name);
+            $('#groupdescription').html(grouplist[selected_groupindex].description);
+            $('#edit-group-modal').modal('hide');
         }
     });
 // ----------------------------------------------------------------------------------------

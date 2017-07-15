@@ -58,6 +58,30 @@ class Group {
         return array('success' => true, 'groupid' => $groupid, 'message' => _("Group $groupid added"));
     }
 
+    // Edit group
+    public function editgroup($admin_userid, $groupid, $name, $description, $organization, $area, $visibility, $access) {
+        // Input sanitisation        
+        $groupid = (int) $groupid;
+        $admin_userid = (int) $admin_userid;
+        $name = preg_replace('/[^\w\s-:]/', '', $name);
+        $description = preg_replace('/[^\w\s-:]/', '', $description);
+        $organization = preg_replace('/[^\w\s-:]/', '', $organization);
+        $area = preg_replace('/[^\w\s-:]/', '', $area);
+        $visibility = $visibility == 'public' ? 'public' : 'private';
+        $access = $access == 'open' ? 'open' : 'closed';
+
+        if ($this->is_group_admin($groupid, $admin_userid)) {
+            $stmt = $this->mysqli->prepare("UPDATE groups SET name=?, description=?, organization=?, area=?, visibility=?, access=? WHERE id=?");
+            $stmt->bind_param("ssssssi", $name, $description, $organization, $area, $visibility, $access, $groupid);
+            if (!$stmt->execute()) {
+                return array('success' => false, 'message' => _("Error editing group"));
+            }
+            return array('success' => true, 'message' => _("Group edited"));
+        } else {
+            return array('success' => false, 'message' => _("You are not administrator of the group"));
+        }
+    }
+
     public function createuseraddtogroup($admin_userid, $groupid, $email, $username, $password, $role) {
         // Input sanitisation
         $admin_userid = (int) $admin_userid;
@@ -325,8 +349,8 @@ class Group {
             return false;
         return true;
     }
-    
-     public function administrator_rights_over_user($groupid, $userid) {
+
+    public function administrator_rights_over_user($groupid, $userid) {
         // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;

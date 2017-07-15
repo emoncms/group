@@ -29,6 +29,12 @@ function group_controller() {
             $route->format = "json";
             $result = $group->create($session["userid"], get("name"), get("description"), get("organization"), get("area"), get("visibility"), get("access"));
         }
+        
+        // group/editgroup?name=test&description=test
+        if ($route->action == "editgroup") {
+            $route->format = "json";
+            $result = $group->editgroup($session["userid"], get('groupid'), get("name"), get("description"), get("organization"), get("area"), get("visibility"), get("access"));
+        }
 
         // group/addmemberauth?groupid=1&username=USERNAME&password=PASSWORD&role=1
         if ($route->action == "addmemberauth") {

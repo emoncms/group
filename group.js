@@ -7,6 +7,13 @@ var group = {
             }});
         return result;
     },
+    'editgroup': function (groupid, name, description, organization, area, visibility, access) {
+        var result = {};
+        $.ajax({url: path + "group/editgroup", data: "groupid=" + groupid + "&name=" + name + "&description=" + description + "&organization=" + organization + '&area=' + area + '&visibility=' + visibility + '&access=' + access, dataType: 'json', async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
     'addmemberauth': function (groupid, username, password, role) {
         var result = {};
         $.ajax({url: path + "group/addmemberauth", data: "groupid=" + groupid + "&username=" + username + "&password=" + password + "&role=" + role, dataType: 'json', async: false, success: function (data) {
