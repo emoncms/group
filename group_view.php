@@ -27,14 +27,14 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
-            <div id="editgroup" class="if-admin"><i class="icon-edit"></i> Edit Group</div>
-            <div id="createuseraddtogroup" class="if-admin"><i class="icon-plus"></i>Create User</div>
-            <div id="addmember" class="if-admin"><i class="icon-plus"></i>Add Member</div>
+            <div id="editgroup" class="if-admin groupselected"><i class="icon-edit"></i> Edit Group</div>
+            <div id="createuseraddtogroup" class="if-admin groupselected"><i class="icon-plus"></i>Create User</div>
+            <div id="addmember" class="if-admin groupselected"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
 
         </div>
-        <table id="userlist-table" class="table hide">
+        <table id="userlist-table" class="table groupselected hide">
             <tr><th>Username</th><th>Active Feeds</th><th>Role  <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
                                                                        - Sub-administrator: access to the list of members, group dashboards and group graphs
                                                                        - Member: view access to dashboards
@@ -42,7 +42,7 @@ MAIN
             <tbody id="userlist"></tbody>
         </table>
 
-        <button id="deletegroup" class="hide">Delete Group</button>
+        <button id="deletegroup" class="hide groupselected">Delete Group</button>
 
         <div id="nogroupselected" class="alert alert-block">
             <h4 class="alert-heading">No Group Selected</h4>
@@ -204,31 +204,25 @@ JAVASCRIPT
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
     draw_grouplist();
+
+// ----------------------------------------------------------------------------------------    
 // Startup group
+// ----------------------------------------------------------------------------------------
     var selected_group = decodeURIComponent(window.location.hash).substring(1);
     console.log("Selectedgroup:" + selected_group)
     if (selected_group != "") {
         for (var gindex in grouplist) {
             if (grouplist[gindex].name == selected_group) {
                 $(".group[gindex=" + gindex + "]").addClass('activated');
-                var groupid = grouplist[gindex].groupid;
-                selected_groupid = groupid;
-                selected_groupindex = gindex;
-                draw_userlist(groupid);
-                $("#groupname").html(grouplist[gindex].name); // Place group name in title
-                $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
-                $("#userlist-table").show(); // Show userlist table
-                $("#deletegroup").show();
-                $('#editgroup').show();
-                $("#addmember").show(); // Show add user button
-                $("#createuseraddtogroup").show(); // Show create user button
-                $("#nogroupselected").hide(); // Hide no group selected alert
-                if (grouplist[gindex].role != 1)
-                    $('.if-admin').hide();
+                draw_group(gindex);
             }
         }
     }
 
+
+// ----------------------------------------------------------------------------------------
+// Functions
+// ----------------------------------------------------------------------------------------
     function draw_grouplist() {
         grouplist = group.grouplist();
         var out = "";
@@ -238,28 +232,18 @@ JAVASCRIPT
         $("#grouplist").html(out);
     }
 
-// ----------------------------------------------------------------------------------------
-// Action: click on group
-// ----------------------------------------------------------------------------------------
-    $("#grouplist").on("click", ".group", function () {
-        // Group selection CSS
-        $(".group").removeClass('activated');
-        $(this).addClass('activated');
-        // Get selected group from attributes
-        var gindex = $(this).attr("gindex");
+    function draw_group(gindex) {
         var groupid = grouplist[gindex].groupid;
         selected_groupid = groupid;
         selected_groupindex = gindex;
         draw_userlist(groupid);
-        document.location.hash = grouplist[gindex].name
         $("#groupname").html(grouplist[gindex].name); // Place group name in title
         $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
-        $("#userlist-table").show(); // Show userlist table
-        $("#deletegroup").show();
-        $("#addmember").show(); // Show add user button        
-        $("#createuseraddtogroup").show();
+        $('.groupselected').show();
         $("#nogroupselected").hide(); // Hide no group selected alert
-    });
+        if (grouplist[gindex].role != 1)
+            $('.if-admin').hide();
+    }
 
     function draw_userlist(groupid) {
         // Load user list
@@ -312,6 +296,19 @@ JAVASCRIPT
     }
 
 // ----------------------------------------------------------------------------------------
+// Action: click on group
+// ----------------------------------------------------------------------------------------
+    $("#grouplist").on("click", ".group", function () {
+        // Group selection CSS
+        $(".group").removeClass('activated');
+        $(this).addClass('activated');
+        // Get selected group from attributes
+        var gindex = $(this).attr("gindex");
+        document.location.hash = grouplist[gindex].name
+        draw_group(gindex);
+    });
+
+// ----------------------------------------------------------------------------------------
 // Action: Group creation
 // ----------------------------------------------------------------------------------------
     $("#groupcreate").click(function () {
@@ -334,7 +331,7 @@ JAVASCRIPT
         }
     });
 
-    // ----------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 // Action: Edit group
 // ----------------------------------------------------------------------------------------
     $("#editgroup").click(function () {
@@ -444,10 +441,7 @@ JAVASCRIPT
             draw_grouplist();
             $("#groupname").html("Users");
             $("#groupdescription").html("");
-            $("#userlist-table").hide();
-            $("#deletegroup").hide();
-            $("#addmember").hide();
-            $("#createuseraddtogroup").hide();
+            $('.groupselected').hide();
             $("#nogroupselected").show();
         }
     });
