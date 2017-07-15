@@ -257,9 +257,12 @@ JAVASCRIPT
             var out = "";
             for (var z in userlist) {
                 out += "<tr>";
-                out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
-                // Active feds
+                if (userlist[z].admin_rights == "full")
+                    out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
+                else
+                    out += "<td class='user' uid=" + userlist[z].userid + ">"+ userlist[z].username + "</td>";
 
+                // Active feeds
                 var prc = userlist[z].activefeeds / userlist[z].feeds;
                 var color = "#00aa00";
                 if (prc < 0.5)

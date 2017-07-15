@@ -191,7 +191,7 @@ class Group {
             return array('success' => false, 'message' => _("You have not got access to the list of users of this group"));
 
         $userlist = array();
-        $result = $this->mysqli->query("SELECT userid,role FROM group_users WHERE groupid = $groupid");
+        $result = $this->mysqli->query("SELECT userid,role,admin_rights FROM group_users WHERE groupid = $groupid");
         while ($row = $result->fetch_object()) {
             // Calculate number of active feeds
             $active = 0;
@@ -214,7 +214,8 @@ class Group {
                 "username" => $u->username,
                 "role" => (int) $row->role,
                 "activefeeds" => (int) $active,
-                "feeds" => (int) $total
+                "feeds" => (int) $total,
+                "admin_rights" => $row->admin_rights
             );
         }
         return $userlist;
