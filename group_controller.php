@@ -55,9 +55,9 @@ function group_controller() {
         }
 
         // --------------------------------------------------------------------------
-        // SPECIAL USER SWITCHING FUNCTION
+        // SPECIAL USER SWITCHING FUNCTIONS
         // --------------------------------------------------------------------------
-        if ($route->action == 'setuser' && $session['write']) {
+        if ($route->action == 'setuser') {
             $route->format = "text";
             $groupid = (int) get('groupid');
             $userid = (int) get('userid');
@@ -68,10 +68,11 @@ function group_controller() {
                 if ($group->is_group_member($groupid, $userid) === true) {
                     // 3. Check that session user has full rights over user requested
                     if ($group->administrator_rights_over_user($groupid, $userid) === true) {
+                        $_SESSION['previous_userid'] = $session['userid'];
+                        $_SESSION['previous_username'] = $session['username'];
                         $_SESSION['userid'] = $userid;
                         header("Location: ../user/view");
-                    }
-                    else
+                    } else
                         $result = "ERROR: You haven't got rights to access this user";
                 } else {
                     $result = "ERROR: User is not a member of group";
@@ -80,8 +81,20 @@ function group_controller() {
                 $result = "ERROR: You are not an administrator of this group";
             }
         }
+
+        if ($route->action == 'logasprevioususer') {
+            $route->format = "text";
+            
+            $_SESSION['userid'] = $_SESSION['previous_userid'];
+            unset($_SESSION['previous_userid']);
+            unset($_SESSION['previous_username']);
+            header("Location: ../group");
+        }
     }
 
+    //---------------------------
+    // SESSION READ
+//---------------------------
     if ($session['read']) {
         // group/grouplist
         // access 1: admin

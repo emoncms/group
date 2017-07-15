@@ -84,3 +84,7 @@
     color:#aa0000;
     font-weight:bold;
 }
+
+#previous_user{
+    display:none;
+}

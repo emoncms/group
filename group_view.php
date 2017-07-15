@@ -11,11 +11,14 @@ MAIN
 -------------------------------------------------------------------------------------------->
 <div id="wrapper">
     <div class="sidebar">
-        <div style="padding-left:10px">
+        <!--<div style="padding-left:10px">
             <div id="sidebar-close"><i class="icon-remove"></i></div>
-            <h3>Groups</h3>
+        </div>-->
+        <div id="previous_user" style="padding: 0 0 10px 10px">
+            <h3>Admin user</h3>'
         </div>
 
+        <h3 style="padding-left:10px">Groups</h3>
         <div id="grouplist"></div>
 
         <div id="groupcreate"><i class="icon-plus"></i>New Group</div>
@@ -23,7 +26,7 @@ MAIN
 
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
-            <button class="btn" id="sidebar-open"><i class="icon-list"></i></button>
+            <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
             <div id="createuseraddtogroup" class="if-admin"><i class="icon-plus"></i>Create User</div>
             <div id="addmember" class="if-admin"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
@@ -177,6 +180,7 @@ JAVASCRIPT
     var selected_groupid = 0;
     var grouplist = [];
     var user_role = 0;
+   
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
