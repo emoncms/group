@@ -96,7 +96,7 @@ MODALS
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
             <option value=3>Member</option>
-            <option value=0>Passive member</option>
+            <option value=0 selected>Passive member</option>
         </select>
 
     </div>
@@ -129,7 +129,7 @@ MODALS
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
             <option value=3>Member</option>
-            <option value=0>Passive member</option>
+            <option value=0 selected>Passive member</option>
         </select>
         <div id="createuseraddtogroup-message"></div>
 
@@ -180,7 +180,7 @@ JAVASCRIPT
     var selected_groupid = 0;
     var grouplist = [];
     var user_role = 0;
-   
+
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
@@ -296,6 +296,7 @@ JAVASCRIPT
 // Action: Group creation
 // ----------------------------------------------------------------------------------------
     $("#groupcreate").click(function () {
+        $('#group-create-modal input').val('');
         $('#group-create-modal').modal('show');
     });
     $("#group-create-action").click(function () {
@@ -317,6 +318,8 @@ JAVASCRIPT
 // Action: Add member
 // ----------------------------------------------------------------------------------------
     $("#addmember").click(function () {
+        $('#group-addmember-modal input').val('');
+        $("#group-addmember-access").val(0);
         $('#group-addmember-modal').modal('show');
     });
     $("#group-addmember-action").click(function () {
@@ -335,6 +338,8 @@ JAVASCRIPT
 // Action: Create user and add to group
 // ----------------------------------------------------------------------------------------
     $("#createuseraddtogroup").click(function () {
+        $('#group-createuseraddtogroup-modal input').val('');
+        $("#group-createuseraddtogroup-role").val(0);
         $('#group-createuseraddtogroup-modal').modal('show');
     });
     $("#group-createuseraddtogroup-action").click(function () {
