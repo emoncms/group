@@ -27,6 +27,7 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
+            <div id="deletegroup" class="if-admin groupselected"><i class="icon-trash"></i> Delete Group</div>
             <div id="editgroup" class="if-admin groupselected"><i class="icon-edit"></i> Edit Group</div>
             <div id="createuseraddtogroup" class="if-admin groupselected"><i class="icon-plus"></i>Create User</div>
             <div id="addmember" class="if-admin groupselected"><i class="icon-plus"></i>Add Member</div>
@@ -41,8 +42,6 @@ MAIN
                                                                        - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th></th></tr>
             <tbody id="userlist"></tbody>
         </table>
-
-        <button id="deletegroup" class="hide groupselected">Delete Group</button>
 
         <div id="nogroupselected" class="alert alert-block">
             <h4 class="alert-heading">No Group Selected</h4>
