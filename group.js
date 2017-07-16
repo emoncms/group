@@ -56,9 +56,16 @@ var group = {
             }});
         return result;
     },
-    'getrole': function (groupid) {
+    'getsessionuserrole': function (groupid) {
         var result = {};
-        $.ajax({url: path + "group/getrole", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
+        $.ajax({url: path + "group/getsessionuserrole", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
+    'getrole': function (userid, groupid) {
+        var result = {};
+        $.ajax({url: path + "group/getrole", data: "userid=" + userid + "&groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});
         return result;

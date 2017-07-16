@@ -35,14 +35,17 @@ MAIN
             <div id="groupdescription"></div>
 
         </div>
-        <table id="userlist-table" class="table groupselected hide">
+        <table id="userlist-table" class="table hide">
             <tr><th>Username</th><th>Active Feeds</th><th>Role  <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
                                                                        - Sub-administrator: access to the list of members, group dashboards and group graphs
                                                                        - Member: view access to dashboards
                                                                        - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th></th></tr>
             <tbody id="userlist"></tbody>
         </table>
-
+        <div id="userlist-alert" class="alert alert-block groupselected">
+            <h4 class="alert-heading"></h4>
+            <p></p>
+        </div>
         <div id="nogroupselected" class="alert alert-block">
             <h4 class="alert-heading">No Group Selected</h4>
             <p>Select or create group from sidebar</p>
@@ -224,6 +227,10 @@ JAVASCRIPT
             }
         }
     }
+    else{        
+        $('.groupselected').hide();
+        $("#nogroupselected").show(); // Hide no group selected alert
+    }
 
 
 // ----------------------------------------------------------------------------------------
@@ -252,58 +259,72 @@ JAVASCRIPT
     }
 
     function draw_userlist(groupid) {
-        // Load user list
+        // Get session user role in group
+        var my_role = group.getsessionuserrole(groupid);
+        // Load listof members
         var userlist = group.userlist(groupid);
-        userlist.sort(function (a, b) {
-            return b.activefeeds - a.activefeeds;
-        });
-        if (userlist.success != undefined) {
-            alert(userlist.message);
-        } else {
-            // Compile the user list html
-            var out = "";
-            for (var z in userlist) {
-                out += "<tr>";
-                if (userlist[z].admin_rights == "full")
-                    out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
-                else
-                    out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
+        if (userlist.success == false) {
+            $('#userlist-table').hide();
+            $('#userlist-alert h4').html('No users to show');
+            $('#userlist-alert p').html(userlist.message);
+        }
+        else {
+            userlist.sort(function (a, b) {
+                return b.activefeeds - a.activefeeds;
+            });
+            if (userlist.success != undefined) {
+                alert(userlist.message);
+            } else {
+                // Clear alert message
+                $('#userlist-alert h4').html('');
+                $('#userlist-alert p').html('');
+                
+                // Compile the user list html
+                var out = "";
+                for (var z in userlist) {
+                    out += "<tr>";
+                    if (my_role === 1 && userlist[z].admin_rights == "full")
+                        out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
+                    else
+                        out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
 
-                // Active feeds
-                var prc = userlist[z].activefeeds / userlist[z].feeds;
-                var color = "#00aa00";
-                if (prc < 0.5)
-                    color = "#aaaa00";
-                if (prc < 0.1)
-                    color = "#aa0000";
-                if (userlist[z].feeds == 0)
-                    color = "#000";
-                out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].feeds + "</b></td>";
-                // Role
-                var role;
-                switch (userlist[z].role) {
-                    case 0:
-                        role = 'Passive member';
-                        break;
-                    case 1:
-                        role = 'Administrator';
-                        break;
-                    case 2:
-                        role = 'Sub-administrator';
-                        break;
-                    case 3:
-                        role = 'Member';
-                        break;
+                    // Active feeds
+                    var prc = userlist[z].activefeeds / userlist[z].feeds;
+                    var color = "#00aa00";
+                    if (prc < 0.5)
+                        color = "#aaaa00";
+                    if (prc < 0.1)
+                        color = "#aa0000";
+                    if (userlist[z].feeds == 0)
+                        color = "#000";
+                    out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].feeds + "</b></td>";
+                    // Role
+                    var role;
+                    switch (userlist[z].role) {
+                        case 0:
+                            role = 'Passive member';
+                            break;
+                        case 1:
+                            role = 'Administrator';
+                            break;
+                        case 2:
+                            role = 'Sub-administrator';
+                            break;
+                        case 3:
+                            role = 'Member';
+                            break;
+                    }
+                    out += "<td>" + role + "</td>";
+                    // Actions
+                    if (userlist[z].userid == my_userid)
+                        out += '<td></td>';
+                    else
+                        out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+                    out += "</tr>";
                 }
-                out += "<td>" + role + "</td>";
-                // Actions
-                if (userlist[z].userid == my_userid)
-                    out += '<td></td>';
-                else
-                    out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-                out += "</tr>";
+                $("#userlist").html(out); // Place userlist html in userlist table 
+                $('#userlist-table').show();
             }
-            $("#userlist").html(out); // Place userlist html in userlist table   
         }
     }
 

@@ -116,12 +116,20 @@ function group_controller() {
             $result = $group->userlist($session["userid"], get("groupid"));
         }
 
-        // group/getrole?groupid=1
+        // group/getrole?userid=1&groupid=1
         // access 1: admin
         if ($route->action == "getrole") {
             $route->format = "json";
+            $result = $group->getrole(get("userid"), get("groupid"));
+        }
+        
+        // group/getsessionuserrole?groupid=1
+        // access 1: admin
+        if ($route->action == "getsessionuserrole") {
+            $route->format = "json";
             $result = $group->getrole($session["userid"], get("groupid"));
         }
+        
     }
 
     return array('content' => $result, 'fullwidth' => false);
