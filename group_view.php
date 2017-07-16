@@ -42,7 +42,7 @@ MAIN
                                                                        - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th></th></tr>
             <tbody id="userlist"></tbody>
         </table>
-        <div id="userlist-alert" class="alert alert-block groupselected">
+        <div id="userlist-alert" class="alert alert-block hide">
             <h4 class="alert-heading"></h4>
             <p></p>
         </div>
@@ -227,7 +227,7 @@ JAVASCRIPT
             }
         }
     }
-    else{        
+    else {
         $('.groupselected').hide();
         $("#nogroupselected").show(); // Hide no group selected alert
     }
@@ -267,6 +267,7 @@ JAVASCRIPT
             $('#userlist-table').hide();
             $('#userlist-alert h4').html('No users to show');
             $('#userlist-alert p').html(userlist.message);
+            $('#userlist-alert').show();
         }
         else {
             userlist.sort(function (a, b) {
@@ -275,10 +276,9 @@ JAVASCRIPT
             if (userlist.success != undefined) {
                 alert(userlist.message);
             } else {
-                // Clear alert message
-                $('#userlist-alert h4').html('');
-                $('#userlist-alert p').html('');
-                
+                // Hide alert message
+                $('#userlist-alert').hide();
+
                 // Compile the user list html
                 var out = "";
                 for (var z in userlist) {
