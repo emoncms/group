@@ -1,6 +1,6 @@
 <?php
 defined('EMONCMS_EXEC') or die('Restricted access');
-global $path, $fullwidth;
+global $path, $fullwidth, $session;
 $fullwidth = true;
 ?>
 <link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
@@ -149,8 +149,8 @@ MODALS
     <div class="modal-body">
         <span id="remove-user-modal-step-1">
             <p>What do you want to do?</p>
-            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="remove-from-group"><label>Remove user from group</label></div>
-            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="delete" disabled="disabled"><label>ToDo - Completely remove user from database - ToDo</label></div>
+            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="remove-from-group" /><span>Remove user from group</span></div>
+            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="delete" disabled="disabled" /><span>ToDo - Completely remove user from database - ToDo</span></div>
         </span>
         <span id="remove-user-modal-step-2" style="display:none"></span>
     </div>
@@ -198,6 +198,8 @@ JAVASCRIPT
 -------------------------------------------------------------------------------------------->
 <script>
     var path = "<?php echo $path; ?>";
+    var my_userid = <?php echo $session["userid"]; ?>;
+    console.log(my_userid);
     sidebar_resize();
     var selected_groupid = 0;
     var selected_groupindex = 0;
@@ -295,8 +297,11 @@ JAVASCRIPT
                 }
                 out += "<td>" + role + "</td>";
                 // Actions
-                out += "<td><i class='removeuser icon-trash' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights +"> </i></td > ";
-                        out += "</tr>";
+                if (userlist[z].userid == my_userid)
+                    out += '<td></td>';
+                else
+                    out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+                out += "</tr>";
             }
             $("#userlist").html(out); // Place userlist html in userlist table   
         }
@@ -423,18 +428,18 @@ JAVASCRIPT
         $('#remove-user-modal-step-2').hide();
         $('#remove-user-action').html('Next');
         $('#remove-user-action').attr('action', 'next');
-        
+
         var userid = $(this).attr("uid");
         $('#remove-user-modal').attr("uid", userid);
-        
+
         var admin_rights = $(this).attr("admin-rights");
-        if(admin_rights !="full"){
+        if (admin_rights != "full") {
             $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', true);
         }
-        else{
-            $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', false);      
+        else {
+            $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', false);
         }
-        
+
         $('#remove-user-modal').modal('show');
     });
     $("#remove-user-action").click(function () {

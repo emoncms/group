@@ -89,6 +89,6 @@
     display:none;
 }
 
-input:disabled+label{
+input:disabled+span{
     opacity: 0.4;
 }
