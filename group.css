@@ -88,3 +88,7 @@
 #previous_user{
     display:none;
 }
+
+input:disabled+label{
+    opacity: 0.4;
+}

@@ -140,18 +140,23 @@ MODALS
     </div>
 </div>
 
-<!-- REMOVE USER FROM GROUP -->
+<!-- REMOVE USER -->
 <div id="remove-user-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="remove-user-modal-label" aria-hidden="true" data-backdrop="static">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="remove-user-modal-label">Remove user from group</h3>
+        <h3 id="remove-user-modal-label">Remove user</h3>
     </div>
     <div class="modal-body">
-        <p>Are you sure you wish to remove this user?</p>
+        <span id="remove-user-modal-step-1">
+            <p>What do you want to do?</p>
+            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="remove-from-group"><label>Remove user from group</label></div>
+            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="delete" disabled="disabled"><label>ToDo - Completely remove user from database - ToDo</label></div>
+        </span>
+        <span id="remove-user-modal-step-2" style="display:none"></span>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-        <button id="remove-user-action" class="btn btn-danger">Remove</button>
+        <button id="remove-user-action" action="next" class="btn btn-danger">Next</button>
     </div>
 </div>
 
@@ -260,7 +265,7 @@ JAVASCRIPT
                 if (userlist[z].admin_rights == "full")
                     out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
                 else
-                    out += "<td class='user' uid=" + userlist[z].userid + ">"+ userlist[z].username + "</td>";
+                    out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
 
                 // Active feeds
                 var prc = userlist[z].activefeeds / userlist[z].feeds;
@@ -290,8 +295,8 @@ JAVASCRIPT
                 }
                 out += "<td>" + role + "</td>";
                 // Actions
-                out += "<td><i class='removeuser icon-trash' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + "></i></td>";
-                out += "</tr>";
+                out += "<td><i class='removeuser icon-trash' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights +"> </i></td > ";
+                        out += "</tr>";
             }
             $("#userlist").html(out); // Place userlist html in userlist table   
         }
@@ -414,20 +419,62 @@ JAVASCRIPT
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
     $("#userlist").on("click", ".removeuser", function () {
-        $('#remove-user-modal').modal('show');
+        $('#remove-user-modal-step-1').show();
+        $('#remove-user-modal-step-2').hide();
+        $('#remove-user-action').html('Next');
+        $('#remove-user-action').attr('action', 'next');
+        
         var userid = $(this).attr("uid");
         $('#remove-user-modal').attr("uid", userid);
+        
+        var admin_rights = $(this).attr("admin-rights");
+        if(admin_rights !="full"){
+            $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', true);
+        }
+        else{
+            $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', false);      
+        }
+        
+        $('#remove-user-modal').modal('show');
     });
     $("#remove-user-action").click(function () {
-        $('#remove-user-modal').modal('hide');
-        var userid = $('#remove-user-modal').attr("uid");
-        var result = group.removeuser(selected_groupid, userid);
-        if (!result.success) {
-            alert(result.message);
-        } else {
-            draw_userlist(selected_groupid);
+        var action = $(this).attr('action');
+        if (action == 'next') {
+            $('#remove-user-modal-step-1').hide();
+            var what_to_do = $('input[name="removeuser-whattodo"]:checked').val();
+            if (what_to_do == 'remove-from-group') {
+                $('#remove-user-modal-step-2').html('<p>Are you sure you want to remove this user from group?</p>');
+                $(this).attr('action', 'remove-from-group');
+            }
+            else {
+                $('#remove-user-modal-step-2').html('<p>Are you sure you wish to completely delete this user from the database?</p><p>All the data will be lost</p>');
+                $(this).attr('action', 'delete-from-database');
+            }
+            $('#remove-user-modal-step-2').show();
+            $('#remove-user-action').html('Done')
+        }
+        else if (action == "remove-from-group") {
+            $('#remove-user-modal').modal('hide');
+            var userid = $('#remove-user-modal').attr("uid");
+            var result = group.removeuser(selected_groupid, userid);
+            if (!result.success) {
+                alert(result.message);
+            } else {
+                draw_userlist(selected_groupid);
+            }
+        }
+        else if (action == "delete-from-database") {
+            $('#remove-user-modal').modal('hide');
+            //todo
         }
     });
+
+    /*
+     <span id="removeuser-confirm">
+     <p>Are you sure you want to remove this user from group?</p>
+     <p>Are you sure you wish to completely delete this user from the database?</p>
+     <p>All the data will be lost</p>
+     </span>*/
 // ----------------------------------------------------------------------------------------
 // Action: Delete group
 // ----------------------------------------------------------------------------------------
