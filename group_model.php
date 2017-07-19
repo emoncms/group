@@ -200,13 +200,12 @@ class Group {
             $result2 = $this->mysqli->query("SELECT id FROM feeds WHERE userid=" . $row->userid);
             while ($row2 = $result2->fetch_object()) {
                 $feedid = $row2->id;
-                $timevalue = $this->feed->get_timevalue_seconds($feedid);
+                $timevalue = $this->feed->get_timevalue($feedid);
                 $diff = $now - $timevalue['time'];
                 if ($diff < (3600 * 24 * 2))
                     $active++;
                 $total++;
             }
-
 
             $u = $this->user->get($row->userid);
             $userlist[] = array(
