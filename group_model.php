@@ -259,14 +259,16 @@ class Group {
         if (!$this->is_group_admin($groupid, $userid))
             return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
 
+        // Check user belongs to group
+        if (!$this->is_group_member($groupid, $userid_to_remove))
+            return array('success' => false, 'message' => _("The user to remove doesn't belong to the group"));
+
         // Check that user to remove is a member of group then delete
-        if ($this->is_group_member($groupid, $userid_to_remove)) {
-            $stmt = $this->mysqli->prepare("DELETE FROM group_users WHERE groupid=? AND userid=?");
-            $stmt->bind_param("ii", $groupid, $userid_to_remove);
-            if (!$stmt->execute())
-                return array('success' => false, 'message' => _("Query error"));
-            return array('success' => true, 'message' => _("User removed from group"));
-        }
+        $stmt = $this->mysqli->prepare("DELETE FROM group_users WHERE groupid=? AND userid=?");
+        $stmt->bind_param("ii", $groupid, $userid_to_remove);
+        if (!$stmt->execute())
+            return array('success' => false, 'message' => _("Query error"));
+        return array('success' => true, 'message' => _("User removed from group"));
     }
 
     // Remove user from database and group
@@ -283,6 +285,10 @@ class Group {
         // Check that user is an admin of group
         if (!$this->is_group_admin($groupid, $session_userid))
             return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+
+        // Check user belongs to group
+        if (!$this->is_group_member($groupid, $userid_to_remove))
+            return array('success' => false, 'message' => _("The user to remove doesn't belong to the group"));
 
         // Check session admin has full rights over user data
         $asd = $this->administrator_rights_over_user($groupid, $userid_to_remove);
