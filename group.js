@@ -35,6 +35,13 @@ var group = {
             }});
         return result;
     },
+    'fullremoveuser': function (groupid, userid) {
+        var result = {};
+        $.ajax({url: path + "group/fullremoveuser", data: "groupid=" + groupid + "&userid=" + userid, dataType: 'json', async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
     'grouplist': function () {
         var result = {};
         $.ajax({url: path + "group/grouplist", dataType: 'json', async: false, success: function (data) {

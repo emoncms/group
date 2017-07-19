@@ -153,7 +153,7 @@ MODALS
         <span id="remove-user-modal-step-1">
             <p>What do you want to do?</p>
             <div  class="radio"><input type="radio" name="removeuser-whattodo" value="remove-from-group" /><span>Remove user from group</span></div>
-            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="delete" disabled="disabled" /><span>ToDo - Completely remove user from database - ToDo</span></div>
+            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="delete" /><span>Completely remove user from database</span></div>
         </span>
         <span id="remove-user-modal-step-2" style="display:none"></span>
     </div>
@@ -491,7 +491,13 @@ JAVASCRIPT
         }
         else if (action == "delete-from-database") {
             $('#remove-user-modal').modal('hide');
-            //todo
+            var userid = $('#remove-user-modal').attr("uid");
+            var result = group.fullremoveuser(selected_groupid, userid);
+            if (!result.success) {
+                alert(result.message);
+            } else {
+                draw_userlist(selected_groupid);
+            }
         }
     });
 

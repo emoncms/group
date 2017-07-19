@@ -22,12 +22,15 @@ class Group {
     private $user;
     private $feed;
     private $redis;
+    private $dashboard;
 
-    public function __construct($mysqli, $redis, $user, $feed) {
+    public function __construct($mysqli, $redis, $user, $feed, $input, $dashboard) {
         $this->mysqli = $mysqli;
         $this->user = $user;
+        $this->input = $input;
         $this->feed = $feed;
         $this->redis = $redis;
+        $this->dashboard = $dashboard;
     }
 
     // Create group, add creator user as administrator
@@ -242,6 +245,7 @@ class Group {
         return array('success' => true, 'message' => _("Group deleted"));
     }
 
+    // Remove member from group
     public function remove_user($userid, $groupid, $userid_to_remove) {
         // Input sanitisation
         $userid = (int) $userid;
@@ -249,7 +253,7 @@ class Group {
 
         // A user cant remove their own account
         if ($userid == $userid_to_remove)
-            return array('success' => false, 'message' => _("Cannot remove own user from group, please delete group"));
+            return array('success' => false, 'message' => _("Cannot remove yourself from group"));
 
         // Check that user is an admin of group
         if (!$this->is_group_admin($groupid, $userid))
@@ -263,6 +267,54 @@ class Group {
                 return array('success' => false, 'message' => _("Query error"));
             return array('success' => true, 'message' => _("User removed from group"));
         }
+    }
+
+    // Remove user from database and group
+    public function full_remove_user($session_userid, $groupid, $userid_to_remove) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+        $groupid = (int) $groupid;
+        $userid_to_remove = (int) $userid_to_remove;
+
+        // A user cant remove their own account
+        if ($session_userid == $userid_to_remove)
+            return array('success' => false, 'message' => _("Cannot delete yourself"));
+
+        // Check that user is an admin of group
+        if (!$this->is_group_admin($groupid, $session_userid))
+            return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+
+        // Check session admin has full rights over user data
+        $asd = $this->administrator_rights_over_user($groupid, $userid_to_remove);
+        if ($this->administrator_rights_over_user($groupid, $userid_to_remove) !== true)
+            return array('success' => false, 'message' => _("Administrator has not got right over users"));
+
+        // Delete inputs
+        $list_of_inputs = $this->input->getlist($userid_to_remove);
+        foreach ($list_of_inputs as $input) {
+            $this->input->delete($userid_to_remove, $input['id']);
+        }
+
+        // Delete feeds        
+        $list_of_feeds = $this->feed->get_user_feeds($userid_to_remove);
+        foreach ($list_of_feeds as $feed) {
+            $this->feed->delete($feed['id']);
+        }
+
+        // Delete dashboards
+        if (is_null($this->dashboard) == false) {
+            $list_of_dashboards = $this->dashboard->get_list($userid_to_remove, false, false);
+            foreach ($list_of_dashboards as $dashboard) {
+                $this->dashboard->delete($dashboard['id']);
+            }
+        }
+
+        // Remove from group
+        $result = $this->remove_user($session_userid, $groupid, $userid_to_remove);
+        if ($result['success'] == true)
+            return array('success' => true, 'message' => _("User completely removed"));
+        else
+            return array('success' => false, 'message' => _("User could not be deleted"));
     }
 
     // Basic check if group of id exists

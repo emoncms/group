@@ -11,8 +11,21 @@ function group_controller() {
     include "Modules/feed/feed_model.php";
     $feed = new Feed($mysqli, $redis, $feed_settings);
 
+    include "Modules/input/input_model.php";
+    $input = new Input($mysqli, $redis, $feed);
+
+    $result = $mysqli->query("SHOW TABLES LIKE 'dashboard'");
+    $dashboard_module_installed = $result->num_rows > 0 ? true : false;
+    if ($dashboard_module_installed === true) {
+        include "Modules/dashboard/dashboard_model.php";
+        $dashboard = new Dashboard($mysqli);
+    } else {
+        $dashboard = null;
+    }
+
     include "Modules/group/group_model.php";
-    $group = new Group($mysqli, $redis, $user, $feed);
+    $group = new Group($mysqli, $redis, $user, $feed, $input, $dashboard);
+
 
     // ------------------------------------------------------------------------------------
     // API
@@ -29,7 +42,7 @@ function group_controller() {
             $route->format = "json";
             $result = $group->create($session["userid"], get("name"), get("description"), get("organization"), get("area"), get("visibility"), get("access"));
         }
-        
+
         // group/editgroup?name=test&description=test
         if ($route->action == "editgroup") {
             $route->format = "json";
@@ -52,6 +65,12 @@ function group_controller() {
         if ($route->action == "removeuser") {
             $route->format = "json";
             $result = $group->remove_user($session["userid"], get("groupid"), get("userid"));
+        }
+
+        // group/removeuser?groupid=1&userid=1
+        if ($route->action == "fullremoveuser") {
+            $route->format = "json";
+            $result = $group->full_remove_user($session["userid"], get("groupid"), get("userid"));
         }
 
         // group/delete?groupid=1
@@ -90,7 +109,7 @@ function group_controller() {
 
         if ($route->action == 'logasprevioususer') {
             $route->format = "text";
-            
+
             $_SESSION['userid'] = $_SESSION['previous_userid'];
             unset($_SESSION['previous_userid']);
             unset($_SESSION['previous_username']);
@@ -122,14 +141,13 @@ function group_controller() {
             $route->format = "json";
             $result = $group->getrole(get("userid"), get("groupid"));
         }
-        
+
         // group/getsessionuserrole?groupid=1
         // access 1: admin
         if ($route->action == "getsessionuserrole") {
             $route->format = "json";
             $result = $group->getrole($session["userid"], get("groupid"));
         }
-        
     }
 
     return array('content' => $result, 'fullwidth' => false);
