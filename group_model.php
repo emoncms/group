@@ -25,6 +25,7 @@ class Group {
     private $dashboard;
 
     public function __construct($mysqli, $redis, $user, $feed, $input, $dashboard) {
+        $this->log = new EmonLogger(__FILE__);
         $this->mysqli = $mysqli;
         $this->user = $user;
         $this->input = $input;
@@ -45,19 +46,25 @@ class Group {
         $access = $access == 'open' ? 'open' : 'closed';
 
 
-        if ($this->exists_name($name))
-            return array('success' => false, 'message' => _("Group already exists"));
+        if ($this->exists_name($name)) {
+            $this->log->warn("Cannot create group,  already exists");
+            return array('success' => false, 'message' => _("Cannot create group,  already exists"));
+        }
 
         $stmt = $this->mysqli->prepare("INSERT INTO groups (name,description, organization, area, visibility, access) VALUES (?,?,?,?,?,?)");
         $stmt->bind_param("ssssss", $name, $description, $organization, $area, $visibility, $access);
         if (!$stmt->execute()) {
+            $this->log->error("Error creating group, problem with sql statement");
             return array('success' => false, 'message' => _("Error creating group"));
         }
         $groupid = $this->mysqli->insert_id;
 
-        if (!$this->add_user($groupid, $userid, 1))
+        if (!$this->add_user($groupid, $userid, 1)) {
+            $this->log->error("Error adding user to group " . $groupid);
             return array('success' => false, 'message' => _("Error adding user to group"));
+        }
 
+        $this->log->info("Group $groupid added");
         return array('success' => true, 'groupid' => $groupid, 'message' => _("Group $groupid added"));
     }
 
@@ -77,10 +84,13 @@ class Group {
             $stmt = $this->mysqli->prepare("UPDATE groups SET name=?, description=?, organization=?, area=?, visibility=?, access=? WHERE id=?");
             $stmt->bind_param("ssssssi", $name, $description, $organization, $area, $visibility, $access, $groupid);
             if (!$stmt->execute()) {
+                $this->log->error("Error editing group, problem with sql statement");
                 return array('success' => false, 'message' => _("Error editing group"));
             }
+            $this->log->info("Group edited");
             return array('success' => true, 'message' => _("Group edited"));
         } else {
+            $this->log->warning("Error editing group, You are not administrator of the group - Session userid: " . $admin_userid);
             return array('success' => false, 'message' => _("You are not administrator of the group"));
         }
     }
@@ -92,23 +102,32 @@ class Group {
         $role = (int) $role;
         // email, username and password checked within $user model
 
-        if (!$this->exists($groupid))
+        if (!$this->exists($groupid)) {
+            $this->log->warn("Group " . $groupid . " does not exist");
             return array('success' => false, 'message' => _("Group does not exist"));
+        }
 
         // 1. Check that user is a group administrator
-        if (!$this->is_group_admin($groupid, $admin_userid))
+        if (!$this->is_group_admin($groupid, $admin_userid)) {
+            $this->log->warn("You haven't got enough permissions to add a member to this group - Session userid: " . $admin_userid);
             return array('success' => false, 'message' => _("You haven't got enough permissions to add a member to this group"));
+        }
 
         // 2. Check username and password, return
         $result = $this->user->register($username, $password, $email);
-        if (!$result["success"])
+        if (!$result["success"]) {
+            $this->log->error("Error creating user - " . var_export($result, true));
             return $result;
+        }
         $add_userid = $result["userid"];
 
         // 3. Add user to group 
-        if (!$this->add_user($groupid, $add_userid, $role, $admin_rights = 'full'))
+        if (!$this->add_user($groupid, $add_userid, $role, $admin_rights = 'full')) {
+            $this->log->error("Error adding user to group");
             return array('success' => false, 'message' => _("Error adding user to group"));
+        }
 
+        $this->log->info("User $add_userid:$username added to group " . $groupid);
         return array('success' => true, 'message' => _("User $add_userid:$username added"));
     }
 
@@ -120,23 +139,32 @@ class Group {
         $role = (int) $role;
         // username and password checked within $user model
 
-        if (!$this->exists($groupid))
+        if (!$this->exists($groupid)) {
+            $this->log->error("Error adding user to group, group does not exist");
             return array('success' => false, 'message' => _("Group does not exist"));
+        }
 
         // 1. Check that user is a group administrator
-        if (!$this->is_group_admin($groupid, $admin_userid))
+        if (!$this->is_group_admin($groupid, $admin_userid)) {
+            $this->log->warn("You haven't got enough permissions to add a member to this group - Session userid: " . $admin_userid);
             return array('success' => false, 'message' => _("You haven't got enough permissions to add a member to this group"));
+        }
 
         // 2. Check username and password, return
         $result = $this->user->get_apikeys_from_login($username, $password);
-        if (!$result["success"])
+        if (!$result["success"]) {
+            $this->log->error("Error adding user to group, username and password don't match - Session userid: " . $admin_userid);
             return $result;
+        }
         $add_userid = $result["userid"];
 
         // 3. Add user to group 
-        if (!$this->add_user($groupid, $add_userid, $role))
+        if (!$this->add_user($groupid, $add_userid, $role)) {
+            $this->log->error("Error adding user to group");
             return array('success' => false, 'message' => _("Error adding user to group"));
+        }
 
+        $this->log->info("User $add_userid:$username added to group " . $groupid);
         return array('success' => true, 'message' => _("User $add_userid:$username added"));
     }
 
@@ -190,8 +218,10 @@ class Group {
 
         // 1. Check that user is a group administrator
         $role = (int) $this->getrole($userid, $groupid);
-        if ($role != 1 && $role != 2)
+        if ($role != 1 && $role != 2) {
+            $this->log->warn("You have not got access to the list of users of this group - Session userid " . $userid);
             return array('success' => false, 'message' => _("You have not got access to the list of users of this group"));
+        }
 
         $userlist = array();
         $result = $this->mysqli->query("SELECT userid,role,admin_rights FROM group_users WHERE groupid = $groupid");
@@ -229,19 +259,26 @@ class Group {
         $groupid = (int) $groupid;
 
         // Check that user is an admin of group
-        if (!$this->is_group_admin($groupid, $userid))
+        if (!$this->is_group_admin($groupid, $userid)) {
+            $this->log->error('Cannot delete group, sesion user is not admin - Session userid ' . $userid);
             return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+        }
 
         $stmt = $this->mysqli->prepare("DELETE FROM groups WHERE id=?");
         $stmt->bind_param("i", $groupid);
-        if (!$stmt->execute())
+        if (!$stmt->execute()) {
+            $this->log->error('Query error, could not delete group ' . $groupid);
             return array('success' => false, 'message' => _("Query error, could not delete group"));
+        }
 
         $stmt = $this->mysqli->prepare("DELETE FROM group_users WHERE groupid=?");
         $stmt->bind_param("i", $groupid);
-        if (!$stmt->execute())
+        if (!$stmt->execute()) {
+            $this->log->error('Query error, could not delete group ' . $groupid);
             return array('success' => false, 'message' => _("Query error, could not delete users from group"));
+        }
 
+        $this->log->error('Group ' . $groupid . ' deleted by session user ' . $userid);
         return array('success' => true, 'message' => _("Group deleted"));
     }
 
@@ -256,12 +293,16 @@ class Group {
             return array('success' => false, 'message' => _("Cannot remove yourself from group"));
 
         // Check that user is an admin of group
-        if (!$this->is_group_admin($groupid, $userid))
+        if (!$this->is_group_admin($groupid, $userid)) {
+            $this->log->error('Cannot delete user, sesion user is not admin - Session userid ' . $userid);
             return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+        }
 
         // Check user belongs to group
-        if (!$this->is_group_member($groupid, $userid_to_remove))
+        if (!$this->is_group_member($groupid, $userid_to_remove)) {
+            $this->log->error('Cannot delete user, user to remove doesn\'t belong to the group');
             return array('success' => false, 'message' => _("The user to remove doesn't belong to the group"));
+        }
 
         // Check that user to remove is a member of group then delete
         $stmt = $this->mysqli->prepare("DELETE FROM group_users WHERE groupid=? AND userid=?");
@@ -283,17 +324,23 @@ class Group {
             return array('success' => false, 'message' => _("Cannot delete yourself"));
 
         // Check that user is an admin of group
-        if (!$this->is_group_admin($groupid, $session_userid))
+        if (!$this->is_group_admin($groupid, $session_userid)) {
+            $this->log->error('Cannot delete group, sesion user is not admin - Session userid ' . $userid);
             return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+        }
 
         // Check user belongs to group
-        if (!$this->is_group_member($groupid, $userid_to_remove))
+        if (!$this->is_group_member($groupid, $userid_to_remove)) {
+            $this->log->error('Cannot delete user, user to remove doesn\'t belong to the group');
             return array('success' => false, 'message' => _("The user to remove doesn't belong to the group"));
+        }
 
         // Check session admin has full rights over user data
         $asd = $this->administrator_rights_over_user($groupid, $userid_to_remove);
-        if ($this->administrator_rights_over_user($groupid, $userid_to_remove) !== true)
+        if ($this->administrator_rights_over_user($groupid, $userid_to_remove) !== true) {
+            $this->log->warn('Cannot delete user data, administrator has not got right over users - Session userid ' . $session_userid);
             return array('success' => false, 'message' => _("Administrator has not got right over users"));
+        }
 
         // Delete inputs
         $list_of_inputs = $this->input->getlist($userid_to_remove);
@@ -317,9 +364,10 @@ class Group {
 
         // Remove from group
         $result = $this->remove_user($session_userid, $groupid, $userid_to_remove);
-        if ($result['success'] == true)
+        if ($result['success'] == true) {
+            $this->log->info('User ' . $userid_to_remove . ' completely removed - Session userid ' . $session_userid);
             return array('success' => true, 'message' => _("User completely removed"));
-        else
+        } else
             return array('success' => false, 'message' => _("User could not be deleted"));
     }
 
@@ -366,8 +414,11 @@ class Group {
 
         $stmt = $this->mysqli->prepare("INSERT INTO group_users (groupid,userid,role, admin_rights) VALUES (?,?,?,?)");
         $stmt->bind_param("iiis", $groupid, $userid, $role, $admin_rights);
-        if (!$stmt->execute())
+        if (!$stmt->execute()) {
+            $this->log->error('Cannot add user to group, error in query');
             return false;
+        }
+        $this->log->info('User ' . $userid . ' added to group ' . '$groupid');
         return true;
     }
 
