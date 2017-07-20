@@ -483,4 +483,19 @@ class Group {
         return array("result" => $total, "count" => $count);
     }
 
+    // Development    
+    public function getapikeys($sessions_user, $groupid) {
+        // Input sanitisation
+        $groupid = (int) $groupid;
+        $sessions_user = (int) $sessions_user;
+
+        $userlist = $this->userlist($sessions_user, $groupid);
+
+        $asd = 0;
+        foreach ($userlist as $user) {
+            $list[] = $this->user->get_apikey_write($user['userid']);
+        }
+        return $list;
+    }
+
 }

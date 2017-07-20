@@ -115,6 +115,12 @@ function group_controller() {
             unset($_SESSION['previous_username']);
             header("Location: ../group");
         }
+
+        // Developemtn
+        if ($route->action == "getapikeys") {
+            $route->format = "json";
+            $result = $group->getapikeys($session['userid'], get("groupid"));
+        }
     }
 
     //---------------------------
