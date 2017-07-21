@@ -35,11 +35,12 @@ MAIN
             <div id="groupdescription"></div>
 
         </div>
+        <div id="userlist-div" class="hide"><p>Group members</p></div>
         <table id="userlist-table" class="table hide">
             <tr><th>Username</th><th>Active Feeds</th><th>Role  <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
                                                                        - Sub-administrator: access to the list of members, group dashboards and group graphs
                                                                        - Member: view access to dashboards
-                                                                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th></th></tr>
+                                                                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th class='userlistactions'></th><th class='userlistactions'></th></tr>
             <tbody id="userlist"></tbody>
         </table>
         <div id="userlist-alert" class="alert alert-block hide">
@@ -196,6 +197,21 @@ MODALS
     </div>
 </div>
 
+<!-- FEEDS/INPUTS LIST -->
+<div id="feedsinputs-list-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="feedsinputs-list-modal-label" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="feedsinputs-list-modal-label"></h3>
+    </div>
+    <div class="modal-body">
+
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="edit-group-action" data-dismiss="modal" class="btn btn-primary">Done</button>
+    </div>
+</div>
+
 <!-------------------------------------------------------------------------------------------
 JAVASCRIPT
 -------------------------------------------------------------------------------------------->
@@ -207,7 +223,8 @@ JAVASCRIPT
     var selected_groupid = 0;
     var selected_groupindex = 0;
     var grouplist = [];
-    var user_role = 0;
+    var my_role = 0;
+    var userlist = [];
 
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
@@ -260,10 +277,11 @@ JAVASCRIPT
 
     function draw_userlist(groupid) {
         // Get session user role in group
-        var my_role = group.getsessionuserrole(groupid);
+        my_role = group.getsessionuserrole(groupid);
         // Load listof members
-        var userlist = group.userlist(groupid);
+        userlist = group.userlist(groupid);
         if (userlist.success == false) {
+            $('#userlist-div').hide();
             $('#userlist-table').hide();
             $('#userlist-alert h4').html('No users to show');
             $('#userlist-alert p').html(userlist.message);
@@ -279,6 +297,30 @@ JAVASCRIPT
                 // Hide alert message
                 $('#userlist-alert').hide();
 
+                var out = "";
+                for (var z in userlist) {
+                    out += "<div class='user' uid='" + userlist[z].userid + "'>";
+                    out += "<div class='user-info'>" + userlist[z].username + " - " + userlist[z].activefeeds + "/" + userlist[z].totalfeeds + " - " + userlist[z].role + "</div>";
+                    out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
+                    out += "<div class='user-feedslist'>";
+                    userlist[z].feedslist.forEach(function (feed) {
+                        out += "<div class='feed'><input type='checkbox' fid='" + feed.id + "' />";
+                        out += "<div class='feed-name'>" + feed.name + "</div>";
+                        out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
+                        out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
+                        out += "</div>"; // feed
+                    });
+                    out += "</div>"; // user-feedslist
+                    out += "<div class='user-inputs hide'></div>";
+                    out += "</div>"; // user-feeds-inputs
+                    out += "</div>"; // user
+                }
+                $("#userlist-div").append(out); // Place userlist html in userlist table 
+                $('#userlist-div').show();
+
+
+
+
                 // Compile the user list html
                 var out = "";
                 for (var z in userlist) {
@@ -289,15 +331,15 @@ JAVASCRIPT
                         out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
 
                     // Active feeds
-                    var prc = userlist[z].activefeeds / userlist[z].feeds;
+                    var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
                     var color = "#00aa00";
                     if (prc < 0.5)
                         color = "#aaaa00";
                     if (prc < 0.1)
                         color = "#aa0000";
-                    if (userlist[z].feeds == 0)
+                    if (userlist[z].totalfeeds == 0)
                         color = "#000";
-                    out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].feeds + "</b></td>";
+                    out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
                     // Role
                     var role;
                     switch (userlist[z].role) {
@@ -320,14 +362,78 @@ JAVASCRIPT
                         out += '<td></td>';
                     else
                         out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+                    //Feeds list
+                    if (my_role != 1 && my_role != 2)
+                        out += '<td></td>';
+                    else
+                        out += "<td><i class='showfeeds icon-list-alt' style='cursor:pointer' index='" + z + "' title='Show feeds' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+                    // Close table row
                     out += "</tr>";
                 }
-                $("#userlist").html(out); // Place userlist html in userlist table 
+                $("#userlist").append(out); // Place userlist html in userlist table 
                 $('#userlist-table').show();
             }
         }
     }
 
+    // Format value dynamically  (copied from feedlist_view.php)
+    function list_format_value(value) {
+        if (value == null)
+            return 'NULL';
+        value = parseFloat(value);
+        if (value >= 1000)
+            value = parseFloat((value).toFixed(0));
+        else if (value >= 100)
+            value = parseFloat((value).toFixed(1));
+        else if (value >= 10)
+            value = parseFloat((value).toFixed(2));
+        else if (value <= -1000)
+            value = parseFloat((value).toFixed(0));
+        else if (value <= -100)
+            value = parseFloat((value).toFixed(1));
+        else if (value < 10)
+            value = parseFloat((value).toFixed(2));
+        return value;
+    }
+
+    // Calculate and color updated time (copied from feedlist_view.php)
+    function list_format_updated(time) {
+        time = time * 1000;
+        var servertime = (new Date()).getTime();// - table.timeServerLocalOffset;
+        var update = (new Date(time)).getTime();
+
+        var secs = (servertime - update) / 1000;
+        var mins = secs / 60;
+        var hour = secs / 3600;
+        var day = hour / 24;
+
+        var updated = secs.toFixed(0) + "s";
+        if ((update == 0) || (!$.isNumeric(secs)))
+            updated = "n/a";
+        else if (secs < 0)
+            updated = secs.toFixed(0) + "s"; // update time ahead of server date is signal of slow network
+        else if (secs.toFixed(0) == 0)
+            updated = "now";
+        else if (day > 7)
+            updated = "inactive";
+        else if (day > 2)
+            updated = day.toFixed(1) + " days";
+        else if (hour > 2)
+            updated = hour.toFixed(0) + " hrs";
+        else if (secs > 180)
+            updated = mins.toFixed(0) + " mins";
+
+        secs = Math.abs(secs);
+        var color = "rgb(255,0,0)";
+        if (secs < 25)
+            color = "rgb(50,200,50)"
+        else if (secs < 60)
+            color = "rgb(240,180,20)";
+        else if (secs < (3600 * 2))
+            color = "rgb(255,125,20)"
+
+        return "<span style='color:" + color + ";'>" + updated + "</span>";
+    }
 // ----------------------------------------------------------------------------------------
 // Action: click on group
 // ----------------------------------------------------------------------------------------
@@ -527,6 +633,46 @@ JAVASCRIPT
         }
     });
 // ----------------------------------------------------------------------------------------
+// Action: Show feeds of a user
+// ----------------------------------------------------------------------------------------
+    $(".showfeeds").click(function () {
+        var index = $(this).attr('index');
+        var feedslist = group.getuserfeeds(selected_groupid, userlist[index].userid);
+        if (feedslist.success == false) {
+            alert(feedslist.message);
+        }
+        else {
+            $('#feedsinputs-list-modal-label').html(userlist[index].username + "'s <strong>public</strong> feeds");
+            if (Object.keys(feedslist).length == 0)
+                $('#feedsinputs-list-modal .modal-body').html('<div class="alert alert-block"><p>The user hasn\'t got any <strong>public</strong> feeds</p></div>');
+            else {
+                $('#feedsinputs-list-modal .modal-body').html('<table class="table" id="feeds-list"><th>Id</th><th>Tag</th>\n\
+        <th>Name</th><th>Process list</th><th>Datatype</th><th>Engine</th><th>Size</th><th>Updated</th><th>Value</th><th></th></table>');
+                feedslist.forEach(function (feed) {
+                    $('#feeds-list').append('<tr>\n\
+                    <td>' + feed.id + '</td> \n\
+                    <td>' + feed.tag + '</td> \n\
+                    <td>' + feed.name + '</td> \n\
+                    <td>' + feed.processList + '</td> \n\
+                    <td>' + feed.datatype + '</td> \n\
+                    <td>' + feed.engine + '</td> \n\
+                    <td>' + feed.size + '</td> \n\
+                    <td>' + feed.time + '</td> \n\
+                    <td>' + feed.value + '</td> \n\
+            </tr>');
+                });
+            }
+
+            $('#feedsinputs-list-modal').modal('show');
+        }
+    });
+
+
+    $('.user').click(function () {
+        var userid = $(this).attr('uid');
+        $('.user-feeds-inputs[uid=' + userid + ']').toggle();
+    });
+// ----------------------------------------------------------------------------------------
 // Sidebar
 // ----------------------------------------------------------------------------------------
     $("#sidebar-open").click(function () {
@@ -557,7 +703,6 @@ JAVASCRIPT
     $(window).resize(function () {
         sidebar_resize();
     });
-
     // For development
     $('#create-inputs-feeds').click(function () {
         var list_apikeys = group.getapikeys(selected_groupid);

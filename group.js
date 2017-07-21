@@ -63,6 +63,13 @@ var group = {
             }});
         return result;
     },
+    'getuserfeeds': function (groupid, userid) {
+        var result = {};
+        $.ajax({url: path + "group/getuserfeeds", data: "groupid=" + groupid + "&userid=" + userid, dataType: 'json', async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
     'getsessionuserrole': function (groupid) {
         var result = {};
         $.ajax({url: path + "group/getsessionuserrole", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {

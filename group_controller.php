@@ -128,28 +128,30 @@ function group_controller() {
 //---------------------------
     if ($session['read']) {
         // group/grouplist
-        // access 1: admin
         if ($route->action == "grouplist") {
             $route->format = "json";
             $result = $group->grouplist($session["userid"]);
         }
 
         // group/userlist?groupid=1
-        // access 1: admin
         if ($route->action == "userlist") {
             $route->format = "json";
             $result = $group->userlist($session["userid"], get("groupid"));
         }
 
+        // group/getuserfeeds?groupid=1&userid=12
+        if ($route->action == "getuserfeeds") {
+            $route->format = "json";
+            $result = $group->getuserfeeds($session["userid"], get("groupid"), get('userid'));
+        }
+
         // group/getrole?userid=1&groupid=1
-        // access 1: admin
         if ($route->action == "getrole") {
             $route->format = "json";
             $result = $group->getrole(get("userid"), get("groupid"));
         }
 
         // group/getsessionuserrole?groupid=1
-        // access 1: admin
         if ($route->action == "getsessionuserrole") {
             $route->format = "json";
             $result = $group->getrole($session["userid"], get("groupid"));

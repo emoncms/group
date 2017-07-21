@@ -211,34 +211,35 @@ class Group {
     }
 
     // Return list of users for which $userid is an administrator or subadministrator
-    public function userlist($userid, $groupid) {
+    public function userlist($session_userid, $groupid) {
         // Input sanitisation
-        $userid = (int) $userid;
+        $session_userid = (int) $session_userid;
         $groupid = (int) $groupid;
 
-        // 1. Check that user is a group administrator
-        $role = (int) $this->getrole($userid, $groupid);
+        // 1. Check that user is a group administrator/subadministrator
+        $role = (int) $this->getrole($session_userid, $groupid);
         if ($role != 1 && $role != 2) {
-            $this->log->warn("You have not got access to the list of users of this group - Session userid " . $userid);
+            $this->log->warn("You have not got access to the list of users of this group - Session userid " . $session_userid);
             return array('success' => false, 'message' => _("You have not got access to the list of users of this group"));
         }
 
         $userlist = array();
         $result = $this->mysqli->query("SELECT userid,role,admin_rights FROM group_users WHERE groupid = $groupid");
         while ($row = $result->fetch_object()) {
-            // Calculate number of active feeds
+            // Get feeds and calculate number of active feeds
+            $userfeeds = $this->getuserfeeds($session_userid, $groupid, $row->userid);
             $active = 0;
             $total = 0;
             $now = time();
-            $result2 = $this->mysqli->query("SELECT id FROM feeds WHERE userid=" . $row->userid);
-            while ($row2 = $result2->fetch_object()) {
-                $feedid = $row2->id;
-                $timevalue = $this->feed->get_timevalue($feedid);
-                $diff = $now - $timevalue['time'];
+            foreach ($userfeeds as $feed) {
+                $diff = $now - $feed['time'];
                 if ($diff < (3600 * 24 * 2))
                     $active++;
                 $total++;
             }
+            
+            // Get inputs
+            $userinputs = $this->getuserinputs($session_userid, $groupid, $row->userid);
 
             $u = $this->user->get($row->userid);
             $userlist[] = array(
@@ -246,11 +247,57 @@ class Group {
                 "username" => $u->username,
                 "role" => (int) $row->role,
                 "activefeeds" => (int) $active,
-                "feeds" => (int) $total,
-                "admin_rights" => $row->admin_rights
+                "totalfeeds" => (int) $total,
+                "admin_rights" => $row->admin_rights,
+                "feedslist" => $userfeeds,
+                "inputslist" => $userinputs
             );
         }
         return $userlist;
+    }
+
+    // Return list of feeds of the given user
+    public function getuserfeeds($session_userid, $groupid, $userid) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+        $userid = (int) $userid;
+        $groupid = (int) $groupid;
+
+        // 1. Check that user is a group administrator or subadministrator
+        $role = (int) $this->getrole($session_userid, $groupid);
+        if ($role != 1 && $role != 2) {
+            $this->log->warn('You have not got access to user\'s feeds of group ' . $groupid . ' - Session userid ' . $session_userid);
+            return array('success' => false, 'message' => _("You have not got access to user's feeds of this group"));
+        }
+
+        // 2. Check that user is member of the group
+        if (!$this->is_group_member($groupid, $userid))
+            return array('success' => false, 'message' => _("The user is not member of the group"));
+
+        // 3. Get list of feeds
+        return $this->feed->get_user_feeds($userid);
+    }
+    
+    // Return list of feeds of the given user
+    public function getuserinputs($session_userid, $groupid, $userid) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+        $userid = (int) $userid;
+        $groupid = (int) $groupid;
+
+        // 1. Check that user is a group administrator or subadministrator
+        $role = (int) $this->getrole($session_userid, $groupid);
+        if ($role != 1 && $role != 2) {
+            $this->log->warn('You have not got access to user\'s feeds of group ' . $groupid . ' - Session userid ' . $session_userid);
+            return array('success' => false, 'message' => _("You have not got access to user's feeds of this group"));
+        }
+
+        // 2. Check that user is member of the group
+        if (!$this->is_group_member($groupid, $userid))
+            return array('success' => false, 'message' => _("The user is not member of the group"));
+
+        // 3. Get list of feeds
+        return $this->input->get_inputs($userid);
     }
 
     public function delete($userid, $groupid) {
@@ -459,6 +506,7 @@ class Group {
         return true;
     }
 
+    // Returns true if the administrato of a group has full access to user account
     public function administrator_rights_over_user($groupid, $userid) {
         // Input sanitisation
         $userid = (int) $userid;
@@ -544,7 +592,8 @@ class Group {
 
         $asd = 0;
         foreach ($userlist as $user) {
-            $list[] = $this->user->get_apikey_write($user['userid']);
+            if ($this->is_group_admin($groupid, $sessions_user) && $this->administrator_rights_over_user($groupid, $user['userid']))
+                $list[] = $this->user->get_apikey_write($user['userid']);
         }
         return $list;
     }
