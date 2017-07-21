@@ -300,23 +300,29 @@ JAVASCRIPT
                 var out = "";
                 for (var z in userlist) {
                     out += "<div class='user' uid='" + userlist[z].userid + "'>";
-                    out += "<div class='user-info'>" + userlist[z].username + " - " + userlist[z].activefeeds + "/" + userlist[z].totalfeeds + " - " + userlist[z].role + "</div>";
+                    out += "<div class='user-info'>";
+                    out += "<a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a>";
+                    out += " - " + userlist[z].activefeeds + "/" + userlist[z].totalfeeds + " - " + userlist[z].role + "</div>";
                     out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
                     out += "<div class='user-feedslist'>";
+                    out += "<div class='user-feedslist-inner'>";
                     userlist[z].feedslist.forEach(function (feed) {
-                        out += "<div class='feed'><input type='checkbox' fid='" + feed.id + "' />";
-                        out += "<div class='feed-name'>" + feed.name + "</div>";
-                        out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
-                        out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
+                        out += "<div class='feed'>";
+                            out += "<input type='checkbox' fid='" + feed.id + "' />";
+                            out += "<div class='feed-name'>" + feed.name + "</div>";
+                            out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
+                            out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
                         out += "</div>"; // feed
                     });
+                    out += "</div>"; // user-feedslist-inner
                     out += "</div>"; // user-feedslist
-                    out += "<div class='user-inputs hide'></div>";
+                    //out += "<div class='user-inputs hide'></div>";
                     out += "</div>"; // user-feeds-inputs
                     out += "</div>"; // user
                 }
                 $("#userlist-div").append(out); // Place userlist html in userlist table 
                 $('#userlist-div').show();
+                //$(".user-feedslist .feed").last().css("border-bottom","1px solid #aaa");
 
 
 
@@ -635,6 +641,10 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Show feeds of a user
 // ----------------------------------------------------------------------------------------
+    $(".setuser").click(function() {
+        e.stopPropagation();
+    });
+
     $(".showfeeds").click(function () {
         var index = $(this).attr('index');
         var feedslist = group.getuserfeeds(selected_groupid, userlist[index].userid);

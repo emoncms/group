@@ -101,34 +101,52 @@ input:disabled+span{
 #userlist-div{  
     font-weight:normal;
     padding:10px;
-    font-weight:bold;
     cursor:pointer;
 }
 
-#userlist-div .user-info{  
-    background-color:#c1c1c1;
-    border-bottom:1px solid #fff;
-    border-left:2px solid #f0f0f0;
+#userlist-div .user-info{
+    font-weight:bold;
     cursor:pointer;
     padding:10px; 
 }
 
-#userlist-div .user-info:hover{ border-left:2px solid #44b3e2; }
+
 
 .user{
-    margin:4px;
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    background-color:#f3f3f3;
 }
+
+.user:last-child {
+    border-bottom: 1px solid #ccc;
+}
+
 .user-feedslist{
-    background-color:#ddd;
+    padding:5px;
+}
+
+.user-feedslist-inner{
+    background-color:#fff; 
 }
 
 .feed{
-    padding:10px
+    padding:10px;
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
+
+.feed:last-child {
+    border-bottom: 1px solid #ccc;
+}
+
+.feed:hover{ border-left:2px solid #44b3e2; }
 
 .feed-value, .feed-time{
     width:60px;
-    padding-top:10px;
+    padding-top:0px;
     float:right;
     text-align:center;
 }
