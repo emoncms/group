@@ -84,7 +84,16 @@ var group = {
             }});
         return result;
     },
-    // Development
+    'csvexport': function (groupid, feedid, start, end, interval, timeformat, name) {
+        var result = {};
+        var url = path + "group/csvexport.json?groupid=" + groupid + "&id=" + feedid + "&start=" + start + "&end=" + end + "&interval=" + interval + "&timeformat=" + timeformat + "&name=" + name;
+        window.open(url);
+        /*  $.ajax({url: path + "group/csvexport", data: "groupid=" + groupid + "&id=" + feedid + "&start=" + start + "&end=" + end + "&interval=" + interval + "&timeformat=" + timeformat + "&name=" + name, dataType: 'json', async: false, success: function (data) {
+         result = data;
+         }});
+         return result;*/
+    },
+// Development
     'getapikeys': function (groupid) {
         var result = {};
         $.ajax({url: path + "group/getapikeys", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
@@ -92,13 +101,14 @@ var group = {
             }});
         return result;
     },
-    'createinputs': function (apikey) {
-        var result = {};
-        $.ajax({url: path + "input/post.json?node=1&json={power4:100,power2:200,power3:300}&apikey", data: "apikey=" + apikey, dataType: 'json', async: false, success: function (data) {
-                result = data;
-            }});
-        return result;
-    },
+    'createinputs'
+            : function (apikey) {
+                var result = {};
+                $.ajax({url: path + "input/post.json?node=1&json={power4:100,power2:200,power3:300}&apikey", data: "apikey=" + apikey, dataType: 'json', async: false, success: function (data) {
+                        result = data;
+                    }});
+                return result;
+            },
     'createfeeds': function (apikey, name) {
         var result = {};
         $.ajax({url: path + "feed/create.json?tag=Test&name=Power" + name + "&datatype=1&engine=5&options={\"interval\":10}&apikey", data: "apikey=" + apikey, dataType: 'json', async: false, success: function (data) {
@@ -115,7 +125,7 @@ var group = {
     },
     'addinputproccess': function (apikey, inputid, processlist) {
         var result = {};
-        $.ajax({url: path + "input/process/set.json?&inputid=" + inputid , data: "apikey=" + apikey + "&processlist=" + processlist, method: "POST", dataType: 'json', async: false, success: function (data) {
+        $.ajax({url: path + "input/process/set.json?&inputid=" + inputid, data: "apikey=" + apikey + "&processlist=" + processlist, method: "POST", dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});
         return result;

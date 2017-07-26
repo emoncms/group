@@ -105,7 +105,7 @@ input:disabled+span{
 }
 
 #userlist-div .user-info{
-    font-weight:bold;
+    font-weight:normal;
     cursor:pointer;
     padding:10px; 
 }
@@ -116,7 +116,7 @@ input:disabled+span{
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
-    background-color:#f3f3f3;
+    background-color:white;
 }
 
 .user:last-child {
@@ -128,7 +128,7 @@ input:disabled+span{
 }
 
 .user-feedslist-inner{
-    background-color:#fff; 
+    background-color:#f3f3f3; 
 }
 
 .feed{
@@ -144,7 +144,7 @@ input:disabled+span{
 
 .feed:hover{ border-left:2px solid #44b3e2; }
 
-.feed-value, .feed-time{
+.feed-value, .feed-time, .feed-download{
     width:60px;
     padding-top:0px;
     float:right;
@@ -161,4 +161,27 @@ input:disabled+span{
 .feed .feed-name {
     display:inline-block;
     padding-left:10px
+}
+
+.user-name, .user-role, .user-active-feeds{
+    width:30%;
+    display:inline-block;
+    box-sizing:border-box
+}
+
+.user-actions{
+    width:8%;
+    display:inline-block;
+    text-align:right;
+    box-sizing:border-box
+}
+
+.table-headers{
+    font-weight: bold;
+    padding:5px 5px 0;
+    line-height:12px
+}
+
+.table-headers .user-name{
+    padding-left:10px;
 }

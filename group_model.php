@@ -237,7 +237,7 @@ class Group {
                     $active++;
                 $total++;
             }
-            
+
             // Get inputs
             $userinputs = $this->getuserinputs($session_userid, $groupid, $row->userid);
 
@@ -277,7 +277,7 @@ class Group {
         // 3. Get list of feeds
         return $this->feed->get_user_feeds($userid);
     }
-    
+
     // Return list of feeds of the given user
     public function getuserinputs($session_userid, $groupid, $userid) {
         // Input sanitisation
@@ -545,6 +545,24 @@ class Group {
         $stmt->bind_result($role);
         $stmt->fetch();
         return $role;
+    }
+
+    public function csvexport($session_userid, $groupid, $feedid, $start, $end, $interval, $timezone, $name) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+        $groupid = (int) $groupid;
+        $feedid = (int) $feedid;
+        $start = (int) $start;
+        $end = (int) $end;
+        $interval = (int) $interval;
+        $timezone = (int) $timezone;
+        $name = preg_replace('/[^\w\s-:]/', '', $name);
+
+        $feed = $this->feed->get($feedid);
+        $myrole = $this->getrole($session_userid, $groupid);
+        if ($myrole != 1 && $myrole != 2)
+            return array('success' => false, 'message' => _("You haven't got enough rights"));
+        return $this->feed->csv_export($feedid, $start, $end, $interval, $timezone, $name);
     }
 
     // --------------------------------------------------------------------

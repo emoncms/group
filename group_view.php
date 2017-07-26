@@ -5,6 +5,9 @@ $fullwidth = true;
 ?>
 <link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
+<link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
 
 <!-------------------------------------------------------------------------------------------
 MAIN
@@ -35,14 +38,16 @@ MAIN
             <div id="groupdescription"></div>
 
         </div>
-        <div id="userlist-div" class="hide"><p>Group members</p></div>
-        <table id="userlist-table" class="table hide">
-            <tr><th>Username</th><th>Active Feeds</th><th>Role  <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
-                                                                       - Sub-administrator: access to the list of members, group dashboards and group graphs
-                                                                       - Member: view access to dashboards
-                                                                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign" /></th><th class='userlistactions'></th><th class='userlistactions'></th></tr>
-            <tbody id="userlist"></tbody>
-        </table>
+        <div class="table-headers hide groupselected">
+            <div class="user-name">Username</div>
+            <div class="user-active-feeds">Active feeds</div>
+            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
+                                           - Sub-administrator: access to the list of members, group dashboards and group graphs
+                                           - Member: view access to dashboards
+                                           - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
+            <div class="user-actions"></div>
+        </div>
+        <div id="userlist-div" class="hide"></div>
         <div id="userlist-alert" class="alert alert-block hide">
             <h4 class="alert-heading"></h4>
             <p></p>
@@ -197,18 +202,71 @@ MODALS
     </div>
 </div>
 
-<!-- FEEDS/INPUTS LIST -->
-<div id="feedsinputs-list-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="feedsinputs-list-modal-label" aria-hidden="true" data-backdrop="static">
+<!-- FEED EXPORT -->
+<div id="feedExportModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="feedExportModalLabel" aria-hidden="true" data-backdrop="static">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="feedsinputs-list-modal-label"></h3>
+        <h3 id="feedExportModalLabel"><b><span id="SelectedExport"></span></b> CSV export</h3>
     </div>
     <div class="modal-body">
-
+        <p>Select the time range and interval that you wish to export: </p>
+        <table class="table">
+            <tr>
+                <td>
+                    <p><b>Start date & time</b></p>
+                    <div id="datetimepicker1" class="input-append date">
+                        <input id="export-start" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
+                        <span class="add-on"> <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                    </div>
+                </td>
+                <td>
+                    <p><b>End date & time</b></p>
+                    <div id="datetimepicker2" class="input-append date">
+                        <input id="export-end" data-format="dd/MM/yyyy hh:mm:ss" type="text" />
+                        <span class="add-on"> <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p><b>Interval</b></p>
+                    <select id="export-interval" >
+                        <option value=1>Auto</option>
+                        <option value=5>5s</option>
+                        <option value=10>10s</option>
+                        <option value=30>30s</option>
+                        <option value=60>1 min</option>
+                        <option value=300>5 mins</option>
+                        <option value=600>10 mins</option>
+                        <option value=900>15 mins</option>
+                        <option value=1800>30 mins</option>
+                        <option value=3600>1 hour</option>
+                        <option value=21600>6 hour</option>
+                        <option value=43200>12 hour</option>
+                        <option value=86400>Daily</option>
+                        <option value=604800>Weekly</option>
+                        <option value=2678400>Monthly</option>
+                        <option value=31536000>Annual</option>
+                    </select>
+                </td>
+                <td>
+                    <p><b>Date time format</b></p>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="export-timeformat" value="" checked>Excel (d/m/Y H:i:s)</label>
+                    </div>
+                    <label>Offset secs (for daily)&nbsp;<input id="export-timezone-offset" type="text" class="input-mini" disabled=""></label>
+                </td>
+            </tr>
+        </table>
+        <div class="alert alert-info">
+            <p>Selecting an interval shorter than the feed interval (or Auto) will use the feed interval instead. Averages are only returned for feed engines with built in averaging.</p>
+            <p>Date time in excel format is in user timezone. Offset can be set if exporting in Unix epoch time format.</p>
+        </div>
     </div>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-        <button id="edit-group-action" data-dismiss="modal" class="btn btn-primary">Done</button>
+        <div id="downloadsizeplaceholder" style="float: left">Estimated download size: <span id="downloadsize">0</span>MB</div>
+        <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo _('Close'); ?></button>
+        <button class="btn" id="export">Export</button>
     </div>
 </div>
 
@@ -299,19 +357,56 @@ JAVASCRIPT
 
                 var out = "";
                 for (var z in userlist) {
+                    // Role
+                    var role;
+                    switch (userlist[z].role) {
+                        case 0:
+                            role = 'Passive member';
+                            break;
+                        case 1:
+                            role = 'Administrator';
+                            break;
+                        case 2:
+                            role = 'Sub-administrator';
+                            break;
+                        case 3:
+                            role = 'Member';
+                            break;
+                    }
+                    // Active feeds colors
+                    var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
+                    var color = "#00aa00";
+                    if (prc < 0.5)
+                        color = "#aaaa00";
+                    if (prc < 0.1)
+                        color = "#aa0000";
+                    if (userlist[z].totalfeeds == 0)
+                        color = "#000";
+                    // out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
+
+                    // html
                     out += "<div class='user' uid='" + userlist[z].userid + "'>";
                     out += "<div class='user-info'>";
-                    out += "<a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a>";
-                    out += " - " + userlist[z].activefeeds + "/" + userlist[z].totalfeeds + " - " + userlist[z].role + "</div>";
+                    if (userlist[z].admin_rights != 'full')
+                        out += "<div class='user-name'>" + userlist[z].username + "</div>";
+                    else
+                        out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></div>";
+                    out += "<div class='user-active-feeds'><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></div> <div class='user-role'>" + role + "</div>";
+                    out += "<div class='user-actions'>";
+                    if (userlist[z].userid != my_userid)
+                        out += "<i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i>";
+                    out += "</div>"; // user-actions
+                    out += "</div>"; // user-info
                     out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
                     out += "<div class='user-feedslist'>";
                     out += "<div class='user-feedslist-inner'>";
                     userlist[z].feedslist.forEach(function (feed) {
                         out += "<div class='feed'>";
-                            out += "<input type='checkbox' fid='" + feed.id + "' />";
-                            out += "<div class='feed-name'>" + feed.name + "</div>";
-                            out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
-                            out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
+                        out += "<input type='checkbox' fid='" + feed.id + "' />";
+                        out += "<div class='feed-name'>" + feed.tag + ':' + feed.name + "</div>";
+                        out += "<div class='feed-download' fid='" + feed.id + "' tag='" + feed.tag + "' name='" + feed.name + "'><i class='icon-download'style='cursor:pointer' title='Download csv'> </i></div>";
+                        out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
+                        out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
                         out += "</div>"; // feed
                     });
                     out += "</div>"; // user-feedslist-inner
@@ -320,7 +415,7 @@ JAVASCRIPT
                     out += "</div>"; // user-feeds-inputs
                     out += "</div>"; // user
                 }
-                $("#userlist-div").append(out); // Place userlist html in userlist table 
+                $("#userlist-div").html(out); // Place userlist html in userlist table 
                 $('#userlist-div').show();
                 //$(".user-feedslist .feed").last().css("border-bottom","1px solid #aaa");
 
@@ -346,22 +441,7 @@ JAVASCRIPT
                     if (userlist[z].totalfeeds == 0)
                         color = "#000";
                     out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
-                    // Role
-                    var role;
-                    switch (userlist[z].role) {
-                        case 0:
-                            role = 'Passive member';
-                            break;
-                        case 1:
-                            role = 'Administrator';
-                            break;
-                        case 2:
-                            role = 'Sub-administrator';
-                            break;
-                        case 3:
-                            role = 'Member';
-                            break;
-                    }
+
                     out += "<td>" + role + "</td>";
                     // Actions
                     if (userlist[z].userid == my_userid)
@@ -553,10 +633,20 @@ JAVASCRIPT
             }
         }
     });
+
+// ----------------------------------------------------------------------------------------
+// Action: Show feeds of a user
+// ----------------------------------------------------------------------------------------
+    $('.user').click(function () {
+        var userid = $(this).attr('uid');
+        $('.user-feeds-inputs[uid=' + userid + ']').toggle();
+    });
+
 // ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
-    $("#userlist").on("click", ".removeuser", function () {
+    $(".removeuser").click(function (e) {
+        e.stopPropagation();
         $('#remove-user-modal-step-1').show();
         $('#remove-user-modal-step-2').hide();
         $('#remove-user-action').html('Next');
@@ -613,12 +703,6 @@ JAVASCRIPT
         }
     });
 
-    /*
-     <span id="removeuser-confirm">
-     <p>Are you sure you want to remove this user from group?</p>
-     <p>Are you sure you wish to completely delete this user from the database?</p>
-     <p>All the data will be lost</p>
-     </span>*/
 // ----------------------------------------------------------------------------------------
 // Action: Delete group
 // ----------------------------------------------------------------------------------------
@@ -638,50 +722,156 @@ JAVASCRIPT
             $("#nogroupselected").show();
         }
     });
+
 // ----------------------------------------------------------------------------------------
-// Action: Show feeds of a user
+// Action: Download feed (copied, but modified, from feedlist_view_classic.php)
 // ----------------------------------------------------------------------------------------
-    $(".setuser").click(function() {
+    $('.feed-download').click(function (e) {
+        e.stopPropagation();
+        $("#export").attr('export-type', "feed");
+        $("#export").attr('feedid', $(this).attr('fid'));
+        var name = $(this).attr('tag') + ":" + $(this).attr('name');
+        $("#export").attr('name', name);
+        $("#SelectedExport").html(name);
+        calculate_download_size(1);
+
+        if ($("#export-timezone-offset").val() == "") {
+            var timezoneoffset = user.timezoneoffset();
+            if (timezoneoffset == null)
+                timezoneoffset = 0;
+            $("#export-timezone-offset").val(parseInt(timezoneoffset));
+        }
+        $('#feedExportModal').modal('show');
+    });
+
+    $('#datetimepicker1').datetimepicker({
+        language: 'en-EN'
+    });
+
+    $('#datetimepicker2').datetimepicker({
+        language: 'en-EN',
+        useCurrent: false //Important! See issue #1075
+    });
+
+    $('#datetimepicker1').on("changeDate", function (e) {
+        $('#datetimepicker2').data("datetimepicker").setStartDate(e.date);
+    });
+
+    $('#datetimepicker2').on("changeDate", function (e) {
+        $('#datetimepicker1').data("datetimepicker").setEndDate(e.date);
+    });
+
+    now = new Date();
+    today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 00, 00);
+    var picker1 = $('#datetimepicker1').data('datetimepicker');
+    var picker2 = $('#datetimepicker2').data('datetimepicker');
+    picker1.setLocalDate(today);
+    picker2.setLocalDate(today);
+    picker1.setEndDate(today);
+    picker2.setStartDate(today);
+
+    $('#export-interval, #export-timeformat').on('change', function (e)
+    {
+        $("#export-timezone-offset").prop("disabled", $("#export-timeformat").prop('checked'));
+        if ($("#export").attr('export-type') == 'group') {
+            var downloadsize = calculate_download_size($("#export").attr('feedcount'));
+        } else {
+            calculate_download_size(1);
+        }
+    });
+
+    $('#datetimepicker1, #datetimepicker2').on('changeDate', function (e)
+    {
+        if ($("#export").attr('export-type') == 'group') {
+            var downloadsize = calculate_download_size($("#export").attr('feedcount'));
+        } else {
+            calculate_download_size(1);
+        }
+    });
+
+    $("#export").click(function ()
+    {
+        var export_start = parse_timepicker_time($("#export-start").val());
+        var export_end = parse_timepicker_time($("#export-end").val());
+        var export_interval = $("#export-interval").val();
+        var export_timezone_offset = parseInt($("#export-timezone-offset").val());
+        var export_timeformat = ($("#export-timeformat").prop('checked') ? 1 : 0);
+        if (export_timeformat) {
+            export_timezone_offset = 0;
+        }
+        if (!export_start) {
+            alert("Please enter a valid start date.");
+            return false;
+        }
+        if (!export_end) {
+            alert("Please enter a valid end date.");
+            return false;
+        }
+        if (export_start >= export_end) {
+            alert("Start date must be further back in time than end date.");
+            return false;
+        }
+        if (export_interval == "") {
+            alert("Please select interval to download.");
+            return false;
+        }
+        var downloadlimit = <?php
+global $feed_settings;
+echo $feed_settings['csvdownloadlimit_mb'];
+?>;
+        var downloadsize = calculate_download_size(1);
+        if (downloadsize > (downloadlimit * 1048576)) {
+            var r = confirm("Estimated download file size is large.\nServer could take a long time or abort depending on stored data size.\Limit is " + downloadlimit + "MB.\n\nTry exporting anyway?");
+            if (!r)
+                return false;
+        }
+        $('#feedExportModal').modal('hide');
+        result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
+        if (result.success == false)
+            alert(result.message);
+    });
+
+    function calculate_download_size(feedcount) {
+        var export_start = parse_timepicker_time($("#export-start").val());
+        var export_end = parse_timepicker_time($("#export-end").val());
+        var export_interval = $("#export-interval").val();
+        var export_timeformat_size = ($("#export-timeformat").prop('checked') ? 20 : 11);// bytes per timestamp
+        var downloadsize = 0;
+        if (!(!$.isNumeric(export_start) || !$.isNumeric(export_end) || !$.isNumeric(export_interval) || export_start > export_end)) {
+            downloadsize = ((export_end - export_start) / export_interval) * (export_timeformat_size + (feedcount * 7)); // avg bytes per data
+        }
+        $("#downloadsize").html((downloadsize / 1024 / 1024).toFixed(2));
+        var downloadlimit = <?php
+global $feed_settings;
+echo $feed_settings['csvdownloadlimit_mb'];
+?>;
+        $("#downloadsizeplaceholder").css('color', (downloadsize == 0 || downloadsize > (downloadlimit * 1048576) ? 'red' : ''));
+        return downloadsize;
+    }
+
+    function parse_timepicker_time(timestr) {
+        var tmp = timestr.split(" ");
+        if (tmp.length != 2)
+            return false;
+
+        var date = tmp[0].split("/");
+        if (date.length != 3)
+            return false;
+
+        var time = tmp[1].split(":");
+        if (time.length != 3)
+            return false;
+
+        return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
+    }
+
+// ----------------------------------------------------------------------------------------
+// Other
+// ----------------------------------------------------------------------------------------
+    $(".setuser").click(function (e) {
         e.stopPropagation();
     });
 
-    $(".showfeeds").click(function () {
-        var index = $(this).attr('index');
-        var feedslist = group.getuserfeeds(selected_groupid, userlist[index].userid);
-        if (feedslist.success == false) {
-            alert(feedslist.message);
-        }
-        else {
-            $('#feedsinputs-list-modal-label').html(userlist[index].username + "'s <strong>public</strong> feeds");
-            if (Object.keys(feedslist).length == 0)
-                $('#feedsinputs-list-modal .modal-body').html('<div class="alert alert-block"><p>The user hasn\'t got any <strong>public</strong> feeds</p></div>');
-            else {
-                $('#feedsinputs-list-modal .modal-body').html('<table class="table" id="feeds-list"><th>Id</th><th>Tag</th>\n\
-        <th>Name</th><th>Process list</th><th>Datatype</th><th>Engine</th><th>Size</th><th>Updated</th><th>Value</th><th></th></table>');
-                feedslist.forEach(function (feed) {
-                    $('#feeds-list').append('<tr>\n\
-                    <td>' + feed.id + '</td> \n\
-                    <td>' + feed.tag + '</td> \n\
-                    <td>' + feed.name + '</td> \n\
-                    <td>' + feed.processList + '</td> \n\
-                    <td>' + feed.datatype + '</td> \n\
-                    <td>' + feed.engine + '</td> \n\
-                    <td>' + feed.size + '</td> \n\
-                    <td>' + feed.time + '</td> \n\
-                    <td>' + feed.value + '</td> \n\
-            </tr>');
-                });
-            }
-
-            $('#feedsinputs-list-modal').modal('show');
-        }
-    });
-
-
-    $('.user').click(function () {
-        var userid = $(this).attr('uid');
-        $('.user-feeds-inputs[uid=' + userid + ']').toggle();
-    });
 // ----------------------------------------------------------------------------------------
 // Sidebar
 // ----------------------------------------------------------------------------------------

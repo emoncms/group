@@ -156,6 +156,11 @@ function group_controller() {
             $route->format = "json";
             $result = $group->getrole($session["userid"], get("groupid"));
         }
+        // group/getsessionuserrole?groupid=1
+        if ($route->action == "csvexport") {
+            $route->format = "json";
+            $result = $group->csvexport($session["userid"], get('groupid'), get("id"), get('start'), get('end'), get('interval'), get('timeformat'), get('name'));
+        }
     }
 
     return array('content' => $result, 'fullwidth' => false);
