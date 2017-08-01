@@ -637,15 +637,14 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Show feeds of a user
 // ----------------------------------------------------------------------------------------
-    $('.user').click(function () {
+    $('body').on('click', '.user', function () {
         var userid = $(this).attr('uid');
         $('.user-feeds-inputs[uid=' + userid + ']').toggle();
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
-    $(".removeuser").click(function (e) {
+            $(".removeuser").click(function (e) {
         e.stopPropagation();
         $('#remove-user-modal-step-1').show();
         $('#remove-user-modal-step-2').hide();
