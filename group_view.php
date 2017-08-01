@@ -30,7 +30,7 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
-            <div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Create/update inputs/feeds</div>
+            <div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>
             <div id="editgroup" class="if-admin groupselected"><i class="icon-edit"></i> Edit Group</div>
             <div id="createuseraddtogroup" class="if-admin groupselected"><i class="icon-plus"></i>Create User</div>
             <div id="addmember" class="if-admin groupselected"><i class="icon-plus"></i>Add Member</div>
@@ -907,17 +907,23 @@ echo $feed_settings['csvdownloadlimit_mb'];
     $('#create-inputs-feeds').click(function () {
         var list_apikeys = group.getapikeys(selected_groupid);
         for (var apikey in list_apikeys) {
-            group.createinputs(list_apikeys[apikey]);
-        }
-        var name = 0;
-        for (var apikey in list_apikeys) {
-            var userinputs = group.getuserinputs(list_apikeys[apikey]);
-            for (z = 0; z < 3; z++) {
-                var feed = group.createfeeds(list_apikeys[apikey], name);
-                if (feed.feedid != undefined)
-                    result = group.addinputproccess(list_apikeys[apikey], userinputs[z].id, '1:' + feed.feedid);
-                name++;
+            //group.createinputs(list_apikeys[apikey]);
+            var d = new Date();
+            var n = d.getTime() / 1000; // seconds
+            for (var z = 0; z < 200; z++) {
+                group.updateinputs(list_apikeys[apikey], n, n % 937);
+                n = n - 10;
             }
         }
+        /*var name = 0;
+         for (var apikey in list_apikeys) {
+         var userinputs = group.getuserinputs(list_apikeys[apikey]);
+         for (z = 0; z < 3; z++) {
+         var feed = group.createfeeds(list_apikeys[apikey], name);
+         if (feed.feedid != undefined)
+         result = group.addinputproccess(list_apikeys[apikey], userinputs[z].id, '1:' + feed.feedid);
+         name++;
+         }
+         }*/
     })
 </script>

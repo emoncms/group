@@ -89,7 +89,8 @@ class Group {
             }
             $this->log->info("Group edited");
             return array('success' => true, 'message' => _("Group edited"));
-        } else {
+        }
+        else {
             $this->log->warning("Error editing group, You are not administrator of the group - Session userid: " . $admin_userid);
             return array('success' => false, 'message' => _("You are not administrator of the group"));
         }
@@ -256,6 +257,19 @@ class Group {
         return $userlist;
     }
 
+    // Return list of user's groups with all the members and their feeds
+    public function mygroups($session_userid) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+
+        $groups = $this->grouplist($session_userid);
+        foreach ($groups as &$group) {
+            $group['users'] = $this->userlist($session_userid, $group['groupid']); // only groups where the session_user is admin or subadmin will return the list of users
+        }
+        $sdf = 1;
+        return $groups;
+    }
+
     // Return list of feeds of the given user
     public function getuserfeeds($session_userid, $groupid, $userid) {
         // Input sanitisation
@@ -276,6 +290,39 @@ class Group {
 
         // 3. Get list of feeds
         return $this->feed->get_user_feeds($userid);
+    }
+
+    // Searches for a feedid in all the groups the user has access to. If user has the right to access the feed, it returns the feed
+    public function getfeed($session_userid, $subaction, $feedid, $start, $end, $interval, $skipmissing, $limitinterval) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+        $feedid = (int) $feedid;
+        $subaction = preg_replace('/[^\w\s-:]/', '', $subaction);
+        // other inputs checked in folloing feed methods
+        // Load all the groups the user has access (including users and feeds
+        $groups = $this->mygroups($session_userid);
+
+        // Search for the feed
+        $feed_found = false;
+        foreach ($groups as $group) {
+            foreach ($group['users'] as $user) {
+                foreach ($user['feedslist'] as $feed)
+                    if ($feedid == $feed['id'])
+                        $feed_found = true;
+            }
+        }
+
+        if ($feed_found == false) {
+            $this->log->warn('You have not got access to that feed ' . $feedid . ' - Session userid ' . $session_userid);
+            return array('success' => false, 'message' => _("You have not access to that feed"));
+        }
+        elseif ($subaction == 'data') {
+            $data = $this->feed->get_data($feedid, $start, $end, $interval, $skipmissing, $limitinterval);
+        }
+        elseif ($subaction == 'average') {
+            $data = $this->feed->get_average($feedid, $start, $end, $outinterval);
+        }
+        return $data;
     }
 
     // Return list of feeds of the given user
@@ -414,7 +461,8 @@ class Group {
         if ($result['success'] == true) {
             $this->log->info('User ' . $userid_to_remove . ' completely removed - Session userid ' . $session_userid);
             return array('success' => true, 'message' => _("User completely removed"));
-        } else
+        }
+        else
             return array('success' => false, 'message' => _("User could not be deleted"));
     }
 

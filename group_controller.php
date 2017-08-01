@@ -19,7 +19,8 @@ function group_controller() {
     if ($dashboard_module_installed === true) {
         include "Modules/dashboard/dashboard_model.php";
         $dashboard = new Dashboard($mysqli);
-    } else {
+    }
+    else {
         $dashboard = null;
     }
 
@@ -97,12 +98,14 @@ function group_controller() {
                         $_SESSION['previous_username'] = $session['username'];
                         $_SESSION['userid'] = $userid;
                         header("Location: ../user/view");
-                    } else
+                    }
+                    else
                         $result = "ERROR: You haven't got rights to access this user";
                 } else {
                     $result = "ERROR: User is not a member of group";
                 }
-            } else {
+            }
+            else {
                 $result = "ERROR: You are not an administrator of this group";
             }
         }
@@ -156,10 +159,23 @@ function group_controller() {
             $route->format = "json";
             $result = $group->getrole($session["userid"], get("groupid"));
         }
+
         // group/getsessionuserrole?groupid=1
         if ($route->action == "csvexport") {
             $route->format = "json";
             $result = $group->csvexport($session["userid"], get('groupid'), get("id"), get('start'), get('end'), get('interval'), get('timeformat'), get('name'));
+        }
+
+        // group/mygroups
+        if ($route->action == "mygroups") {
+            $route->format = "json";
+            $result = $group->mygroups($session["userid"]);
+        }
+
+        // group/getfeed/data.json?id=111&start=1500566400000&end=1501172100000&interval=900&skipmissing=0&limitinterval=undefined"
+       if ($route->action == "getfeed") {
+            $route->format = "json";
+            $result = $group->getfeed($session["userid"],$route->subaction,get('id'),get('start'),get('end'),get('interval'),get('skipmissing'),get('limitinterval'));
         }
     }
 

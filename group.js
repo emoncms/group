@@ -104,7 +104,15 @@ var group = {
     'createinputs'
             : function (apikey) {
                 var result = {};
-                $.ajax({url: path + "input/post.json?node=1&json={power4:100,power2:200,power3:300}&apikey", data: "apikey=" + apikey, dataType: 'json', async: false, success: function (data) {
+                $.ajax({url: path + "input/post.json?node=1&json={power4:100,power2:100,power3:100}&apikey", data: "apikey=" + apikey, dataType: 'json', async: false, success: function (data) {
+                        result = data;
+                    }});
+                return result;
+            },
+    'updateinputs'
+            : function (apikey, time, value) {
+                var result = {};
+                $.ajax({url: path + "input/post.json?input/post.json?time=" + time + "&node=1&fulljson={'power1':" + (value + 12) + ",'power2':" + (value - 89) + ",'power3':" + (value + 103) + "}&apikey", data: "apikey=" + apikey, dataType: 'json', async: false, success: function (data) {
                         result = data;
                     }});
                 return result;
