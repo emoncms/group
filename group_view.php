@@ -45,7 +45,9 @@ MAIN
                                            - Sub-administrator: access to the list of members, group dashboards and group graphs
                                            - Member: view access to dashboards
                                            - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
-            <div class="user-actions"></div>
+            <div class="user-actions">
+                <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
+            </div>
         </div>
         <div id="userlist-div" class="hide"></div>
         <div id="userlist-alert" class="alert alert-block hide">
@@ -644,7 +646,7 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
-            $(".removeuser").click(function (e) {
+    $(".removeuser").click(function (e) {
         e.stopPropagation();
         $('#remove-user-modal-step-1').show();
         $('#remove-user-modal-step-2').hide();
@@ -863,6 +865,35 @@ echo $feed_settings['csvdownloadlimit_mb'];
 
         return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
     }
+
+// ----------------------------------------------------------------------------------------
+// Action: Show User actions buttons when feed check boxes are ticked
+// ----------------------------------------------------------------------------------------
+    $('.feed input').click(function (e) {
+        e.stopPropagation();
+        var any_checked = false;
+        $('.feed input').each(function () {
+            if ($(this).is(':checked'))
+                any_checked = true;
+        })
+        if (any_checked)
+            $('.feed-graph').show();
+        else
+            $('.feed-graph').hide();
+    });
+
+// ----------------------------------------------------------------------------------------
+// Action: open graph page
+// ----------------------------------------------------------------------------------------
+    $('.feed-graph').click(function (e) {
+        var feeds = [];
+        $('.feed input').each(function () {
+            if ($(this).is(':checked'))
+                feeds.push($(this).attr('fid'))
+        });
+        window.location = path + "graph/groupgraph/" + selected_groupid + ',' + feeds.join(",");
+    });
+
 
 // ----------------------------------------------------------------------------------------
 // Other
