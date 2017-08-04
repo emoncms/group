@@ -24,8 +24,18 @@ function group_controller() {
         $dashboard = null;
     }
 
+    $result = $mysqli->query("SHOW TABLES LIKE 'graph'");
+    $graph_module_installed = $result->num_rows > 0 ? true : false;
+    if ($graph_module_installed === true) {
+        include "Modules/graph/graph_model.php";
+        $graph = new Graph($mysqli, 'null');
+    }
+    else {
+        $graph = null;
+    }
+
     include "Modules/group/group_model.php";
-    $group = new Group($mysqli, $redis, $user, $feed, $input, $dashboard);
+    $group = new Group($mysqli, $redis, $user, $feed, $input, $dashboard, $graph);
 
 
     // ------------------------------------------------------------------------------------
@@ -173,9 +183,9 @@ function group_controller() {
         }
 
         // group/getfeed/data.json?id=111&start=1500566400000&end=1501172100000&interval=900&skipmissing=0&limitinterval=undefined"
-       if ($route->action == "getfeed") {
+        if ($route->action == "getfeed") {
             $route->format = "json";
-            $result = $group->getfeed($session["userid"],$route->subaction,get('id'),get('start'),get('end'),get('interval'),get('skipmissing'),get('limitinterval'));
+            $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'));
         }
     }
 

@@ -23,8 +23,9 @@ class Group {
     private $feed;
     private $redis;
     private $dashboard;
+    private $graph;
 
-    public function __construct($mysqli, $redis, $user, $feed, $input, $dashboard) {
+    public function __construct($mysqli, $redis, $user, $feed, $input, $dashboard, $graph) {
         $this->log = new EmonLogger(__FILE__);
         $this->mysqli = $mysqli;
         $this->user = $user;
@@ -32,6 +33,7 @@ class Group {
         $this->feed = $feed;
         $this->redis = $redis;
         $this->dashboard = $dashboard;
+        $this->graph = $graph;
     }
 
     // Create group, add creator user as administrator
@@ -451,7 +453,6 @@ class Group {
         }
 
         // Check session admin has full rights over user data
-        $asd = $this->administrator_rights_over_user($groupid, $userid_to_remove);
         if ($this->administrator_rights_over_user($groupid, $userid_to_remove) !== true) {
             $this->log->warn('Cannot delete user data, administrator has not got right over users - Session userid ' . $session_userid);
             return array('success' => false, 'message' => _("Administrator has not got right over users"));
@@ -477,14 +478,24 @@ class Group {
             }
         }
 
+        // Delete graphs - For a reason that I haven't found when using the graph object it crashes
+        if (is_null($this->graph) == false) {
+            /* $list_of_graphs = $this->graph->get_all($userid_to_remove);
+              foreach ($list_of_graphs['user'] as $graph) {
+              $this->graph->delete($graph['id']);
+              } */
+            $result = $this->mysqli->query("DELETE FROM graph WHERE `userid` = '$userid_to_remove'");
+        }
+
         // Remove from group
         $result = $this->remove_user($session_userid, $groupid, $userid_to_remove);
-        if ($result['success'] == true) {
-            $this->log->info('User ' . $userid_to_remove . ' completely removed - Session userid ' . $session_userid);
-            return array('success' => true, 'message' => _("User completely removed"));
-        }
-        else
+        if ($result['success'] == false)
             return array('success' => false, 'message' => _("User could not be deleted"));
+
+        // Remove from users table
+        $result = $this->mysqli->query("DELETE FROM users WHERE `id` = '$userid_to_remove'");
+        $this->log->info('User ' . $userid_to_remove . ' completely removed - Session userid ' . $session_userid);
+        return array('success' => true, 'message' => _("User completely removed"));
     }
 
     // Basic check if group of id exists
