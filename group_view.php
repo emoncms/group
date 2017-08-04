@@ -269,7 +269,6 @@ JAVASCRIPT
 <script>
     var path = "<?php echo $path; ?>";
     var my_userid = <?php echo $session["userid"]; ?>;
-    console.log(my_userid);
     sidebar_resize();
     var selected_groupid = 0;
     var selected_groupindex = 0;
@@ -926,15 +925,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
     // For development
     $('body').on('click', '#create-inputs-feeds', function () {
         var list_apikeys = group.getapikeys(selected_groupid);
-        for (var apikey in list_apikeys) {
-            //group.createinputs(list_apikeys[apikey]);
-            var d = new Date();
-            var n = d.getTime() / 1000; // seconds
-            for (var z = 0; z < 200; z++) {
-                group.updateinputs(list_apikeys[apikey], n, n % 937);
-                n = n - 10;
-            }
-        }
+        // create inputs
+        /*for (var apikey in list_apikeys) {
+         group.createinputs(list_apikeys[apikey]);
+         }*/
+
+        //create feeds
         /*var name = 0;
          for (var apikey in list_apikeys) {
          var userinputs = group.getuserinputs(list_apikeys[apikey]);
@@ -945,5 +941,19 @@ echo $feed_settings['csvdownloadlimit_mb'];
          name++;
          }
          }*/
+
+        //update feeds
+        for (var apikey in list_apikeys) {
+            var feeds = group.getfeeds(list_apikeys[apikey]);
+            for (var i in feeds) {
+                var d = new Date();
+                var n = d.getTime() / 1000; // seconds
+                for (var z = 0; z < 10; z++) {
+                    group.updatefeed(feeds[i].id, list_apikeys[apikey], n, (z + n % 937));
+                    console.log('yeah')
+                    n = n - 10;
+                }
+            }
+        }
     })
 </script>
