@@ -41,10 +41,7 @@ MAIN
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
             <div class="user-active-feeds">Active feeds</div>
-            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
-                                           - Sub-administrator: access to the list of members, group dashboards and group graphs
-                                           - Member: view access to dashboards
-                                           - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
+            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
             <div class="user-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
             </div>
@@ -99,10 +96,7 @@ MODALS
         <p>Password:<br>
             <input id="group-addmember-password" type="password"></p>
 
-        <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
-                       - Sub-administrator: access to the list of members, group dashboards and group graphs
-                       - Member: view access to dashboards
-                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -132,10 +126,7 @@ MODALS
             <input id="group-createuseraddtogroup-password" type="password"></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
-        <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)
-                       - Sub-administrator: access to the list of members, group dashboards and group graphs
-                       - Member: view access to dashboards
-                       - Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-createuseraddtogroup-role">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -494,7 +485,7 @@ JAVASCRIPT
         var mins = secs / 60;
         var hour = secs / 3600;
         var day = hour / 24;
-                var updated = secs.toFixed(0) + "s";
+        var updated = secs.toFixed(0) + "s";
         if ((update == 0) || (!$.isNumeric(secs)))
             updated = "n/a";
         else if (secs < 0)
@@ -541,26 +532,26 @@ JAVASCRIPT
         $('#group-create-modal input').val('');
         $('#group-create-modal').modal('show');
     });
-            $("body").on('click', "#group-create-action",function () {
-            var name = $("#group-create-name").val();
-    var description = $("#group-create-description").val();
-    var organization = $("#group-create-organization").val() || 'N/A';
-    var area = $("#group-create-area").val() || 'N/A';
-    var visibility = $("#group-create-visibility").val() || 'private';
-    var access = $("#group-create-access").val() || 'closed';
-    var result = group.create(name, description, organization, area, visibility, access);
-    if (!result.success) {
-        alert(result.message);
-    } else {
-        $('#group-create-modal').modal('hide');
-        draw_grouplist();
+    $("body").on('click', "#group-create-action", function () {
+        var name = $("#group-create-name").val();
+        var description = $("#group-create-description").val();
+        var organization = $("#group-create-organization").val() || 'N/A';
+        var area = $("#group-create-area").val() || 'N/A';
+        var visibility = $("#group-create-visibility").val() || 'private';
+        var access = $("#group-create-access").val() || 'closed';
+        var result = group.create(name, description, organization, area, visibility, access);
+        if (!result.success) {
+            alert(result.message);
+        } else {
+            $('#group-create-modal').modal('hide');
+            draw_grouplist();
         }
     }
     );
 // ----------------------------------------------------------------------------------------
 // Action: Edit group
 // ----------------------------------------------------------------------------------------
-            $("body").on('click', "#editgroup", function () {
+    $("body").on('click', "#editgroup", function () {
         $("#edit-group-name").val(grouplist[selected_groupindex].name);
         $("#edit-group-description").val(grouplist[selected_groupindex].description);
         $("#edit-group-organization").val(grouplist[selected_groupindex].organization);
