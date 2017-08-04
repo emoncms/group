@@ -494,8 +494,7 @@ JAVASCRIPT
         var mins = secs / 60;
         var hour = secs / 3600;
         var day = hour / 24;
-
-        var updated = secs.toFixed(0) + "s";
+                var updated = secs.toFixed(0) + "s";
         if ((update == 0) || (!$.isNumeric(secs)))
             updated = "n/a";
         else if (secs < 0)
@@ -525,7 +524,7 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: click on group
 // ----------------------------------------------------------------------------------------
-    $("#grouplist").on("click", ".group", function () {
+    $("body").on("click", "#grouplist .group", function () {
         // Group selection CSS
         $(".group").removeClass('activated');
         $(this).addClass('activated');
@@ -538,30 +537,30 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Group creation
 // ----------------------------------------------------------------------------------------
-    $("#groupcreate").click(function () {
+    $("body").on('click', '#groupcreate', function () {
         $('#group-create-modal input').val('');
         $('#group-create-modal').modal('show');
     });
-    $("#group-create-action").click(function () {
-        var name = $("#group-create-name").val();
-        var description = $("#group-create-description").val();
-        var organization = $("#group-create-organization").val() || 'N/A';
-        var area = $("#group-create-area").val() || 'N/A';
-        var visibility = $("#group-create-visibility").val() || 'private';
-        var access = $("#group-create-access").val() || 'closed';
-        var result = group.create(name, description, organization, area, visibility, access);
-        if (!result.success) {
-            alert(result.message);
-        } else {
-            $('#group-create-modal').modal('hide');
-            draw_grouplist();
+            $("body").on('click', "#group-create-action",function () {
+            var name = $("#group-create-name").val();
+    var description = $("#group-create-description").val();
+    var organization = $("#group-create-organization").val() || 'N/A';
+    var area = $("#group-create-area").val() || 'N/A';
+    var visibility = $("#group-create-visibility").val() || 'private';
+    var access = $("#group-create-access").val() || 'closed';
+    var result = group.create(name, description, organization, area, visibility, access);
+    if (!result.success) {
+        alert(result.message);
+    } else {
+        $('#group-create-modal').modal('hide');
+        draw_grouplist();
         }
-    });
-
+    }
+    );
 // ----------------------------------------------------------------------------------------
 // Action: Edit group
 // ----------------------------------------------------------------------------------------
-    $("#editgroup").click(function () {
+            $("body").on('click', "#editgroup", function () {
         $("#edit-group-name").val(grouplist[selected_groupindex].name);
         $("#edit-group-description").val(grouplist[selected_groupindex].description);
         $("#edit-group-organization").val(grouplist[selected_groupindex].organization);
@@ -571,7 +570,7 @@ JAVASCRIPT
         $('#edit-group-modal').modal('show');
     });
 
-    $('#edit-group-action').click(function () {
+    $("body").on('click', '#edit-group-action', function () {
         var name = $("#edit-group-name").val();
         var description = $("#edit-group-description").val();
         var organization = $("#edit-group-organization").val() || 'N/A';
@@ -591,12 +590,12 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Add member
 // ----------------------------------------------------------------------------------------
-    $("#addmember").click(function () {
+    $("body").on('click', "#addmember", function () {
         $('#group-addmember-modal input').val('');
         $("#group-addmember-access").val(0);
         $('#group-addmember-modal').modal('show');
     });
-    $("#group-addmember-action").click(function () {
+    $("body").on('click', "#group-addmember-action", function () {
         var username = $("#group-addmember-username").val();
         var password = $("#group-addmember-password").val();
         var access = $("#group-addmember-access").val();
@@ -611,12 +610,12 @@ JAVASCRIPT
     // ----------------------------------------------------------------------------------------
 // Action: Create user and add to group
 // ----------------------------------------------------------------------------------------
-    $("#createuseraddtogroup").click(function () {
+    $("body").on('click', "#createuseraddtogroup", function () {
         $('#group-createuseraddtogroup-modal input').val('');
         $("#group-createuseraddtogroup-role").val(0);
         $('#group-createuseraddtogroup-modal').modal('show');
     });
-    $("#group-createuseraddtogroup-action").click(function () {
+    $("body").on('click', "#group-createuseraddtogroup-action", function () {
         var email = $("#group-createuseraddtogroup-email").val();
         var username = $("#group-createuseraddtogroup-username").val();
         var password = $("#group-createuseraddtogroup-password").val();
@@ -646,7 +645,7 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
-    $(".removeuser").click(function (e) {
+    $("body").on('click', ".removeuser", function (e) {
         e.stopPropagation();
         $('#remove-user-modal-step-1').show();
         $('#remove-user-modal-step-2').hide();
@@ -666,7 +665,7 @@ JAVASCRIPT
 
         $('#remove-user-modal').modal('show');
     });
-    $("#remove-user-action").click(function () {
+    $("body").on('click', "#remove-user-action", function () {
         var action = $(this).attr('action');
         if (action == 'next') {
             $('#remove-user-modal-step-1').hide();
@@ -707,10 +706,10 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Delete group
 // ----------------------------------------------------------------------------------------
-    $("#deletegroup").click(function () {
+    $("body").on('click', "#deletegroup", function () {
         $('#delete-group-modal').modal('show');
     });
-    $("#delete-group-action").click(function () {
+    $("body").on('click', "#delete-group-action", function () {
         $('#delete-group-modal').modal('hide');
         var result = group.deletegroup(selected_groupid);
         if (!result.success) {
@@ -727,7 +726,7 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Action: Download feed (copied, but modified, from feedlist_view_classic.php)
 // ----------------------------------------------------------------------------------------
-    $('.feed-download').click(function (e) {
+    $('body').on('click', '.feed-download', function (e) {
         e.stopPropagation();
         $("#export").attr('export-type', "feed");
         $("#export").attr('feedid', $(this).attr('fid'));
@@ -771,7 +770,7 @@ JAVASCRIPT
     picker1.setEndDate(today);
     picker2.setStartDate(today);
 
-    $('#export-interval, #export-timeformat').on('change', function (e)
+    $("body").on('change', '#export-interval, #export-timeformat', function (e)
     {
         $("#export-timezone-offset").prop("disabled", $("#export-timeformat").prop('checked'));
         if ($("#export").attr('export-type') == 'group') {
@@ -781,7 +780,7 @@ JAVASCRIPT
         }
     });
 
-    $('#datetimepicker1, #datetimepicker2').on('changeDate', function (e)
+    $("body").on('changeDate', '#datetimepicker1, #datetimepicker2', function (e)
     {
         if ($("#export").attr('export-type') == 'group') {
             var downloadsize = calculate_download_size($("#export").attr('feedcount'));
@@ -790,7 +789,7 @@ JAVASCRIPT
         }
     });
 
-    $("#export").click(function ()
+    $("body").on('click', "#export", function ()
     {
         var export_start = parse_timepicker_time($("#export-start").val());
         var export_end = parse_timepicker_time($("#export-end").val());
@@ -869,7 +868,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
 // Action: Show User actions buttons when feed check boxes are ticked
 // ----------------------------------------------------------------------------------------
-    $('.feed input').click(function (e) {
+    $('body').on('click', '.feed input', function (e) {
         e.stopPropagation();
         var any_checked = false;
         $('.feed input').each(function () {
@@ -885,7 +884,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
 // Action: open graph page
 // ----------------------------------------------------------------------------------------
-    $('.feed-graph').click(function (e) {
+    $("body").on('click', '.feed-graph', function (e) {
         var feeds = [];
         $('.feed input').each(function () {
             if ($(this).is(':checked'))
@@ -898,18 +897,18 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
 // Other
 // ----------------------------------------------------------------------------------------
-    $(".setuser").click(function (e) {
+    $("body").on('click', ".setuser", function (e) {
         e.stopPropagation();
     });
 
 // ----------------------------------------------------------------------------------------
 // Sidebar
 // ----------------------------------------------------------------------------------------
-    $("#sidebar-open").click(function () {
+    $("body").on('click', "#sidebar-open", function () {
         $(".sidebar").css("left", "250px");
         $("#sidebar-close").show();
     });
-    $("#sidebar-close").click(function () {
+    $("body").on('click', "#sidebar-close", function () {
         $(".sidebar").css("left", "0");
         $("#sidebar-close").hide();
     });
@@ -934,7 +933,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
         sidebar_resize();
     });
     // For development
-    $('#create-inputs-feeds').click(function () {
+    $('body').on('click', '#create-inputs-feeds', function () {
         var list_apikeys = group.getapikeys(selected_groupid);
         for (var apikey in list_apikeys) {
             //group.createinputs(list_apikeys[apikey]);
