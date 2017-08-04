@@ -325,6 +325,27 @@ class Group {
         return $data;
     }
 
+    // Searches for a feedid in all the groups the user has access to. If user has the right to access the feed, returns true
+    private function access_to_user_feed($session_userid, $feedid) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+        $feedid = (int) $feedid;
+
+        $groups = $this->mygroups($session_userid);
+
+        // Search for the feed
+        $feed_found = false;
+        foreach ($groups as $group) {
+            foreach ($group['users'] as $user) {
+                foreach ($user['feedslist'] as $feed)
+                    if ($feedid == $feed['id'])
+                        $feed_found = true;
+            }
+        }
+
+        return $feed_found;
+    }
+
     // Return list of feeds of the given user
     public function getuserinputs($session_userid, $groupid, $userid) {
         // Input sanitisation
@@ -599,18 +620,26 @@ class Group {
         // Input sanitisation
         $session_userid = (int) $session_userid;
         $groupid = (int) $groupid;
-        $feedid = (int) $feedid;
+        $feedid = preg_replace('/[^\d,]/', '', $feedid);
         $start = (int) $start;
         $end = (int) $end;
         $interval = (int) $interval;
         $timezone = (int) $timezone;
         $name = preg_replace('/[^\w\s-:]/', '', $name);
 
-        $feed = $this->feed->get($feedid);
         $myrole = $this->getrole($session_userid, $groupid);
         if ($myrole != 1 && $myrole != 2)
             return array('success' => false, 'message' => _("You haven't got enough rights"));
-        return $this->feed->csv_export($feedid, $start, $end, $interval, $timezone, $name);
+        if (!$this->access_to_user_feed($session_userid, $feedid))
+            return array('success' => false, 'message' => _("You haven't got enough rights"));
+
+        if (strpos($feedid, ',') === false) // There is only one feedid
+            $download = $this->feed->csv_export($feedid, $start, $end, $interval, $timezone, $name);
+        else
+            $download = $this->feed->csv_export_multi($feedid, $start, $end, $interval, $timezone, $name);
+        $dfgd = 1;
+
+        return $download;
     }
 
     // --------------------------------------------------------------------

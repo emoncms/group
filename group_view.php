@@ -42,8 +42,9 @@ MAIN
             <div class="user-name">Username</div>
             <div class="user-active-feeds">Active feeds</div>
             <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
-            <div class="user-actions">
+            <div class="multiple-feeds-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
+                <button class="btn multiple-feed-download hide" title="Download feeds" type="multiple"><i class="icon-download"></i></button>                
             </div>
         </div>
         <div id="userlist-div" class="hide"></div>
@@ -199,7 +200,7 @@ MODALS
 <div id="feedExportModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="feedExportModalLabel" aria-hidden="true" data-backdrop="static">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="feedExportModalLabel"><b><span id="SelectedExport"></span></b> CSV export</h3>
+        <h3 id="feedExportModalLabel"><b><span id="SelectedExport"></span></b></h3>
     </div>
     <div class="modal-body">
         <p>Select the time range and interval that you wish to export: </p>
@@ -275,12 +276,10 @@ JAVASCRIPT
     var grouplist = [];
     var my_role = 0;
     var userlist = [];
-
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
     draw_grouplist();
-
 // ----------------------------------------------------------------------------------------    
 // Startup group
 // ----------------------------------------------------------------------------------------
@@ -346,7 +345,6 @@ JAVASCRIPT
             } else {
                 // Hide alert message
                 $('#userlist-alert').hide();
-
                 var out = "";
                 for (var z in userlist) {
                     // Role
@@ -422,7 +420,6 @@ JAVASCRIPT
                         out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
                     else
                         out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
-
                     // Active feeds
                     var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
                     var color = "#00aa00";
@@ -433,7 +430,6 @@ JAVASCRIPT
                     if (userlist[z].totalfeeds == 0)
                         color = "#000";
                     out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
-
                     out += "<td>" + role + "</td>";
                     // Actions
                     if (userlist[z].userid == my_userid)
@@ -477,9 +473,8 @@ JAVASCRIPT
     // Calculate and color updated time (copied from feedlist_view.php)
     function list_format_updated(time) {
         time = time * 1000;
-        var servertime = (new Date()).getTime();// - table.timeServerLocalOffset;
+        var servertime = (new Date()).getTime(); // - table.timeServerLocalOffset;
         var update = (new Date(time)).getTime();
-
         var secs = (servertime - update) / 1000;
         var mins = secs / 60;
         var hour = secs / 3600;
@@ -499,7 +494,6 @@ JAVASCRIPT
             updated = hour.toFixed(0) + " hrs";
         else if (secs > 180)
             updated = mins.toFixed(0) + " mins";
-
         secs = Math.abs(secs);
         var color = "rgb(255,0,0)";
         if (secs < 25)
@@ -523,7 +517,6 @@ JAVASCRIPT
         document.location.hash = grouplist[gindex].name
         draw_group(gindex);
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: Group creation
 // ----------------------------------------------------------------------------------------
@@ -559,7 +552,6 @@ JAVASCRIPT
         $("#edit-group-access").val(grouplist[selected_groupindex].access);
         $('#edit-group-modal').modal('show');
     });
-
     $("body").on('click', '#edit-group-action', function () {
         var name = $("#edit-group-name").val();
         var description = $("#edit-group-description").val();
@@ -611,7 +603,6 @@ JAVASCRIPT
         var password = $("#group-createuseraddtogroup-password").val();
         var confirm_password = $("#group-createuseraddtogroup-password-confirm").val();
         var role = $("#group-createuseraddtogroup-role").val();
-
         if (password != confirm_password)
             $("#createuseraddtogroup-message").html("<div class='alert alert-error'>Passwords do not match</div>");
         else {
@@ -624,7 +615,6 @@ JAVASCRIPT
             }
         }
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: Show feeds of a user
 // ----------------------------------------------------------------------------------------
@@ -641,10 +631,8 @@ JAVASCRIPT
         $('#remove-user-modal-step-2').hide();
         $('#remove-user-action').html('Next');
         $('#remove-user-action').attr('action', 'next');
-
         var userid = $(this).attr("uid");
         $('#remove-user-modal').attr("uid", userid);
-
         var admin_rights = $(this).attr("admin-rights");
         if (admin_rights != "full") {
             $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', true);
@@ -692,7 +680,6 @@ JAVASCRIPT
             }
         }
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: Delete group
 // ----------------------------------------------------------------------------------------
@@ -712,19 +699,47 @@ JAVASCRIPT
             $("#nogroupselected").show();
         }
     });
-
 // ----------------------------------------------------------------------------------------
-// Action: Download feed (copied, but modified, from feedlist_view_classic.php)
+// Action: 
+//      - Download feed (copied, but modified, from feedlist_view_classic.php)
+//      - Download multiple feeds
 // ----------------------------------------------------------------------------------------
-    $('body').on('click', '.feed-download', function (e) {
+    $('body').on('click', '.feed-download, .multiple-feed-download', function (e) {
         e.stopPropagation();
-        $("#export").attr('export-type', "feed");
-        $("#export").attr('feedid', $(this).attr('fid'));
-        var name = $(this).attr('tag') + ":" + $(this).attr('name');
-        $("#export").attr('name', name);
-        $("#SelectedExport").html(name);
-        calculate_download_size(1);
+        if ($(this).attr('type') == 'multiple') {
+            /*$("#export").attr('export-type', "group");
+             var group = $(this).attr('group');
+             $("#export").attr('group', group);
+             var rows = $(this).attr('rows').split(",");
+             var feedids = [];
+             for (i in rows) {
+             feedids.push(table.data[rows[i]].id);
+             } // get feedids from rowids
+             $("#export").attr('feedids', feedids);
+             $("#export").attr('feedcount', rows.length);
+             $("#SelectedExport").html(group + " tag (" + rows.length + " feeds)");
+             calculate_download_size(rows.length);*/
 
+            $("#export").attr('export-type', "group");
+            // var group = $(this).attr('group');
+            //$("#export").attr('group', group);
+            var feedids = [];
+            $('.feed input:checked').each(function () {
+                feedids.push($(this).attr('fid'));
+            });
+            $("#export").attr('feedids', feedids);
+            $("#export").attr('feedcount', feedids.length);
+            $("#SelectedExport").html("Download " + feedids.length + " feeds");
+            $("#export").attr('name', selected_group);
+            calculate_download_size(feedids.length);
+        } else {
+            $("#export").attr('export-type', "feed");
+            $("#export").attr('feedid', $(this).attr('fid'));
+            var name = $(this).attr('tag') + ":" + $(this).attr('name');
+            $("#export").attr('name', name);
+            $("#SelectedExport").html(name);
+            calculate_download_size(1);
+        }
         if ($("#export-timezone-offset").val() == "") {
             var timezoneoffset = user.timezoneoffset();
             if (timezoneoffset == null)
@@ -733,24 +748,19 @@ JAVASCRIPT
         }
         $('#feedExportModal').modal('show');
     });
-
     $('#datetimepicker1').datetimepicker({
         language: 'en-EN'
     });
-
     $('#datetimepicker2').datetimepicker({
         language: 'en-EN',
         useCurrent: false //Important! See issue #1075
     });
-
     $('#datetimepicker1').on("changeDate", function (e) {
         $('#datetimepicker2').data("datetimepicker").setStartDate(e.date);
     });
-
     $('#datetimepicker2').on("changeDate", function (e) {
         $('#datetimepicker1').data("datetimepicker").setEndDate(e.date);
     });
-
     now = new Date();
     today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 00, 00);
     var picker1 = $('#datetimepicker1').data('datetimepicker');
@@ -759,7 +769,6 @@ JAVASCRIPT
     picker2.setLocalDate(today);
     picker1.setEndDate(today);
     picker2.setStartDate(today);
-
     $("body").on('change', '#export-interval, #export-timeformat', function (e)
     {
         $("#export-timezone-offset").prop("disabled", $("#export-timeformat").prop('checked'));
@@ -769,7 +778,6 @@ JAVASCRIPT
             calculate_download_size(1);
         }
     });
-
     $("body").on('changeDate', '#datetimepicker1, #datetimepicker2', function (e)
     {
         if ($("#export").attr('export-type') == 'group') {
@@ -778,7 +786,6 @@ JAVASCRIPT
             calculate_download_size(1);
         }
     });
-
     $("body").on('click', "#export", function ()
     {
         var export_start = parse_timepicker_time($("#export-start").val());
@@ -809,23 +816,33 @@ JAVASCRIPT
 global $feed_settings;
 echo $feed_settings['csvdownloadlimit_mb'];
 ?>;
-        var downloadsize = calculate_download_size(1);
+
+        if ($(this).attr('export-type') == 'group')
+            var downloadsize = calculate_download_size($(this).attr('feedcount'));
+        else
+            var downloadsize = calculate_download_size(1);
         if (downloadsize > (downloadlimit * 1048576)) {
             var r = confirm("Estimated download file size is large.\nServer could take a long time or abort depending on stored data size.\Limit is " + downloadlimit + "MB.\n\nTry exporting anyway?");
             if (!r)
                 return false;
         }
+
         $('#feedExportModal').modal('hide');
-        result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
+
+        if ($(this).attr('export-type') == 'group') {
+            result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat,  $(this).attr('name'));
+        }
+        else {
+            result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
+        }
         if (result.success == false)
             alert(result.message);
     });
-
     function calculate_download_size(feedcount) {
         var export_start = parse_timepicker_time($("#export-start").val());
         var export_end = parse_timepicker_time($("#export-end").val());
         var export_interval = $("#export-interval").val();
-        var export_timeformat_size = ($("#export-timeformat").prop('checked') ? 20 : 11);// bytes per timestamp
+        var export_timeformat_size = ($("#export-timeformat").prop('checked') ? 20 : 11); // bytes per timestamp
         var downloadsize = 0;
         if (!(!$.isNumeric(export_start) || !$.isNumeric(export_end) || !$.isNumeric(export_interval) || export_start > export_end)) {
             downloadsize = ((export_end - export_start) / export_interval) * (export_timeformat_size + (feedcount * 7)); // avg bytes per data
@@ -843,15 +860,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
         var tmp = timestr.split(" ");
         if (tmp.length != 2)
             return false;
-
         var date = tmp[0].split("/");
         if (date.length != 3)
             return false;
-
         var time = tmp[1].split(":");
         if (time.length != 3)
             return false;
-
         return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
     }
 
@@ -866,11 +880,10 @@ echo $feed_settings['csvdownloadlimit_mb'];
                 any_checked = true;
         })
         if (any_checked)
-            $('.feed-graph').show();
+            $('.multiple-feeds-actions button').show();
         else
-            $('.feed-graph').hide();
+            $('.multiple-feeds-actions button').hide();
     });
-
 // ----------------------------------------------------------------------------------------
 // Action: open graph page
 // ----------------------------------------------------------------------------------------
@@ -882,15 +895,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
         });
         window.location = path + "graph/groupgraph/" + selected_groupid + ',' + feeds.join(",");
     });
-
-
 // ----------------------------------------------------------------------------------------
 // Other
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".setuser", function (e) {
         e.stopPropagation();
     });
-
 // ----------------------------------------------------------------------------------------
 // Sidebar
 // ----------------------------------------------------------------------------------------

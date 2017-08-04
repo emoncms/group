@@ -168,6 +168,12 @@ input:disabled+span{
     display:inline-block;
     box-sizing:border-box
 }
+.multiple-feeds-actions{
+    width:8%;
+    text-align: right;
+    display:inline-block;
+    box-sizing:border-box
+}
 
 .user-actions{
     width:8%;
