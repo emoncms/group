@@ -248,12 +248,21 @@ class Group {
             $userlist[] = array(
                 "userid" => (int) $row->userid,
                 "username" => $u->username,
+                // from group
                 "role" => (int) $row->role,
+                "admin_rights" => $row->admin_rights,
+                // feeds an inputs
                 "activefeeds" => (int) $active,
                 "totalfeeds" => (int) $total,
-                "admin_rights" => $row->admin_rights,
                 "feedslist" => $userfeeds,
-                "inputslist" => $userinputs
+                "inputslist" => $userinputs,
+                // user info
+                "name" => $u->name,
+                "bio" => $u->bio,
+                "location" => $u->location,
+                "timezone" => $u->timezone,
+                "email" => $u->email,
+                "tags" => $u->tags
             );
         }
         return $userlist;
@@ -348,7 +357,7 @@ class Group {
         return $feed_found;
     }
 
-    // Return list of feeds of the given user
+    // Return list of inputs of the given user
     public function getuserinputs($session_userid, $groupid, $userid) {
         // Input sanitisation
         $session_userid = (int) $session_userid;
@@ -547,6 +556,89 @@ class Group {
         }
         $this->log->info('User ' . $userid . ' added to group ' . '$groupid');
         return true;
+    }
+
+    public function setuserinfo($session_userid, $groupid, $to_set_userid, $username, $name, $email, $bio, $timezone, $location, $role, $password, $tags) {
+        // Input sanitisation
+        $session_userid = (int) $session_userid;
+        $groupid = (int) $groupid;
+        $to_set_userid = (int) $to_set_userid;
+        $role = (int) $role;
+        // everything else checked within $user model
+
+        if (!$this->is_group_admin($groupid, $session_userid)) {
+            $this->log->error('Cannot edit user user, sesion user is not admin - Session userid ' . $userid);
+            return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
+        }
+
+        // Check user belongs to group
+        if (!$this->is_group_member($groupid, $to_set_userid)) {
+            $this->log->error('Cannot edit user, user to remove doesn\'t belong to the group');
+            return array('success' => false, 'message' => _("The user to edit doesn't belong to the group"));
+        }
+
+        // Check session admin has full rights over user data
+        if ($this->administrator_rights_over_user($groupid, $to_set_userid) !== true) {
+            $this->log->warn('Cannot edit user data, administrator has not got right over users - Session userid ' . $session_userid);
+            return array('success' => false, 'message' => _("Administrator has not got right over user"));
+        }
+
+        // Get user info in order to have the other fields that we are not updating
+        $user_data = $this->user->get($to_set_userid);
+
+        // Set basic user's info
+        $user_data->name = $name;
+        $user_data->location = $location;
+        $user_data->bio = $bio;
+        $user_data->timezone = $timezone;
+        $user_data->tags = $tags;
+        $result = $this->user->set($to_set_userid, $user_data);
+        if (!$result['success'] == false) {
+            $this->log->error('User info' . $to_set_userid . ' not updated ' . '$groupid');
+            return $result;
+        }
+
+        // Username
+        if ($user_data->username != $username) {
+            $result = $this->user->change_username($to_set_userid, $username);
+            if ($result['success'] == false) {
+                $this->log->error('User username ' . $to_set_userid . ' not updated ' . '$groupid');
+                $result['message'] = 'User info updated except username, email, role and/or password - ' . $result['message'];
+                return ($result);
+            }
+        }
+
+        // email
+        if ($user_data->email != $email) {
+            $result = $this->user->change_email($to_set_userid, $email);
+            if ($result['success'] == false) {
+                $this->log->error('User mail ' . $to_set_userid . ' not updated ' . '$groupid');
+                $result['message'] = 'User info updated except email, role and/or password - ' . $result['message'];
+                return ($result);
+            }
+        }
+
+        // Password
+        if ($password != '') {
+            $result = $this->user->set_password($to_set_userid, $password);
+            if ($result['success'] == false) {
+                $this->log->error('Password ' . $to_set_userid . ' not updated ' . '$groupid');
+                $result['message'] = 'User info updated except role and/or password - ' . $result['message'];
+                return ($result);
+            }
+        }
+
+        // role
+        $query_result = $this->mysqli->query("UPDATE group_users SET role=$role WHERE userid=$to_set_userid AND groupid=$groupid");
+        if ($query_result != true) {
+            $result['success'] = false;
+            $this->log->error('Role ' . $to_set_userid . ' not updated ' . '$groupid');
+            $result['message'] = 'User info updated except role';
+            return ($result);
+        }
+
+        $result['success'] = true;
+        return $result;
     }
 
     public function is_group_member($groupid, $userid) {

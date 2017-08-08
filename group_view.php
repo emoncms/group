@@ -97,7 +97,7 @@ MODALS
         <p>Password:<br>
             <input id="group-addmember-password" type="password"></p>
 
-        <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -127,7 +127,7 @@ MODALS
             <input id="group-createuseraddtogroup-password" type="password"></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
-        <p>Access   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-createuseraddtogroup-role">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -160,6 +160,48 @@ MODALS
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
         <button id="remove-user-action" action="next" class="btn btn-danger">Next</button>
+    </div>
+</div>
+
+<!-- EDIT USER -->
+<div id="edit-user-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="edit-user-modal-label" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="edit-user-modal-label">Edit user</h3>
+    </div>
+    <div class="modal-body">
+        <table class="table">
+            <tr><td>Username</td><td><input class="edit-user-username" type="text"></input></td></tr>
+            <tr><td>Name</td><td><input class="edit-user-name" type="text"></input></td></tr>
+            <tr><td>Email</td><td><input class="edit-user-email" type="text"></input></td></tr>
+            <tr><td>Location</td><td><input class="edit-user-location" type="text"></input></td></tr>
+            <tr><td>Bio</td><td><input class="edit-user-bio" type="text"></input></td></tr>
+            <tr><td>Timezome</td><td><input class="edit-user-timezone" type="text"></input></td></tr>
+            <tr><td>Password    <i class="icon-question-sign" title="Leave it blank if you don not wish to change it" /></td><td><input class="edit-user-password" type="password"></input></td></tr>
+            <tr><td>Confirm password</td><td><input class="edit-user-confirm-password" type="password"></input></td></tr>
+            <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
+                <td><select id="edit-user-role">
+                        <option value=1>Administrator</option>
+                        <option value=2>Sub-administrator</option>
+                        <option value=3>Member</option>
+                        <option value=0 selected>Passive member</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Tags</td>
+                <td>Name  <input class="edit-user-tag-name" type="text" style="width:75px;margin-right:15px"></input> <button class="btn edit-user-tag-add" style="margin-bottom:10px"><i class="icon-plus"></i>Add</button><br />
+                    Value  <input class="edit-user-tag-value" type="text"  style="width:165px"></input>
+                    <div id="edit-user-tagslist"></div>
+                </td>
+            </tr>
+        </table>
+        <div id="edit-user-modal-message" class="hide"><div class="alert alert-error">Passwords do not match</div></div>
+        <div id="edit-user-modal-message-tag" class="hide alert alert-error"></div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="edit-user-action" action="next" class="btn btn-primary">Next</button>
     </div>
 </div>
 
@@ -383,8 +425,11 @@ JAVASCRIPT
                         out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></div>";
                     out += "<div class='user-active-feeds'><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></div> <div class='user-role'>" + role + "</div>";
                     out += "<div class='user-actions'>";
-                    if (userlist[z].userid != my_userid)
-                        out += "<i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i>";
+                    if (userlist[z].userid != my_userid) {
+                        if (userlist[z].admin_rights == 'full')
+                            out += "<i class='edit-user icon-edit if-admin'  style='cursor:pointer' title='Edit user' uid=" + userlist[z].userid + " uindex=" + z + "> </i>";
+                        out += "<i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove user from group' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i>";
+                    }
                     out += "</div>"; // user-actions
                     out += "</div>"; // user-info
                     out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
@@ -409,43 +454,41 @@ JAVASCRIPT
                 $('#userlist-div').show();
                 //$(".user-feedslist .feed").last().css("border-bottom","1px solid #aaa");
 
-
-
-
                 // Compile the user list html
-                var out = "";
-                for (var z in userlist) {
-                    out += "<tr>";
-                    if (my_role === 1 && userlist[z].admin_rights == "full")
-                        out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
-                    else
-                        out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
-                    // Active feeds
-                    var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
-                    var color = "#00aa00";
-                    if (prc < 0.5)
-                        color = "#aaaa00";
-                    if (prc < 0.1)
-                        color = "#aa0000";
-                    if (userlist[z].totalfeeds == 0)
-                        color = "#000";
-                    out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
-                    out += "<td>" + role + "</td>";
-                    // Actions
-                    if (userlist[z].userid == my_userid)
-                        out += '<td></td>';
-                    else
-                        out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-                    //Feeds list
-                    if (my_role != 1 && my_role != 2)
-                        out += '<td></td>';
-                    else
-                        out += "<td><i class='showfeeds icon-list-alt' style='cursor:pointer' index='" + z + "' title='Show feeds' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-                    // Close table row
-                    out += "</tr>";
-                }
-                $("#userlist").append(out); // Place userlist html in userlist table 
-                $('#userlist-table').show();
+                /*var out = "";
+                 for (var z in userlist) {
+                 out += "<tr>";
+                 if (my_role === 1 && userlist[z].admin_rights == "full")
+                 out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
+                 else
+                 out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
+                 // Active feeds
+                 var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
+                 var color = "#00aa00";
+                 if (prc < 0.5)
+                 color = "#aaaa00";
+                 if (prc < 0.1)
+                 color = "#aa0000";
+                 if (userlist[z].totalfeeds == 0)
+                 color = "#000";
+                 out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
+                 out += "<td>" + role + "</td>";
+                 // Actions
+                 if (userlist[z].userid == my_userid)
+                 out += '<td></td>';
+                 else
+                 out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+                 //Feeds list
+                 if (my_role != 1 && my_role != 2)
+                 out += '<td></td>';
+                 else
+                 out += "<td><i class='showfeeds icon-list-alt' style='cursor:pointer' index='" + z + "' title='Show feeds' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+                 // Close table row
+                 out += "</tr>";
+                 }
+                 $("#userlist").append(out); // Place userlist html in userlist table 
+                 $('#userlist-table').show();
+                 */
             }
         }
     }
@@ -589,7 +632,7 @@ JAVASCRIPT
             draw_userlist(selected_groupid);
         }
     });
-    // ----------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------
 // Action: Create user and add to group
 // ----------------------------------------------------------------------------------------
     $("body").on('click', "#createuseraddtogroup", function () {
@@ -679,6 +722,102 @@ JAVASCRIPT
                 draw_userlist(selected_groupid);
             }
         }
+    });
+// ----------------------------------------------------------------------------------------
+// Action: Edit user
+// ----------------------------------------------------------------------------------------
+    $("body").on('click', ".edit-user", function (e) {
+        e.stopPropagation();
+
+        $('#edit-user-modal-message-tag').hide();
+        $('#edit-user-modal-message').hide();
+        $('.edit-user-tag-name').val('');
+        $('.edit-user-tag-value').val('');
+
+        var userid = $(this).attr("uid");
+        $('#edit-user-action').attr("uid", userid);
+
+        var uindex = $(this).attr("uindex");
+        $('.edit-user-username').val(userlist[uindex].username);
+        $('.edit-user-name').val(userlist[uindex].name);
+        $('.edit-user-email').val(userlist[uindex].email);
+        $('.edit-user-location').val(userlist[uindex].location);
+        $('.edit-user-bio').val(userlist[uindex].bio);
+        $('.edit-user-timezone').val(userlist[uindex].timezone);
+        $('.edit-user-password').val('');
+        $('.edit-user-confirm-password').val('');
+        $('#edit-user-role option[value="' + userlist[uindex].role + '"]').prop('selected', true);
+        var html = '';
+        var tags = JSON.parse(userlist[uindex].tags);
+        for (var tag in tags) {
+            var value = tags[tag];
+            html += '<div name="' + tag + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + tag + ': ' + value + '<span class="remove-tag" name="' + tag + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
+        }
+        $('#edit-user-tagslist').html(html);
+
+        $('#edit-user-modal').modal('show');
+    });
+    $("body").on('click', "#edit-user-action", function () {
+        var userid = $('#edit-user-action').attr("uid");
+
+        var username = $('.edit-user-username').val();
+        var name = $('.edit-user-name').val();
+        var email = $('.edit-user-email').val();
+        var location = $('.edit-user-location').val();
+        var bio = $('.edit-user-bio').val();
+        var timezone = $('.edit-user-timezone').val();
+        var role = $('#edit-user-role').val();
+        var password = $('.edit-user-password').val();
+        var password_confirmation = $('.edit-user-confirm-password').val();
+        var tags = {};
+        $('#edit-user-tagslist div').each(function () {
+            tags[$(this).attr('name')] = $(this).attr('value');
+        });
+        tags = JSON.stringify(tags);
+
+        var ready_to_save = true;
+        if (password != '') {
+            if (password != password_confirmation) {
+                $('#edit-user-modal-message').show();
+                ready_to_save = false;
+            }
+        }
+        if (ready_to_save) {
+            var result = group.setuserinfo(userid, selected_groupid, username, name, email, location, bio, timezone, role, password, tags);
+            if (result.success != true)
+                alert(result.message);
+            $('#edit-user-modal').modal('hide');
+            draw_userlist(selected_groupid);
+            $('#edit-user-modal-message').hide();
+        }
+    });
+    $("body").on('click', ".edit-user-tag-add", function () {
+        $('#edit-user-modal-message-tag').hide();
+        var name = $('.edit-user-tag-name').val();
+        var value = $('.edit-user-tag-value').val();
+        var html = '<div name="' + name + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + name + ': ' + value + '<span class="remove-tag" name="' + name + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
+        var name_found = false;
+
+        // Find out if tag is already used
+        $('#edit-user-tagslist div').each(function () {
+            if ($(this).attr('name') == name)
+                name_found = true;
+        });
+
+        // Add tag
+        if (name == '' || value == '')
+            $('#edit-user-modal-message-tag').html('Name and value cannot be empty').show();
+        else if (name_found == true)
+            $('#edit-user-modal-message-tag').html('Tag already in use').show();
+        else {
+            $('#edit-user-tagslist').append(html);
+            $('.edit-user-tag-name').val('');
+            $('.edit-user-tag-value').val('');
+        }
+    });
+    $("body").on('click', ".remove-tag", function () {
+        var name = $(this).attr('name');
+        $('#edit-user-tagslist div[name=' + name + ']').remove();
     });
 // ----------------------------------------------------------------------------------------
 // Action: Delete group
@@ -830,7 +969,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('#feedExportModal').modal('hide');
 
         if ($(this).attr('export-type') == 'group') {
-            result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat,  $(this).attr('name'));
+            result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
         }
         else {
             result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));

@@ -35,6 +35,14 @@ var group = {
             }});
         return result;
     },
+    'setuserinfo': function (userid, groupid, username, name, email, location, bio, timezone, role, password, tags) {
+        var result = {};
+        $.ajax({url: path + "group/setuserinfo", method: "POST", data: "groupid=" + groupid + "&userid=" + userid + "&username=" + username + "&name=" + name + "&email=" + email + "&bio=" + bio + "&timezone=" + timezone + "&location=" + location + "&role=" + role + "&password=" + password + "&tags=" + tags, dataType: 'json', async: false, success: function (data) {
+                result = data;
+               //console.log(result.responseText)
+            }});
+        return result;
+    },
     'fullremoveuser': function (groupid, userid) {
         var result = {};
         $.ajax({url: path + "group/fullremoveuser", data: "groupid=" + groupid + "&userid=" + userid, dataType: 'json', async: false, success: function (data) {

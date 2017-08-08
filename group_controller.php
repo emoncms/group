@@ -90,6 +90,12 @@ function group_controller() {
             $result = $group->delete($session["userid"], get("groupid"));
         }
 
+        // group/setuserinfo?"groupid=12&userid=2&username=fede123&name=federico&email=federico@gmail.com&bio=&timezone=UTC&location=Machynlleth&role=2&password=mypwd&tags={system:PV,house:big}
+        if ($route->action == "setuserinfo") {
+            $route->format = "json";
+            $result = $group->setuserinfo($session["userid"], post('groupid'), post("userid"), post('username'), post('name'), post('email'), post('bio'), post('timezone'), post('location'), post('role'), post('password'), post('tags'));
+        }
+
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTIONS
         // --------------------------------------------------------------------------
