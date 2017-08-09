@@ -44,12 +44,13 @@ MAIN
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
             <div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>
+            <div id="deletegroup" class="if-admin groupselected"><i class="icon-trash"></i>Delete group</div>
             <div id="editgroup" class="if-admin groupselected"><i class="icon-edit"></i> Edit Group</div>
             <div id="createuseraddtogroup" class="if-admin groupselected"><i class="icon-plus"></i>Create User</div>
             <div id="addmember" class="if-admin groupselected"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
-
+            
         </div>
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
