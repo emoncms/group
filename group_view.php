@@ -761,6 +761,7 @@ JAVASCRIPT
 
         $('#edit-user-modal-message-tag').hide();
         $('#edit-user-modal-message').hide();
+        $('#edit-user-matching-tags').hide();
         $('.edit-user-tag-name').val('');
         $('.edit-user-tag-value').val('');
 
@@ -850,6 +851,7 @@ JAVASCRIPT
     });
     $("body").on('keyup', ".edit-user-tag-name", function () {
         var typed = $(this).val();
+        $('#edit-user-matching-tags').hide();
         var matching_tags = [];
         if (typed.length > 2) {
             for (var z in tags_used_in_group) {
@@ -864,8 +866,6 @@ JAVASCRIPT
                 $('#edit-user-matching-tags').append('<p class="matched-tag" tag="' + matching_tags[z] + '" style="cursor:default">' + matching_tags[z] + '</p>')
             $('#edit-user-matching-tags').show();
         }
-        else
-            $('#edit-user-matching-tags').hide();
     });
     $("body").on('click', ".matched-tag", function () {
         $('.edit-user-tag-name').val($(this).attr('tag'));
