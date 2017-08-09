@@ -14,9 +14,9 @@ MAIN
 -------------------------------------------------------------------------------------------->
 <div id="wrapper">
     <div class="sidebar">
-        <!--<div style="padding-left:10px">
+        <div style="padding-left:10px">
             <div id="sidebar-close"><i class="icon-remove"></i></div>
-        </div>-->
+        </div>
         <div id="previous_user" style="padding: 0 0 10px 10px">
             <h3>Admin user</h3>'
         </div>
