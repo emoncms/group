@@ -43,14 +43,14 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
-            <!--<div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>-->
+            <div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>
             <div id="deletegroup" class="if-admin groupselected"><i class="icon-trash"></i>Delete group</div>
             <div id="editgroup" class="if-admin groupselected"><i class="icon-edit"></i> Edit Group</div>
             <div id="createuseraddtogroup" class="if-admin groupselected"><i class="icon-plus"></i>Create User</div>
             <div id="addmember" class="if-admin groupselected"><i class="icon-plus"></i>Add Member</div>
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
-            
+
         </div>
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
@@ -402,6 +402,13 @@ JAVASCRIPT
             userlist.sort(function (a, b) {
                 return b.activefeeds - a.activefeeds;
             });
+
+            // Fill tags_used_in_group
+            for (var z in userlist)
+                for (var tag in userlist[z].tags)
+                    if (!tags_used_in_group.includes(tag))
+                        tags_used_in_group.push(tag);
+
         }
 
         // Html
@@ -1197,9 +1204,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
             for (var i in feeds) {
                 var d = new Date();
                 var n = d.getTime() / 1000; // seconds
-                for (var z = 0; z < 10; z++) {
-                    group.updatefeed(feeds[i].id, list_apikeys[apikey], n, (z + n % 937));
-                    console.log('yeah')
+                for (var z = 0; z < 15; z++) {
+                    group.updatefeed(feeds[i].id, list_apikeys[apikey], n, Math.random() * 1000);
                     n = n - 10;
                 }
             }
