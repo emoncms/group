@@ -190,9 +190,11 @@ MODALS
             </tr>
             <tr>
                 <td>Tags</td>
-                <td>Name  <input class="edit-user-tag-name" type="text" style="width:75px;margin-right:15px"></input> <button class="btn edit-user-tag-add" style="margin-bottom:10px"><i class="icon-plus"></i>Add</button><br />
-                    Value  <input class="edit-user-tag-value" type="text"  style="width:165px"></input>
-                    <div id="edit-user-tagslist"></div>
+                <td><div id="edit-user-tags-wrapper">
+                        Name  <input class="edit-user-tag-name" type="text" style="width:75px;margin-right:15px"></input><div id="edit-user-matching-tags" class="hide"></div> <button class="btn edit-user-tag-add" style="margin-bottom:10px"><i class="icon-plus"></i>Add</button><br />
+                        Value  <input class="edit-user-tag-value" type="text"  style="width:165px"></input>
+                        <div id="edit-user-tagslist"></div>
+                    </div>
                 </td>
             </tr>
         </table>
@@ -318,6 +320,7 @@ JAVASCRIPT
     var grouplist = [];
     var my_role = 0;
     var userlist = [];
+    var tags_used_in_group = [];
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
@@ -379,118 +382,136 @@ JAVASCRIPT
             $('#userlist-alert').show();
         }
         else {
+            // Sort userlist
             userlist.sort(function (a, b) {
                 return b.activefeeds - a.activefeeds;
             });
-            if (userlist.success != undefined) {
-                alert(userlist.message);
-            } else {
-                // Hide alert message
-                $('#userlist-alert').hide();
-                var out = "";
-                for (var z in userlist) {
-                    // Role
-                    var role;
-                    switch (userlist[z].role) {
-                        case 0:
-                            role = 'Passive member';
-                            break;
-                        case 1:
-                            role = 'Administrator';
-                            break;
-                        case 2:
-                            role = 'Sub-administrator';
-                            break;
-                        case 3:
-                            role = 'Member';
-                            break;
-                    }
-                    // Active feeds colors
-                    var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
-                    var color = "#00aa00";
-                    if (prc < 0.5)
-                        color = "#aaaa00";
-                    if (prc < 0.1)
-                        color = "#aa0000";
-                    if (userlist[z].totalfeeds == 0)
-                        color = "#000";
-                    // out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
 
-                    // html
-                    out += "<div class='user' uid='" + userlist[z].userid + "'>";
-                    out += "<div class='user-info'>";
-                    if (userlist[z].admin_rights != 'full')
-                        out += "<div class='user-name'>" + userlist[z].username + "</div>";
-                    else
-                        out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></div>";
-                    out += "<div class='user-active-feeds'><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></div> <div class='user-role'>" + role + "</div>";
-                    out += "<div class='user-actions'>";
-                    if (userlist[z].userid != my_userid) {
-                        if (userlist[z].admin_rights == 'full')
-                            out += "<i class='edit-user icon-edit if-admin'  style='cursor:pointer' title='Edit user' uid=" + userlist[z].userid + " uindex=" + z + "> </i>";
-                        out += "<i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove user from group' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i>";
+            // Parse list of tags for every user and add them to tags_used_in_group
+            for (var z in userlist) {
+                try {
+                    userlist[z].tags = JSON.parse(userlist[z].tags);
+                    for (var tag in userlist[z].tags) {
+                        if (!tags_used_in_group.includes(tag))
+                            tags_used_in_group.push(tag);
                     }
-                    out += "</div>"; // user-actions
-                    out += "</div>"; // user-info
-                    out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
-                    out += "<div class='user-feedslist'>";
-                    out += "<div class='user-feedslist-inner'>";
-                    userlist[z].feedslist.forEach(function (feed) {
-                        out += "<div class='feed'>";
-                        out += "<input type='checkbox' fid='" + feed.id + "' />";
-                        out += "<div class='feed-name'>" + feed.tag + ':' + feed.name + "</div>";
-                        out += "<div class='feed-download' fid='" + feed.id + "' tag='" + feed.tag + "' name='" + feed.name + "'><i class='icon-download'style='cursor:pointer' title='Download csv'> </i></div>";
-                        out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
-                        out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
-                        out += "</div>"; // feed
-                    });
-                    out += "</div>"; // user-feedslist-inner
-                    out += "</div>"; // user-feedslist
-                    //out += "<div class='user-inputs hide'></div>";
-                    out += "</div>"; // user-feeds-inputs
-                    out += "</div>"; // user
                 }
-                $("#userlist-div").html(out); // Place userlist html in userlist table 
-                $('#userlist-div').show();
-                //$(".user-feedslist .feed").last().css("border-bottom","1px solid #aaa");
-
-                // Compile the user list html
-                /*var out = "";
-                 for (var z in userlist) {
-                 out += "<tr>";
-                 if (my_role === 1 && userlist[z].admin_rights == "full")
-                 out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
-                 else
-                 out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
-                 // Active feeds
-                 var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
-                 var color = "#00aa00";
-                 if (prc < 0.5)
-                 color = "#aaaa00";
-                 if (prc < 0.1)
-                 color = "#aa0000";
-                 if (userlist[z].totalfeeds == 0)
-                 color = "#000";
-                 out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
-                 out += "<td>" + role + "</td>";
-                 // Actions
-                 if (userlist[z].userid == my_userid)
-                 out += '<td></td>';
-                 else
-                 out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-                 //Feeds list
-                 if (my_role != 1 && my_role != 2)
-                 out += '<td></td>';
-                 else
-                 out += "<td><i class='showfeeds icon-list-alt' style='cursor:pointer' index='" + z + "' title='Show feeds' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-                 // Close table row
-                 out += "</tr>";
-                 }
-                 $("#userlist").append(out); // Place userlist html in userlist table 
-                 $('#userlist-table').show();
-                 */
+                catch (e) {
+                    userlist[z].tags = {};
+                }
             }
         }
+
+        // Html
+        if (userlist.success != undefined) {
+            alert(userlist.message);
+        } else {
+            // Hide alert message
+            $('#userlist-alert').hide();
+            var out = "";
+            for (var z in userlist) {
+                // Role
+                var role;
+                switch (userlist[z].role) {
+                    case 0:
+                        role = 'Passive member';
+                        break;
+                    case 1:
+                        role = 'Administrator';
+                        break;
+                    case 2:
+                        role = 'Sub-administrator';
+                        break;
+                    case 3:
+                        role = 'Member';
+                        break;
+                }
+                // Active feeds colors
+                var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
+                var color = "#00aa00";
+                if (prc < 0.5)
+                    color = "#aaaa00";
+                if (prc < 0.1)
+                    color = "#aa0000";
+                if (userlist[z].totalfeeds == 0)
+                    color = "#000";
+                // out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
+
+                // html
+                out += "<div class='user' uid='" + userlist[z].userid + "'>";
+                out += "<div class='user-info'>";
+                if (userlist[z].admin_rights != 'full')
+                    out += "<div class='user-name'>" + userlist[z].username + "</div>";
+                else
+                    out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></div>";
+                out += "<div class='user-active-feeds'><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></div> <div class='user-role'>" + role + "</div>";
+                out += "<div class='user-actions'>";
+                if (userlist[z].userid != my_userid) {
+                    if (userlist[z].admin_rights == 'full')
+                        out += "<i class='edit-user icon-edit if-admin'  style='cursor:pointer' title='Edit user' uid=" + userlist[z].userid + " uindex=" + z + "> </i>";
+                    out += "<i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove user from group' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i>";
+                }
+                out += "</div>"; // user-actions
+                out += "</div>"; // user-info
+                out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
+                out += "<div class='user-feedslist'>";
+                out += "<div class='user-feedslist-inner'>";
+                userlist[z].feedslist.forEach(function (feed) {
+                    out += "<div class='feed'>";
+                    out += "<input type='checkbox' fid='" + feed.id + "' />";
+                    out += "<div class='feed-name'>" + feed.tag + ':' + feed.name + "</div>";
+                    out += "<div class='feed-download' fid='" + feed.id + "' tag='" + feed.tag + "' name='" + feed.name + "'><i class='icon-download'style='cursor:pointer' title='Download csv'> </i></div>";
+                    out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
+                    out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
+                    out += "</div>"; // feed
+                });
+                out += "</div>"; // user-feedslist-inner
+                out += "</div>"; // user-feedslist
+                //out += "<div class='user-inputs hide'></div>";
+                out += "</div>"; // user-feeds-inputs
+                out += "</div>"; // user
+            }
+            $("#userlist-div").html(out); // Place userlist html in userlist table 
+            $('#userlist-div').show();
+            //$(".user-feedslist .feed").last().css("border-bottom","1px solid #aaa");
+
+            // Compile the user list html
+            /*var out = "";
+             for (var z in userlist) {
+             out += "<tr>";
+             if (my_role === 1 && userlist[z].admin_rights == "full")
+             out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
+             else
+             out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
+             // Active feeds
+             var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
+             var color = "#00aa00";
+             if (prc < 0.5)
+             color = "#aaaa00";
+             if (prc < 0.1)
+             color = "#aa0000";
+             if (userlist[z].totalfeeds == 0)
+             color = "#000";
+             out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
+             out += "<td>" + role + "</td>";
+             // Actions
+             if (userlist[z].userid == my_userid)
+             out += '<td></td>';
+             else
+             out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+             //Feeds list
+             if (my_role != 1 && my_role != 2)
+             out += '<td></td>';
+             else
+             out += "<td><i class='showfeeds icon-list-alt' style='cursor:pointer' index='" + z + "' title='Show feeds' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
+             // Close table row
+             out += "</tr>";
+             }
+             $("#userlist").append(out); // Place userlist html in userlist table 
+             $('#userlist-table').show();
+             */
+        }
+
     }
 
     // Format value dynamically  (copied from feedlist_view.php)
@@ -748,9 +769,8 @@ JAVASCRIPT
         $('.edit-user-confirm-password').val('');
         $('#edit-user-role option[value="' + userlist[uindex].role + '"]').prop('selected', true);
         var html = '';
-        var tags = JSON.parse(userlist[uindex].tags);
-        for (var tag in tags) {
-            var value = tags[tag];
+        for (var tag in userlist[uindex].tags) {
+            var value = userlist[uindex].tags[tag];
             html += '<div name="' + tag + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + tag + ': ' + value + '<span class="remove-tag" name="' + tag + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
         }
         $('#edit-user-tagslist').html(html);
@@ -817,7 +837,30 @@ JAVASCRIPT
     });
     $("body").on('click', ".remove-tag", function () {
         var name = $(this).attr('name');
-        $('#edit-user-tagslist div[name=' + name + ']').remove();
+        $('#edit-user-tagslist div[name="' + name + '"]').remove();
+    });
+    $("body").on('keyup', ".edit-user-tag-name", function () {
+        var typed = $(this).val();
+        var matching_tags = [];
+        if (typed.length > 2) {
+            for (var z in tags_used_in_group) {
+                if (tags_used_in_group[z].indexOf(typed) != -1)
+                    matching_tags.push(tags_used_in_group[z]);
+            }
+        }
+
+        if (matching_tags.length > 0) {
+            $('#edit-user-matching-tags').html("");
+            for (var z in matching_tags)
+                $('#edit-user-matching-tags').append('<p class="matched-tag" tag="' + matching_tags[z] + '" style="cursor:default">' + matching_tags[z] + '</p>')
+            $('#edit-user-matching-tags').show();
+        }
+        else
+            $('#edit-user-matching-tags').hide();
+    });
+    $("body").on('click', ".matched-tag", function () {
+        $('.edit-user-tag-name').val($(this).attr('tag'));
+        $('#edit-user-matching-tags').hide();
     });
 // ----------------------------------------------------------------------------------------
 // Action: Delete group
@@ -955,7 +998,6 @@ JAVASCRIPT
 global $feed_settings;
 echo $feed_settings['csvdownloadlimit_mb'];
 ?>;
-
         if ($(this).attr('export-type') == 'group')
             var downloadsize = calculate_download_size($(this).attr('feedcount'));
         else
@@ -967,7 +1009,6 @@ echo $feed_settings['csvdownloadlimit_mb'];
         }
 
         $('#feedExportModal').modal('hide');
-
         if ($(this).attr('export-type') == 'group') {
             result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
         }

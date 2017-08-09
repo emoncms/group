@@ -195,3 +195,27 @@ input:disabled+span{
 .user-actions i{
     padding-left:5px;
 }
+
+.matched-tag:hover{
+    background-color:#f2f2f2;
+}
+
+#edit-user-tags-wrapper{
+    position:relative;
+}
+
+#edit-user-matching-tags{
+    position:absolute;
+    background-color:#fcfcfc;
+    padding:5px 15px;
+    border: solid #ddd 1px;
+    border-radius:5px;
+    left:41px;
+    top:30px;
+    z-index:1;
+}
+
+.matched-tag{
+    padding:0;
+    margin:0;
+}
