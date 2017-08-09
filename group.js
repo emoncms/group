@@ -108,7 +108,7 @@ var group = {
          }});
          return result;*/
     },
-// Development
+// Add mock data to users - Used during development
     'getapikeys': function (groupid) {
         var result = {};
         $.ajax({url: path + "group/getapikeys", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
