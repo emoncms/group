@@ -219,3 +219,36 @@ input:disabled+span{
     padding:0;
     margin:0;
 }
+
+#search-wrapper{
+    padding-left:10px
+}
+
+#search-list{
+    margin:30px
+}
+
+#search-list{
+    position:absolute;
+    background-color:rgba(250, 250, 250, 0.96);
+    padding: 0 10px;
+    top:58px;
+    left:-20px;
+    width:82%;
+}
+
+#search-list p:hover{
+    background-color:white
+}
+
+#search-list p{
+    margin:1px;
+    cursor:default;
+    font-size:13px
+}
+
+
+#search-list h4{
+    margin:10px 0 0;
+    font-size:13px
+}

@@ -56,6 +56,13 @@ var group = {
                 result = data;
             }});
         return result;
+    },    
+    'extendedgrouplist': function () {
+        var result = {};
+        $.ajax({url: path + "group/mygroups", dataType: 'json', async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
     },
     'deletegroup': function (groupid) {
         var result = {};

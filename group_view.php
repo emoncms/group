@@ -21,6 +21,19 @@ MAIN
             <h3>Admin user</h3>'
         </div>
 
+        <h3 style="padding-left:10px">Search</h3>
+        <div id="search-wrapper">
+            <input id="search-box"></input>
+            <div id="search-list">
+                <h4 class="hide search-list-groups-show">Groups</h4>
+                <div id="search-list-groups" class="hide search-list-groups-show"></div>
+                <h4 class="hide search-list-users-show">Users</h4>
+                <div id="search-list-users" class="hide search-list-users-show"></div>
+                <h4 class="hide search-list-tags-show">Tags</h4>
+                <div id="search-list-tags" class="hide search-list-tags-show"></div>
+            </div>
+        </div>
+
         <h3 style="padding-left:10px">Groups</h3>
         <div id="grouplist"></div>
 
@@ -321,6 +334,7 @@ JAVASCRIPT
     var my_role = 0;
     var userlist = [];
     var tags_used_in_group = [];
+    var summary_for_search = [];
 // ----------------------------------------------------------------------------------------
 // Draw: grouplist
 // ----------------------------------------------------------------------------------------
@@ -372,6 +386,7 @@ JAVASCRIPT
     function draw_userlist(groupid) {
         // Get session user role in group
         my_role = group.getsessionuserrole(groupid);
+
         // Load listof members
         userlist = group.userlist(groupid);
         if (userlist.success == false) {
@@ -386,20 +401,6 @@ JAVASCRIPT
             userlist.sort(function (a, b) {
                 return b.activefeeds - a.activefeeds;
             });
-
-            // Parse list of tags for every user and add them to tags_used_in_group
-            for (var z in userlist) {
-                try {
-                    userlist[z].tags = JSON.parse(userlist[z].tags);
-                    for (var tag in userlist[z].tags) {
-                        if (!tags_used_in_group.includes(tag))
-                            tags_used_in_group.push(tag);
-                    }
-                }
-                catch (e) {
-                    userlist[z].tags = {};
-                }
-            }
         }
 
         // Html
@@ -1075,6 +1076,63 @@ echo $feed_settings['csvdownloadlimit_mb'];
         });
         window.location = path + "graph/groupgraph/" + selected_groupid + ',' + feeds.join(",");
     });
+// ----------------------------------------------------------------------------------------
+// Action: search
+// ----------------------------------------------------------------------------------------
+    $("body").on('focus', '#search-box', function (e) {
+        summary_for_search = group.extendedgrouplist();
+    });
+    $("body").on('keyup', '#search-box', function (e) {
+        $('.search-list-groups-show').hide();
+        $('.search-list-users-show').hide();
+        $('.search-list-tags-show').hide();
+        $('#search-list-groups').html('');
+        $('#search-list-users').html('');
+        $('#search-list-tags').html('');
+        var typed = $('#search-box').val();
+        if (typed.length > 2) {
+            summary_for_search.forEach(function (group) {
+                if (group.name.indexOf(typed) != -1) {
+                    $('#search-list-groups').append('<p class="search-match" groupid="' + group.groupid + '">' + group.name + '</p>');
+                    $('.search-list-groups-show').show();
+                }
+                group.users.forEach(function (user) {
+                    if (user.username.indexOf(typed) != -1) {
+                        $('#search-list-users').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '">' + group.name + ': ' + user.username + '</p>');
+                        $('.search-list-users-show').show();
+                    }
+                    for (var tag in user.tags) {
+                        if (user.tags[tag].indexOf(typed) != -1) {
+                            $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                            $('.search-list-tags-show').show();
+                        }
+                        else if (tag.indexOf(typed) != -1) {
+                            $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                            $('.search-list-tags-show').show();
+                        }
+                    }
+                });
+            });
+        }
+    });
+    $("body").on('click', '.search-match', function (e) {
+        var groupid = $(this).attr('groupid');
+        var userid = $(this).attr('userid');
+        var tag = $(this).attr('tag');
+        $('.group[gid=' + groupid + ']').click();
+        $('.user[uid=' + userid + ']').click();
+    });
+    $("body").on('focusout', '#search-box', function (e) {
+        setTimeout(function () { // we delay the execution to allow the click on .search-match to happen
+            $('.search-list-groups-show').hide();
+            $('.search-list-users-show').hide();
+            $('.search-list-tags-show').hide();
+            $('#search-list-groups').html('');
+            $('#search-list-users').html('');
+            $('#search-list-tags').html('');
+        }, 100);
+    });
+// ----------------------------------------------------------------------------------------
 // ----------------------------------------------------------------------------------------
 // Other
 // ----------------------------------------------------------------------------------------

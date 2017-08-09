@@ -262,7 +262,7 @@ class Group {
                 "location" => $u->location,
                 "timezone" => $u->timezone,
                 "email" => $u->email,
-                "tags" => $u->tags
+                "tags" => json_decode($u->tags)
             );
         }
         return $userlist;
