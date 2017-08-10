@@ -43,7 +43,7 @@ MAIN
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
-            <div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>
+            <!--<div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>-->
             <div id="deletegroup" class="if-admin groupselected"><i class="icon-trash"></i>Delete group</div>
             <div id="editgroup" class="if-admin groupselected"><i class="icon-edit"></i> Edit Group</div>
             <div id="createuseraddtogroup" class="if-admin groupselected"><i class="icon-plus"></i>Create User</div>
@@ -387,7 +387,6 @@ JAVASCRIPT
     function draw_userlist(groupid) {
         // Get session user role in group
         my_role = group.getsessionuserrole(groupid);
-
         // Load listof members
         userlist = group.userlist(groupid);
         if (userlist.success == false) {
@@ -402,13 +401,11 @@ JAVASCRIPT
             userlist.sort(function (a, b) {
                 return b.activefeeds - a.activefeeds;
             });
-
             // Fill tags_used_in_group
             for (var z in userlist)
                 for (var tag in userlist[z].tags)
                     if (!tags_used_in_group.includes(tag))
                         tags_used_in_group.push(tag);
-
         }
 
         // Html
@@ -465,14 +462,28 @@ JAVASCRIPT
                 out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-feedslist'>";
                 out += "<div class='user-feedslist-inner'>";
+                // Add tags
+                var tags_list = [];
                 userlist[z].feedslist.forEach(function (feed) {
-                    out += "<div class='feed'>";
-                    out += "<input type='checkbox' fid='" + feed.id + "' />";
-                    out += "<div class='feed-name'>" + feed.tag + ':' + feed.name + "</div>";
-                    out += "<div class='feed-download' fid='" + feed.id + "' tag='" + feed.tag + "' name='" + feed.name + "'><i class='icon-download'style='cursor:pointer' title='Download csv'> </i></div>";
-                    out += "<div class='feed-value'>" + list_format_value(feed.value) + "</div>";
-                    out += "<div class='feed-time'>" + list_format_updated(feed.time) + "</div>";
-                    out += "</div>"; // feed
+                    if (tags_list.indexOf(feed.tag) == -1) {
+                        tags_list.push(feed.tag);
+                        out += "<div class='feed-tag' tag='" + feed.tag + "'>";
+                        out += "<input class='feed-tag-checkbox' type='checkbox' tag='" + feed.tag + "' uid='" + userlist[z].userid + "' />" + feed.tag;
+                        // Add feed tah have the current tag
+                        userlist[z].feedslist.forEach(function (feed_again) {
+                            if (feed_again.tag == feed.tag) {
+                                out += "<div class='feed hide' tag='" + feed_again.tag + "' uid='" + userlist[z].userid + "'>";
+                                out += "<input type='checkbox' fid='" + feed_again.id + "' tag='" + feed_again.tag + "' uid='" + userlist[z].userid + "' />";
+                                out += "<div class='feed-name'>" + feed_again.name + "</div>";
+                                out += "<div class='feed-download' fid='" + feed_again.id + "' tag='" + feed_again.tag + "' name='" + feed_again.name + "'><i class='icon-download'style='cursor:pointer' title='Download csv'> </i></div>";
+                                out += "<div class='feed-value'>" + list_format_value(feed_again.value) + "</div>";
+                                out += "<div class='feed-time'>" + list_format_updated(feed_again.time) + "</div>";
+                                out += "</div>"; // feed
+                            }
+                        });
+                        out += "</div>";
+                    }
+
                 });
                 out += "</div>"; // user-feedslist-inner
                 out += "</div>"; // user-feedslist
@@ -693,9 +704,24 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
     $('body').on('click', '.user', function () {
         var userid = $(this).attr('uid');
-        $('.user-feeds-inputs[uid=' + userid + ']').toggle();
+        $('.user-feeds-inputs[uid="' + userid + '"]').toggle();
     });
-// ----------------------------------------------------------------------------------------
+    $('body').on('click', '.feed-tag', function (e) {
+        e.stopPropagation();
+        var tag = $(this).attr('tag');
+        $(this).find('.feed[tag="' + tag + '"]').toggle();
+    });
+    $('body').on('click', '.feed-tag-checkbox', function (e) {
+        e.stopPropagation();
+        var tag = $(this).attr('tag');
+        var uid = $(this).attr('uid');
+        if ($(this).is(':checked')) {
+            $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', 'checked');
+        }
+        else
+            $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', '');
+    });
+    // ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".removeuser", function (e) {
@@ -758,16 +784,13 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".edit-user", function (e) {
         e.stopPropagation();
-
         $('#edit-user-modal-message-tag').hide();
         $('#edit-user-modal-message').hide();
         $('#edit-user-matching-tags').hide();
         $('.edit-user-tag-name').val('');
         $('.edit-user-tag-value').val('');
-
         var userid = $(this).attr("uid");
         $('#edit-user-action').attr("uid", userid);
-
         var uindex = $(this).attr("uindex");
         $('.edit-user-username').val(userlist[uindex].username);
         $('.edit-user-name').val(userlist[uindex].name);
@@ -784,12 +807,10 @@ JAVASCRIPT
             html += '<div name="' + tag + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + tag + ': ' + value + '<span class="remove-tag" name="' + tag + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
         }
         $('#edit-user-tagslist').html(html);
-
         $('#edit-user-modal').modal('show');
     });
     $("body").on('click', "#edit-user-action", function () {
         var userid = $('#edit-user-action').attr("uid");
-
         var username = $('.edit-user-username').val();
         var name = $('.edit-user-name').val();
         var email = $('.edit-user-email').val();
@@ -804,7 +825,6 @@ JAVASCRIPT
             tags[$(this).attr('name')] = $(this).attr('value');
         });
         tags = JSON.stringify(tags);
-
         var ready_to_save = true;
         if (password != '') {
             if (password != password_confirmation) {
@@ -827,13 +847,11 @@ JAVASCRIPT
         var value = $('.edit-user-tag-value').val();
         var html = '<div name="' + name + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + name + ': ' + value + '<span class="remove-tag" name="' + name + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
         var name_found = false;
-
         // Find out if tag is already used
         $('#edit-user-tagslist div').each(function () {
             if ($(this).attr('name') == name)
                 name_found = true;
         });
-
         // Add tag
         if (name == '' || value == '')
             $('#edit-user-modal-message-tag').html('Name and value cannot be empty').show();
@@ -1061,7 +1079,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
 // Action: Show User actions buttons when feed check boxes are ticked
 // ----------------------------------------------------------------------------------------
-    $('body').on('click', '.feed input', function (e) {
+    $('body').on('click', '.feed-tag-checkbox, .feed input', function (e) {
         e.stopPropagation();
         var any_checked = false;
         $('.feed input').each(function () {
@@ -1072,6 +1090,22 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $('.multiple-feeds-actions button').show();
         else
             $('.multiple-feeds-actions button').hide();
+    });
+// ----------------------------------------------------------------------------------------
+// Action: Untick tag checbox when all the feed checkboxes are unticked
+// ----------------------------------------------------------------------------------------
+    $('body').on('click', '.feed input', function (e) {
+        e.stopPropagation();
+        var tag = $(this).attr('tag');
+        var uid = $(this).attr('uid');
+        var any_checked = false;
+        $('.feed input[tag="' + tag + '"][uid="' + uid + '"]').each(function () {
+            if ($(this).is(':checked'))
+                any_checked = true;
+        })
+        if (!any_checked) {
+            $('.feed-tag-checkbox[tag="' + tag + '"][uid="' + uid + '"]').prop('checked', '');
+        }
     });
 // ----------------------------------------------------------------------------------------
 // Action: open graph page

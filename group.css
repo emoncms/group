@@ -107,7 +107,7 @@ input:disabled+span{
 #userlist-div .user-info{
     font-weight:normal;
     cursor:pointer;
-    padding:10px; 
+    padding:10px 10px 0; 
 }
 
 
@@ -127,9 +127,6 @@ input:disabled+span{
     padding:5px;
 }
 
-.user-feedslist-inner{
-    background-color:#f3f3f3; 
-}
 
 .feed{
     padding:10px;
@@ -251,4 +248,23 @@ input:disabled+span{
 #search-list h4{
     margin:10px 0 0;
     font-size:13px
+}
+
+.user-feedslist-inner .feed{
+    background-color:#f3f3f3; 
+    margin:0
+}
+
+.user-feedslist-inner > div {
+    background-color:#ddd;
+    padding:10px 10px 5px;
+    margin:2px
+}
+
+.feed:nth-child(2){
+    margin-top:10px
+}
+
+input.feed-tag-checkbox{
+    margin-right:8px
 }
