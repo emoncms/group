@@ -1099,13 +1099,20 @@ echo $feed_settings['csvdownloadlimit_mb'];
         var tag = $(this).attr('tag');
         var uid = $(this).attr('uid');
         var any_checked = false;
+        var any_unchecked = false;
         $('.feed input[tag="' + tag + '"][uid="' + uid + '"]').each(function () {
             if ($(this).is(':checked'))
                 any_checked = true;
-        })
-        if (!any_checked) {
-            $('.feed-tag-checkbox[tag="' + tag + '"][uid="' + uid + '"]').prop('checked', '');
-        }
+            else
+                any_unchecked = true;
+        });
+        if (any_checked == true && any_unchecked == false) // all checked
+            $('.feed-tag-checkbox[tag="' + tag + '"][uid="' + uid + '"]').prop('checked', 'checked').prop("indeterminate", false);
+        else if (any_checked == false && any_unchecked == true) // none checked
+            $('.feed-tag-checkbox[tag="' + tag + '"][uid="' + uid + '"]').prop('checked', '').prop("indeterminate", false);
+        else // some checked and some unchecked
+            $('.feed-tag-checkbox[tag="' + tag + '"][uid="' + uid + '"]').prop("indeterminate", true);
+
     });
 // ----------------------------------------------------------------------------------------
 // Action: open graph page
