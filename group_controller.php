@@ -195,5 +195,13 @@ function group_controller() {
         }
     }
 
+    //---------------------------
+    // NO SESSION
+    //---------------------------
+    if ($route->action == "getfeed") { // When displaying a public feed for example in a public dashboard
+            $route->format = "json";
+            $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'));
+        }
+
     return array('content' => $result, 'fullwidth' => false);
 }

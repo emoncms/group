@@ -303,7 +303,7 @@ class Group {
         return $this->feed->get_user_feeds($userid);
     }
 
-    // Searches for a feedid in all the groups the user has access to. If user has the right to access the feed, it returns the feed
+    // Searches for a feedid in all the groups the user has access to. If feed is public or user has the right to accessit, it returns the feed
     public function getfeed($session_userid, $subaction, $feedid, $start, $end, $interval, $skipmissing, $limitinterval) {
         // Input sanitisation
         $session_userid = (int) $session_userid;
@@ -313,17 +313,24 @@ class Group {
         // Load all the groups the user has access (including users and feeds
         $groups = $this->mygroups($session_userid);
 
-        // Search for the feed
+        // Check if feed is public
+        $feed_is_public = false;
         $feed_found = false;
-        foreach ($groups as $group) {
-            foreach ($group['users'] as $user) {
-                foreach ($user['feedslist'] as $feed)
-                    if ($feedid == $feed['id'])
-                        $feed_found = true;
+        $f = $this->feed->get($feedid);
+        if ($f['public'])
+            $feed_is_public = true;
+        else {
+            // Search for the feed in user's groups
+            foreach ($groups as $group) {
+                foreach ($group['users'] as $user) {
+                    foreach ($user['feedslist'] as $feed)
+                        if ($feedid == $feed['id'])
+                            $feed_found = true;
+                }
             }
         }
 
-        if ($feed_found == false) {
+        if ($feed_is_public == false && $feed_found == false) {
             $this->log->warn('You have not got access to that feed ' . $feedid . ' - Session userid ' . $session_userid);
             return array('success' => false, 'message' => _("You have not access to that feed"));
         }
