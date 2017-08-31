@@ -92,13 +92,13 @@ var group = {
             }});
         return result;
     },
-    'getrole': function (userid, groupid) {
+    /*'getrole': function (userid, groupid) {
         var result = {};
         $.ajax({url: path + "group/getrole", data: "userid=" + userid + "&groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});
         return result;
-    },
+    },*/
     'csvexport': function (groupid, feedid, start, end, interval, timeformat, name) {
         var result = {};
         var url = path + "group/csvexport.json?groupid=" + groupid + "&id=" + feedid + "&start=" + start + "&end=" + end + "&interval=" + interval + "&timeformat=" + timeformat + "&name=" + name;

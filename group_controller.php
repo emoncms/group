@@ -165,10 +165,10 @@ function group_controller() {
         }
 
         // group/getrole?userid=1&groupid=1
-        if ($route->action == "getrole") {
+       /* if ($route->action == "getrole") {
             $route->format = "json";
             $result = $group->getrole(get("userid"), get("groupid"));
-        }
+        }*/
 
         // group/getsessionuserrole?groupid=1
         if ($route->action == "getsessionuserrole") {
