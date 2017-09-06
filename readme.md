@@ -1,5 +1,8 @@
 # Groups module
 
+*Note:* 
+- Graph module with Group support in [development branch of graph module in CarbonCoop](https://github.com/carboncoop/graph/tree/develop)
+
 Status: Prototype v1 in development
 
 Multi-user administration module.
