@@ -1,97 +1,31 @@
 # Groups module
 
-*Note:* 
-- Graph module with Group support in [development branch of graph module in CarbonCoop](https://github.com/carboncoop/graph/tree/develop)
+**Status:** beta (testing)
 
-Status: Prototype v1 in development
+An emonCMS module that allows a single user to manage several user accounts from a single interface. The admisnitrator of a group can add members to it and manage them. 
+This is not global administration for all users of an emonCMS installation (for which there is a basic implementation inbuilt in emoncms already).
 
-Multi-user administration module.
+##Features
+- Create groups
+- Create a new user and add it to group (administrator has full access to new user's account)
+- Add existing emonCMS user to a group providing username and password  (administrator has full access to user's account)
+- Log into a group member's account with one click (and log back to original user)
+- Browse group member's feeds sorted by tag
+- One click csv download of selected group member's feeds
+- One click graph visualisation of selected group member's feeds
+- Edit user info
+- Added "tags" to user info to help categorize and add an extra level of grouping. An example of a tag could be "Heat Pump model", this can be added to a user and specify as its value the name of the HP. The UI helps reuse tag names in groups
+- Search functionality: looking for a word in user names, group names and user tags
 
-Administration and groups for multiple emoncms accounts on emoncms.org or other muti user emoncms installation. Providing administrator access to specific users/groups rather than global administration for all users – for which there is a basic implementation inbuilt in emoncms already.
+##Roles
+- Administrator: full access (create users, add member, create group graphs, etc)
+- Sub-administrator: access to the list of members and group graphs
+- Passive member: no access to group. The aim of the user is to be managed by the group administrator
 
-**A group:**
+##Graph module with Group support
+In order to display feeds from different members of a group in a graph you need to install the Graph module with Group support in [development branch of graph module in CarbonCoop](https://github.com/carboncoop/graph/tree/develop)
 
-- Types of installation: "Air source heatpumps", "Solar + battery systems"
-- Particular research project, e.g "Heatpump Study", "Retrofit study"
-- A group of users wishing to compare energy use and generation
-
-Concept design:
-
-![groups1.png](files/groups1.png)
-
-Screenshots:
-
-![groups2.png](files/groups2.png)
-
-![groups3.png](files/groups3.png)
-
-**Use case 1:** An installer of heatpumps, solarpv etc who is monitoring 10-100s of installations, across many sites, providing remote assistance and fault checking.
-
-An administration module would allow an initial emoncms user to add users to their administrator view. Making it possible to remotely manage multiple accounts without logging into each account individually.
-
-**Use case 2:** A research project monitoring 10-100s of sites. Requiring site status check’s to ensure monitoring is all operating ok. Alerts to signal a system going offline or measurement going outside of expected range. 
-
-Advanced multi site data export tools for further data analysis
-
-**Use case 3:** A group of interested users in a community energy project who want to compare energy use and generation in a group as well as doing a level of consumption and generation aggregation.
-
-There could be in this case a group administrator and then users which are members of the group. There would be specific access permissions for each user type so that such a group administrator may not have access to individuals detailed data but have access to summaries and aggregation.
-
-## API
-
-**emoncms/group/create?name=NAME&description=DESCRIPTION**
-
-Result:
-
-    {"success":true,"groupid":1,"message":"Group 1 added"}
-    
-**emoncms/group/addmemberauth?groupid=1&username=USERNAME&password=PASSWORD&access=0**
-
-*Access:* 1: Add user as administrator. 0: Add user without administration access.
-
-Result:
-
-    {"success":true,"message":"User 1:USERNAME added"}
-
-**emoncms/group/grouplist**
-
-Result:
-
-    [
-        {"groupid":1,"name":"Heatpumps","description":"Heatpump installations"},
-        {"groupid":2,"name":"Retrofits","description":"Retrofit projects"}
-    ]
-    
-**emoncms/group/userlist?groupid=1**
-
-Result:
-
-    [
-        {"userid":1,"username":"House1","access":1},
-        {"userid":2,"username":"House2","access":0}
-    ]
-    
-## Todo
-
-**V1:** Basic groups, administrative user access and active feeds monitor
-
-- Edit group name and description
-- Edit user access
-
-**V2:** User stats 
-
-Implement ability to show either: 
-  - a selected real-time feed value in the user list
-  - an average or total e.g: average temperature in the last day, kwh in the last day
-  - a calculation e.g: heat kwh last day / electric kwh last day, perhaps implemented as available calculations that are pre-written: e.g: heatpump COP (which would then look for feeds following a naming convention in each users account).
-
-**V3:** Basic notifications
-
-- Implement inactive feeds email notification
-- Implement alerts based on feed values and calculations e.g alert if COP over last week is below 2.0.
-
-**V4:** Reports
-
-Perhaps an integration with a dedicated reporting module, ability to send custom reports to users of installation performance etc. Or reports to administrators of overall group/project status
-
-
+##Future developments (who knows when)
+- Add member to group with username and token (admnistrator can see and use user's feeds but has not got full access to his/her account)
+- Group search functionality: groups can be "public" or "private" and therefor are searchable or not
+- Join request: groups can be "open" (users can joing then without request) or "closed" (to join a user hast to request it and relevant token is sent to an administrator)
