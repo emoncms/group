@@ -4,6 +4,7 @@
 
 An emonCMS module that allows a single user to manage several user accounts from a single interface. The admisnitrator of a group can add members to it and manage them. 
 This is not global administration for all users of an emonCMS installation (for which there is a basic implementation inbuilt in emoncms already).
+![groups_snap_shot.png](files/groups_snap_shot.png)
 
 ##Features
 - Create groups
@@ -24,6 +25,8 @@ This is not global administration for all users of an emonCMS installation (for 
 
 ##Graph module with Group support
 In order to display feeds from different members of a group in a graph you need to install the Graph module with Group support in [development branch of graph module in CarbonCoop](https://github.com/carboncoop/graph/tree/develop)
+![groups_snap_shot2.png](files/groups_snap_shot2.png)
+
 
 ##Future developments (who knows when)
 - Add member to group with username and token (admnistrator can see and use user's feeds but has not got full access to his/her account)
