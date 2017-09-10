@@ -14,28 +14,8 @@ function group_controller() {
     include "Modules/input/input_model.php";
     $input = new Input($mysqli, $redis, $feed);
 
-    $result = $mysqli->query("SHOW TABLES LIKE 'dashboard'");
-    $dashboard_module_installed = $result->num_rows > 0 ? true : false;
-    if ($dashboard_module_installed === true) {
-        include "Modules/dashboard/dashboard_model.php";
-        $dashboard = new Dashboard($mysqli);
-    }
-    else {
-        $dashboard = null;
-    }
-
-    $result = $mysqli->query("SHOW TABLES LIKE 'graph'");
-    $graph_module_installed = $result->num_rows > 0 ? true : false;
-    if ($graph_module_installed === true) {
-        include "Modules/graph/graph_model.php";
-        $graph = new Graph($mysqli, 'null');
-    }
-    else {
-        $graph = null;
-    }
-
     include "Modules/group/group_model.php";
-    $group = new Group($mysqli, $redis, $user, $feed, $input, $dashboard, $graph);
+    $group = new Group($mysqli, $redis, $user, $feed, $input);
 
 
     // ------------------------------------------------------------------------------------
@@ -165,10 +145,10 @@ function group_controller() {
         }
 
         // group/getrole?userid=1&groupid=1
-       /* if ($route->action == "getrole") {
-            $route->format = "json";
-            $result = $group->getrole(get("userid"), get("groupid"));
-        }*/
+        /* if ($route->action == "getrole") {
+          $route->format = "json";
+          $result = $group->getrole(get("userid"), get("groupid"));
+          } */
 
         // group/getsessionuserrole?groupid=1
         if ($route->action == "getsessionuserrole") {
@@ -199,9 +179,9 @@ function group_controller() {
     // NO SESSION
     //---------------------------
     if ($route->action == "getfeed") { // When displaying a public feed for example in a public dashboard
-            $route->format = "json";
-            $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'));
-        }
+        $route->format = "json";
+        $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'));
+    }
 
     return array('content' => $result, 'fullwidth' => false);
 }

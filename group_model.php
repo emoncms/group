@@ -22,18 +22,15 @@ class Group {
     private $user;
     private $feed;
     private $redis;
-    private $dashboard;
-    private $graph;
+    private $input;
 
-    public function __construct($mysqli, $redis, $user, $feed, $input, $dashboard, $graph) {
+    public function __construct($mysqli, $redis, $user, $feed, $input) {
         $this->log = new EmonLogger(__FILE__);
         $this->mysqli = $mysqli;
         $this->user = $user;
         $this->input = $input;
         $this->feed = $feed;
         $this->redis = $redis;
-        $this->dashboard = $dashboard;
-        $this->graph = $graph;
     }
 
     // Create group, add creator user as administrator
@@ -487,19 +484,14 @@ class Group {
         }
 
         // Delete dashboards
-        if (is_null($this->dashboard) == false) {
-            $list_of_dashboards = $this->dashboard->get_list($userid_to_remove, false, false);
-            foreach ($list_of_dashboards as $dashboard) {
-                $this->dashboard->delete($dashboard['id']);
-            }
+        $result = $mysqli->query("SHOW TABLES LIKE 'dashboard'");
+        if ($result->num_rows > 0){
+            $result = $this->mysqli->query("DELETE FROM dashboard WHERE `userid` = '$userid_to_remove'");
         }
-
-        // Delete graphs - For a reason that I haven't found when using the graph object it crashes
-        if (is_null($this->graph) == false) {
-            /* $list_of_graphs = $this->graph->get_all($userid_to_remove);
-              foreach ($list_of_graphs['user'] as $graph) {
-              $this->graph->delete($graph['id']);
-              } */
+        
+        // Delete graphs
+        $result = $mysqli->query("SHOW TABLES LIKE 'graph'");
+        if ($result->num_rows > 0){
             $result = $this->mysqli->query("DELETE FROM graph WHERE `userid` = '$userid_to_remove'");
         }
 
