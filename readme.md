@@ -6,6 +6,11 @@ An emonCMS module that allows a single user to manage several user accounts from
 This is not global administration for all users of an emonCMS installation (for which there is a basic implementation inbuilt in emoncms already).
 ![groups_snap_shot.png](files/groups_snap_shot.png)
 
+## Installation
+As any other module: clone this repository in the Modules directory of your emonCMS installation and update database.
+You also need to update your emonCMS from here: [emonCMS with Group Module support](https://github.com/carboncoop/emoncms/tree/user_tags)
+
+
 ## Features
 - Create groups
 - Create a new user and add it to group (administrator has full access to new user's account)
