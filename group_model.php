@@ -485,13 +485,13 @@ class Group {
 
         // Delete dashboards
         $result = $mysqli->query("SHOW TABLES LIKE 'dashboard'");
-        if ($result->num_rows > 0){
+        if ($result->num_rows > 0) {
             $result = $this->mysqli->query("DELETE FROM dashboard WHERE `userid` = '$userid_to_remove'");
         }
-        
+
         // Delete graphs
         $result = $mysqli->query("SHOW TABLES LIKE 'graph'");
-        if ($result->num_rows > 0){
+        if ($result->num_rows > 0) {
             $result = $this->mysqli->query("DELETE FROM graph WHERE `userid` = '$userid_to_remove'");
         }
 
@@ -697,6 +697,17 @@ class Group {
         if ($admin_rights != 'full')
             return false;
         return true;
+    }
+
+    public function get_user_role($session_userid, $userid, $groupid) {
+        $session_userid = (int) $session_userid;
+        $userid = (int) $userid;
+        $groupid = (int) $groupid;
+
+        // Check session user is group admin/subadmin
+        $session_user_role = $this->getrole($session_userid, $groupid);
+        if ($session_user_role == 1 || $session_user_role == 2)
+            return $this->getrole($userid, $groupid);
     }
 
     private function getrole($userid, $groupid) {
