@@ -1187,6 +1187,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".setuser", function (e) {
         e.stopPropagation();
+        alert('You are now logged as ' + $(this).html());
     });
 // ----------------------------------------------------------------------------------------
 // Sidebar
