@@ -14,8 +14,18 @@ function group_controller() {
     include "Modules/input/input_model.php";
     $input = new Input($mysqli, $redis, $feed);
 
+    $task = null;
+    $result = $mysqli->query("SHOW TABLES LIKE 'tasks'");
+    if ($result->num_rows > 0) {
+        require_once "Modules/process/process_model.php";
+        $process = new Process($mysqli, $input, $feed, $user->get_timezone($session['userid']));
+        require_once "Modules/task/task_model.php";
+        $task = new Task($mysqli, $redis, $process);
+    }
+
+
     include "Modules/group/group_model.php";
-    $group = new Group($mysqli, $redis, $user, $feed, $input);
+    $group = new Group($mysqli, $redis, $user, $feed, $input, $task);
 
 
     // ------------------------------------------------------------------------------------
@@ -25,7 +35,10 @@ function group_controller() {
 
         if ($route->action == "") {
             $route->format = "html";
-            $result = view("Modules/group/group_view.php", array());
+            if (is_null($task) === true)
+                $result = view("Modules/group/group_view.php", array('task_support' => false));
+            else
+                $result = view("Modules/group/group_view.php", array('task_support' => true));
         }
 
         // group/create?name=test&description=test
@@ -93,7 +106,10 @@ function group_controller() {
                         $_SESSION['previous_userid'] = $session['userid'];
                         $_SESSION['previous_username'] = $session['username'];
                         $_SESSION['userid'] = $userid;
-                        header("Location: ../user/view");
+                        if (is_null(get('view')))
+                            header("Location: ../user/view");
+                        else if (get('view') == 'tasks')
+                            header("Location: ../task/list#" . get('tag'));
                     }
                     else
                         $result = "ERROR: You haven't got rights to access this user";

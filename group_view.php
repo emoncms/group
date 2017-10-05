@@ -1,13 +1,25 @@
 <?php
+//http://jsfiddle.net/nhft183g/2/
+
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $fullwidth, $session;
 $fullwidth = true;
 ?>
 <link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
-<link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-<script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
+<?php
+if ($task_support === true) {
+    ?>
+    <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/task/task.js"></script>
+    <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/table.js"></script>
+    <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
+    <script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
+    <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
+    <?php
+    require "Modules/process/Views/process_ui.php";
+}
+?>
 
 <!-------------------------------------------------------------------------------------------
 MAIN
@@ -55,7 +67,7 @@ MAIN
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
             <div class="user-active-feeds">Active feeds</div>
-            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
+            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
             <div class="multiple-feeds-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
                 <button class="btn multiple-feed-download hide" title="Download feeds" type="multiple"><i class="icon-download"></i></button>                
@@ -111,7 +123,7 @@ MODALS
         <p>Password:<br>
             <input id="group-addmember-password" type="password"></p>
 
-        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -141,7 +153,7 @@ MODALS
             <input id="group-createuseraddtogroup-password" type="password"></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
-        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-createuseraddtogroup-role">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -193,7 +205,7 @@ MODALS
             <tr><td>Timezome</td><td><input class="edit-user-timezone" type="text"></input></td></tr>
             <tr><td>Password    <i class="icon-question-sign" title="Leave it blank if you don not wish to change it" /></td><td><input class="edit-user-password" type="password"></input></td></tr>
             <tr><td>Confirm password</td><td><input class="edit-user-confirm-password" type="password"></input></td></tr>
-            <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
+            <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
                 <td><select id="edit-user-role">
                         <option value=1>Administrator</option>
                         <option value=2>Sub-administrator</option>
@@ -336,22 +348,35 @@ JAVASCRIPT
     var userlist = [];
     var tags_used_in_group = [];
     var summary_for_search = [];
-// ----------------------------------------------------------------------------------------
-// Draw: grouplist
-// ----------------------------------------------------------------------------------------
+    var task_support = <?php echo $task_support; ?> === 1 ? true : false;
+
+    // ----------------------------------------------------------------------------------------
+    // Task: ini
+    // ----------------------------------------------------------------------------------------
+    if (task_support == true) {
+        load_custom_table_fields();
+        processlist_ui.init(1); // 1 means that contexttype is feeds and virtual feeds (other option is 1 for input)
+    }
+
+    // ----------------------------------------------------------------------------------------
+    // Draw: grouplist
+    // ----------------------------------------------------------------------------------------
     draw_grouplist();
-// ----------------------------------------------------------------------------------------    
-// Startup group
-// ----------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------    
+    // Startup group
+    // ----------------------------------------------------------------------------------------
     var selected_group = decodeURIComponent(window.location.hash).substring(1);
     console.log("Selectedgroup:" + selected_group)
     if (selected_group != "") {
-        for (var gindex in grouplist) {
-            if (grouplist[gindex].name == selected_group) {
-                $(".group[gindex=" + gindex + "]").addClass('activated');
-                draw_group(gindex);
+        setTimeout(function () { // We need some extra time to let processlist_ui.init(1) to finish
+            for (var gindex in grouplist) {
+                if (grouplist[gindex].name == selected_group) {
+                    $(".group[gindex=" + gindex + "]").addClass('activated');
+                    draw_group(gindex);
+                }
             }
-        }
+        }, 100);
     }
     else {
         $('.groupselected').hide();
@@ -443,13 +468,13 @@ JAVASCRIPT
                     color = "#000";
                 // out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
 
-                // html
+                // html user
                 out += "<div class='user' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-info'>";
                 if (userlist[z].admin_rights != 'full')
                     out += "<div class='user-name'>" + userlist[z].username + "</div>";
                 else
-                    out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></div>";
+                    out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "' username='" + userlist[z].username + "'>" + userlist[z].username + "</a></div>";
                 out += "<div class='user-active-feeds'><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></div> <div class='user-role'>" + role + "</div>";
                 out += "<div class='user-actions'>";
                 if (userlist[z].userid != my_userid) {
@@ -459,7 +484,10 @@ JAVASCRIPT
                 }
                 out += "</div>"; // user-actions
                 out += "</div>"; // user-info
+
+                // html feeds and tasks
                 out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
+                // Feeds                
                 out += "<div class='user-feedslist'>";
                 out += "<div class='user-feedslist-inner'>";
                 // Add tags
@@ -483,53 +511,50 @@ JAVASCRIPT
                         });
                         out += "</div>";
                     }
-
                 });
                 out += "</div>"; // user-feedslist-inner
                 out += "</div>"; // user-feedslist
-                //out += "<div class='user-inputs hide'></div>";
+
+                // Tasks div
+                if (task_support === true && userlist[z].taskslist.length > 0) {
+                    out += "<div class='user-tasks' groupid='" + groupid + "' userid='" + userlist[z].userid + "'>";
+                    out += "<div class='user-taskslist-inner'>";
+                    // Add tags
+                    var tags_list = [];
+                    table.data = userlist[z].taskslist; // we use it to draw some task fields
+                    userlist[z].taskslist.forEach(function (task) {
+                        if (tags_list.indexOf(task.tag) == -1) {
+                            tags_list.push(task.tag);
+                            out += "<div class='task-tag' tag='" + task.tag + "'>";
+                            out += "Tasks - " + (task.tag === '' ? 'NoGroup' : task.tag);
+                            // Add tasks tah have the current tag
+                            userlist[z].taskslist.forEach(function (task_again, row) {
+                                if (task_again.tag == task.tag) {
+                                    out += "<div class='task hide' tag='" + task.tag + "' uid='" + userlist[z].userid + "'>";
+                                    out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
+                                    out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
+                                    out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
+                                    out += "<div class='task-edit' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-edit' /></a></div>";
+                                    out += "<div class='task-enabled' title='Enabled'>" + (task_again.enabled === true ? 'On' : 'Off') + "</div>";
+                                    out += "</div>"; // task
+                                }
+                            });
+                            out += "</div>"; // task-tag
+                        }
+                    });
+                    out += "</div>"; // user-taskslist-inner                    
+                    out += "</div>"; // .user-tasks
+                }
+
+                // Close divs
                 out += "</div>"; // user-feeds-inputs
                 out += "</div>"; // user
             }
             $("#userlist-div").html(out); // Place userlist html in userlist table 
-            $('#userlist-div').show();
-            //$(".user-feedslist .feed").last().css("border-bottom","1px solid #aaa");
 
-            // Compile the user list html
-            /*var out = "";
-             for (var z in userlist) {
-             out += "<tr>";
-             if (my_role === 1 && userlist[z].admin_rights == "full")
-             out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
-             else
-             out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
-             // Active feeds
-             var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
-             var color = "#00aa00";
-             if (prc < 0.5)
-             color = "#aaaa00";
-             if (prc < 0.1)
-             color = "#aa0000";
-             if (userlist[z].totalfeeds == 0)
-             color = "#000";
-             out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
-             out += "<td>" + role + "</td>";
-             // Actions
-             if (userlist[z].userid == my_userid)
-             out += '<td></td>';
-             else
-             out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-             //Feeds list
-             if (my_role != 1 && my_role != 2)
-             out += '<td></td>';
-             else
-             out += "<td><i class='showfeeds icon-list-alt' style='cursor:pointer' index='" + z + "' title='Show feeds' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-             // Close table row
-             out += "</tr>";
-             }
-             $("#userlist").append(out); // Place userlist html in userlist table 
-             $('#userlist-table').show();
-             */
+            // Show
+            $('#userlist-div').show();
+
         }
 
     }
@@ -589,6 +614,7 @@ JAVASCRIPT
 
         return "<span style='color:" + color + ";'>" + updated + "</span>";
     }
+
 // ----------------------------------------------------------------------------------------
 // Action: click on group
 // ----------------------------------------------------------------------------------------
@@ -722,6 +748,15 @@ JAVASCRIPT
             $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', '');
     });
     // ----------------------------------------------------------------------------------------
+// Action: Show tasks of a user
+// ----------------------------------------------------------------------------------------
+
+    $('body').on('click', '.task-tag', function (e) {
+        e.stopPropagation();
+        var tag = $(this).attr('tag');
+        $(this).find('.feed[tag="' + tag + '"]').toggle();
+    });
+// ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".removeuser", function (e) {
@@ -1187,7 +1222,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".setuser", function (e) {
         e.stopPropagation();
-        alert('You are now logged as ' + $(this).html());
+        alert('You are now logged as ' + $(this).attr('username'));
     });
 // ----------------------------------------------------------------------------------------
 // Sidebar
@@ -1220,6 +1255,16 @@ echo $feed_settings['csvdownloadlimit_mb'];
     $(window).resize(function () {
         sidebar_resize();
     });
+
+// ----------------------------------------------------------------------------------------
+// Tasks
+// ----------------------------------------------------------------------------------------
+    $("body").on('click', ".task-tag", function (e) {
+        e.stopPropagation();
+        var tag = $(this).attr('tag');
+        $(this).find('.task[tag="' + tag + '"]').toggle();
+    });
+
     // For development
     $('body').on('click', '#create-inputs-feeds', function () {
         var list_apikeys = group.getapikeys(selected_groupid);

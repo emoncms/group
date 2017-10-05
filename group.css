@@ -127,21 +127,26 @@ input:disabled+span{
     padding:5px;
 }
 
+.user-tasks{
+    padding:0 5px 5px;
+    margin-top:-5px;
+}
 
-.feed{
+
+.feed, .task{
     padding:10px;
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
 }
 
-.feed:last-child {
+.feed:last-child, .task:last-child  {
     border-bottom: 1px solid #ccc;
 }
 
-.feed:hover{ border-left:2px solid #44b3e2; }
+.feed:hover, .task:hover{ border-left:2px solid #44b3e2; }
 
-.feed-value, .feed-time, .feed-download{
+.feed-value, .feed-time, .feed-download {
     width:60px;
     padding-top:0px;
     float:right;
@@ -155,7 +160,7 @@ input:disabled+span{
     text-align:center;
 }
 
-.feed .feed-name {
+.feed .feed-name, .task .task-name {
     display:inline-block;
     padding-left:10px
 }
@@ -250,21 +255,50 @@ input:disabled+span{
     font-size:13px
 }
 
-.user-feedslist-inner .feed{
+.user-feedslist-inner .feed, .user-taskslist-inner .task{
     background-color:#f3f3f3; 
     margin:0
 }
 
-.user-feedslist-inner > div {
+.user-feedslist-inner > div, .user-taskslist-inner > div {
     background-color:#ddd;
     padding:10px 10px 5px;
     margin:2px
 }
 
-.feed:nth-child(2){
+.user-taskslist-inner > div {
+    padding-left: 31px
+}
+
+.feed:nth-child(2), .task:nth-child(1){
     margin-top:10px
 }
 
 input.feed-tag-checkbox{
     margin-right:8px
+}
+
+.task div{
+    display:inline-block;
+}
+ .user-taskslist-inner > div {
+    background-color:#c6c6c6;
+}
+
+.task-name{
+    width:300px
+}
+
+.task-processlist{
+    width:400px
+}
+.task-frequency{
+    width:300px
+}
+.task-enabled{
+}
+
+.task-edit{
+    float:right;
+    margin:0 20px;
 }

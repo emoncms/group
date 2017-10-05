@@ -23,14 +23,16 @@ class Group {
     private $feed;
     private $redis;
     private $input;
+    private $task;
 
-    public function __construct($mysqli, $redis, $user, $feed, $input) {
+    public function __construct($mysqli, $redis, $user, $feed, $input, $task = null) {
         $this->log = new EmonLogger(__FILE__);
         $this->mysqli = $mysqli;
         $this->user = $user;
         $this->input = $input;
         $this->feed = $feed;
         $this->redis = $redis;
+        $this->task = $task;
     }
 
     // Create group, add creator user as administrator
@@ -227,7 +229,7 @@ class Group {
         $result = $this->mysqli->query("SELECT userid,role,admin_rights FROM group_users WHERE groupid = $groupid");
         while ($row = $result->fetch_object()) {
             // Get feeds and calculate number of active feeds
-            $userfeeds = $this->getuserfeeds($session_userid, $groupid, $row->userid);
+            $userfeeds = $this->feed->get_user_feeds($row->userid);
             $active = 0;
             $total = 0;
             $now = time();
@@ -239,9 +241,17 @@ class Group {
             }
 
             // Get inputs
-            $userinputs = $this->getuserinputs($session_userid, $groupid, $row->userid);
+            $userinputs = $this->input->get_inputs($row->userid);
 
+            // Get tasks
+            $user_tasks = array();
+            if (is_null($this->task) === false)
+                $user_tasks = $this->task->get_tasks($row->userid);
+
+            // Get user info
             $u = $this->user->get($row->userid);
+
+            // Add everything to the array
             $userlist[] = array(
                 "userid" => (int) $row->userid,
                 "username" => $u->username,
@@ -253,6 +263,8 @@ class Group {
                 "totalfeeds" => (int) $total,
                 "feedslist" => $userfeeds,
                 "inputslist" => $userinputs,
+                // tasks
+                "taskslist" => $user_tasks,
                 // user info
                 "name" => $u->name,
                 "bio" => $u->bio,
