@@ -455,6 +455,9 @@ JAVASCRIPT
                 for (var tag in userlist[z].tags)
                     if (!tags_used_in_group.includes(tag))
                         tags_used_in_group.push(tag);
+            // Replace feeds available for processes - processlist_ui.init(1) has loaded current user's ones, we are goin to add feeds of all users in the group
+            if (task_support == true)
+                processlist_load_group_users_feeds();
         }
 
         // Html
@@ -637,6 +640,17 @@ JAVASCRIPT
             color = "rgb(255,125,20)"
 
         return "<span style='color:" + color + ";'>" + updated + "</span>";
+    }
+
+    // Loads into processlist_ui.feedlist array feeds from all the users in the groups
+    function processlist_load_group_users_feeds() {
+        processlist_ui.feedlist = {};
+        userlist.forEach(function (user) {
+            user.feedslist.forEach(function (feed) {
+                processlist_ui.feedlist[feed.id] = JSON.parse(JSON.stringify(feed));
+                processlist_ui.feedlist[feed.id].name = user.username + ": " + feed.name;
+            });
+        });
     }
 
 // ----------------------------------------------------------------------------------------
@@ -1413,14 +1427,14 @@ echo $feed_settings['csvdownloadlimit_mb'];
     })
 
     /*setTimeout(function () {
-        $('.user[uid="17"]').click();
-        $('.feed-tag-checkbox[tag=Test][uid=17]').click();
-        $('.create-task').click();
-        $('#task-create-name').val('Buenas noches');
-        $('#taskCreate-confirm').click();
-        $('#process-add').click();
-        $('#save-processlist').click();
-    }, 300);*/
+     $('.user[uid="17"]').click();
+     $('.feed-tag-checkbox[tag=Test][uid=17]').click();
+     $('.create-task').click();
+     $('#task-create-name').val('Buenas noches');
+     $('#taskCreate-confirm').click();
+     $('#process-add').click();
+     $('#save-processlist').click();
+     }, 300);*/
 
 
 </script>
