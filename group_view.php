@@ -71,6 +71,7 @@ MAIN
             <div class="multiple-feeds-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
                 <button class="btn multiple-feed-download hide" title="Download feeds" type="multiple"><i class="icon-download"></i></button>                
+                <button class="btn create-task hide if-admin" title="Create task"><i class="icon-list"></i></button>                
             </div>
         </div>
         <div id="userlist-div" class="hide"></div>
@@ -334,6 +335,29 @@ MODALS
     </div>
 </div>
 
+<!-- CREATE TASK -->
+<div id="taskCreateModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="taskCreateModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="taskCreateModalLabel"><?php echo _('Create task'); ?></h3>
+    </div>
+    <div class="modal-body">
+        <p><?php echo _('Once a task is created you will need to set up the Process List and enable it'); ?></p>
+        <table>
+            <tr><td><?php echo _('Name*'); ?></td><td><input id="task-create-name" type="text" /></td></tr>
+            <tr><td><?php echo _('Description'); ?></td><td><input id="task-create-description" type="text" /></td></tr>
+            <tr><td><?php echo _('Tag'); ?></td><td><input id="task-create-tag" type="text" /></td></tr>
+            <tr><td><?php echo _('Frequency'); ?></td><td id="task-create-frequency"></td></tr>
+            <tr><td><?php echo _('Start date'); ?></td><td><div class="input-append date" id="task-create-run-on" data-format="dd/MM/yyyy hh:mm"><input data-format="dd/MM/yyyy hh:mm" type="text" /><span class="add-on"> <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span></div></td></tr>
+        </table>
+        <div id="task-create-message" class="alert alert-block hide"></div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo _('Cancel'); ?></button>
+        <button id="taskCreate-confirm" class="btn btn-primary"><?php echo _('Create task'); ?></button>
+    </div>
+</div>
+
 <!-------------------------------------------------------------------------------------------
 JAVASCRIPT
 -------------------------------------------------------------------------------------------->
@@ -535,7 +559,7 @@ JAVASCRIPT
                                     out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
                                     out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
                                     out += "<div class='task-edit' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-edit' /></a></div>";
-                                    out += "<div class='task-enabled' title='Enabled'>" + (task_again.enabled === true ? 'On' : 'Off') + "</div>";
+                                    out += "<div class='task-enabled' title='Enabled'>" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
                                     out += "</div>"; // task
                                 }
                             });
@@ -1107,7 +1131,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
             return false;
         var time = tmp[1].split(":");
         if (time.length != 3)
-            return false;
+            time.push(0);
         return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
     }
 
@@ -1125,6 +1149,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $('.multiple-feeds-actions button').show();
         else
             $('.multiple-feeds-actions button').hide();
+        if (grouplist[selected_groupindex].role != 1)
+            $('.if-admin').hide();
     });
 // ----------------------------------------------------------------------------------------
 // Action: Untick tag checbox when all the feed checkboxes are unticked
@@ -1264,6 +1290,93 @@ echo $feed_settings['csvdownloadlimit_mb'];
         var tag = $(this).attr('tag');
         $(this).find('.task[tag="' + tag + '"]').toggle();
     });
+    $("body").on('click', ".create-task", function (e) {
+        // Frequency field
+        $('#task-create-frequency').html(get_frequency_html({type: 'once_a_month'}));
+        add_frequency_html_events();
+        // Start date field
+        $('#task-create-run-on').datetimepicker({language: 'en-EN', useCurrent: true, weekStart: 1});
+        var now = new Date();
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
+        var picker = $('#task-create-run-on').data('datetimepicker');
+        picker.setLocalDate(today);
+        // Reset fields        
+        $('#task-create-message').hide();
+        $('#task-create-name').val('');
+        $('#task-create-description').val('');
+        $('#task-create-tag').val('');
+        $('#task-create-frequency [value="once_a_month"]').click();
+        $('#taskCreateModal').modal('show');
+
+        // Get all the checked feeds and store them into the ProcessList modal
+        var feedids = [];
+        $('.feed input[type=checkbox]:checked').each(function () {
+            feedids.push($(this).attr('fid'));
+        });
+        $('#processlistModal').attr('feedids', JSON.stringify(feedids));
+    });
+
+    $('#taskCreate-confirm').on('click', function () {
+        $('#task-create-message').hide();
+        var name = $('#task-create-name').val();
+        if ($('#task-create-name').val() == '')
+            $('#task-create-message').html('<p>Name cannot be empty</p>').show();
+        else {
+            // Prepare process list
+            var processlist = new Array();
+            processlist[0] = new Array('group__source_multifeed', $('#processlistModal').attr('feedids').replace(/["\[\]]/gi, '').replace(/,/gi, '-'));
+            // Get other task fields    
+            var description = $('#task-create-description').val();
+            var tag = $('#task-create-tag').val();
+            var frequency = get_frequency_field('#task-create-frequency');
+            var run_on = parse_timepicker_time($('#task-create-run-on input').val());
+            $('#processlistModal').attr('name', name);
+            $('#processlistModal').attr('description', description);
+            $('#processlistModal').attr('tag', tag);
+            $('#processlistModal').attr('frequency', frequency);
+            $('#processlistModal').attr('run_on', run_on);
+            // Show hide modals
+            $('#taskCreateModal').modal('hide');
+            $('#processlistModal').hide();
+            processlist_ui.load(0, processlist, 'Multi feed task -', null, null); // show processlist modal
+            // Remove actions from the first proccess in the processlist (Source multifeed) as we dont' want the user to be able toedit/remove it
+            $('.edit-process[processid=0]').hide();
+            $('.delete-process[processid=0]').hide();
+            // Change the html of the buttons
+            $('#processlistModal #close').html('Cancel');
+            $('#processlistModal #save-processlist').html('Ok');
+        }
+    });
+
+    $("#processlistModal").on('click', '#save-processlist', function () {
+        var feedids = JSON.parse($('#processlistModal').attr('feedids'));
+        var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
+        processlist = processlist.substring(processlist.indexOf(",") + 1); // We remove the first process (source multi-feed) as we are already sending the list of feedids in another variable, more convenient this way
+        var name = $('#processlistModal').attr('name');
+        var description = $('#processlistModal').attr('description');
+        var tag = $('#processlistModal').attr('tag');
+        var frequency = $('#processlistModal').attr('frequency');
+        var run_on = $('#processlistModal').attr('run_on');
+
+        var result = group.setMultiFeedProcessList(feedids, processlist, selected_groupid, name, description, tag, frequency, run_on);
+        if (result.success) {
+            draw_userlist(selected_groupid);
+            $("#processlistModal").modal('hide');
+        } else {
+            alert('There have been some errors saving the process lists:\n' + result.message.replace(/\\n/g, '\n'));
+        }
+    });
+
+    $("#processlistModal").on('click', '#process-add', function () {
+        // The addintion of a new process to the list redraws the table adding the edit and remove buttons to the "source multifeed" process> we removed them as we don't want the user to edit/remove that process
+        $('.edit-process[processid=0]').hide();
+        $('.delete-process[processid=0]').hide();
+        // And also qwe make the "Changed press to save" button look like OK
+        $('#processlistModal #save-processlist').html('Ok').removeClass('btn-warning').addClass('btn-success');
+    });
+
+
+
 
     // For development
     $('body').on('click', '#create-inputs-feeds', function () {
@@ -1298,4 +1411,16 @@ echo $feed_settings['csvdownloadlimit_mb'];
             }
         }
     })
+
+    /*setTimeout(function () {
+        $('.user[uid="17"]').click();
+        $('.feed-tag-checkbox[tag=Test][uid=17]').click();
+        $('.create-task').click();
+        $('#task-create-name').val('Buenas noches');
+        $('#taskCreate-confirm').click();
+        $('#process-add').click();
+        $('#save-processlist').click();
+    }, 300);*/
+
+
 </script>

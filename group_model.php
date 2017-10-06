@@ -277,7 +277,7 @@ class Group {
         return $userlist;
     }
 
-    // Return list of user's groups with all the members and their feeds
+    // Return list of user's groups with all the members and their data
     public function mygroups($session_userid) {
         // Input sanitisation
         $session_userid = (int) $session_userid;
@@ -765,6 +765,76 @@ class Group {
         $dfgd = 1;
 
         return $download;
+    }
+
+    public function set_multifeed_processlist($session_userid, $groupid, $feedids, $processlist, $name, $description, $tag, $frequency, $run_on) {
+        $session_userid = (int) $session_userid;
+        $feedids = json_decode($feedids);
+        $groupid = (int) $groupid;
+        $processlist = preg_replace('/([^0-9:],)/', '', $processlist);
+
+        $name = preg_replace('/[^\p{N}\p{L}_\s-:]/u', '', $name);
+        $description = preg_replace('/[^\p{N}\p{L}_\s-:]/u', '', $description);
+        $tag = preg_replace('/[^\p{N}\p{L}_\s-:]/u', '', $tag);
+        $run_on = (preg_replace('/([^0-9])/', '', $run_on));
+        $frequency = preg_replace("/[^\p{L}_\p{N}\s-.],'/u", '', $frequency);
+        $enabled = 1;
+
+        $errors = '';
+
+        if ($this->is_group_admin($groupid, $session_userid)) {
+            // Fetch all users in group and their feeds
+            $group_users = $this->get_group_users($groupid);
+            foreach ($group_users as &$userforfeeds) {
+                $userforfeeds['feeds'] = $this->feed->get_user_feeds($userforfeeds['userid']);
+            }
+            // Search for the feeds and if they are found create the task, this way we ensure the administrator has access to the feed
+            foreach ($feedids as $feedid) {
+                $found = false;
+                foreach ($group_users as $user) {
+                    foreach ($user['feeds'] as $feed) {
+                        if ($feed['id'] == $feedid) {
+                            $found = true;
+                            if ($user['admin_rights'] != 'full') {
+                                $this->log->warn("User $session_userid is trying to create a task for user " . $user['userid'] . " but hasn't got full rights");
+                                $errors .= 'Not enough rights over ' . $user['username'];
+                            }
+                            else {
+                                $taskid = $this->task->create_task($user['userid'], $feed['name'] . ': ' . $name, $description, $tag, $frequency, $run_on, $enabled);
+                                if (is_numeric($taskid))  // if is not a number there was an error creating the task
+                                    $result = $this->task->set_processlist($user['userid'], $taskid, "53:" . $feedid . "," . $processlist); // We add the Source Feed process to the process list
+                                else {
+                                    $this->log->info("Problem creating task " . $taskid['message']);
+                                    $errors .= $user['username'] . ": " . $feed['name'] . ' - ' . $taskid['message'] . '\n';
+                                }
+                            }
+                        }
+                    }
+                }
+                if ($found === false)
+                    $this->log->warn("User $session_userid is trying to create a task with source feed $feedid but it doesnt belong to user of the group $groupid");
+            }
+        }
+        else
+            return array("result" => false, 'message' => 'You are not administrator of this group');
+        if ($errors == '')
+            return array('success' => true, 'message' => 'Task processlists created');
+        else
+            return array("result" => false, 'message' => $errors);
+    }
+
+    private function get_group_users($groupid) {
+        $result = $this->mysqli->query("SELECT userid, role, admin_rights FROM group_users WHERE groupid = $groupid");
+        while ($row = $result->fetch_object()) {
+            $username = $this->user->get_username((int) $row->userid);
+            $users[] = array(
+                "userid" => (int) $row->userid,
+                "role" => (int) $row->role,
+                "admin_rights" => $row->admin_rights,
+                "username" => $username
+            );
+        }
+        return $users;
     }
 
     // --------------------------------------------------------------------

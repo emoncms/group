@@ -166,19 +166,19 @@ input:disabled+span{
 }
 
 .user-name, .user-role, .user-active-feeds{
-    width:30%;
+    width:27%;
     display:inline-block;
     box-sizing:border-box
 }
 .multiple-feeds-actions{
-    width:8%;
+    width:15%;
     text-align: right;
     display:inline-block;
     box-sizing:border-box
 }
 
 .user-actions{
-    width:8%;
+    width:16%;
     display:inline-block;
     text-align:right;
     box-sizing:border-box
@@ -286,17 +286,21 @@ input.feed-tag-checkbox{
 }
 
 .task-name{
-    width:300px
+    min-width:150px;
+    width:30%
 }
 
 .task-processlist{
-    width:400px
+    min-width:300px;
+    width:30%
 }
 .task-frequency{
-    width:300px
+    min-width:120px;
+    width:20%
 }
 .task-enabled{
-}
+min-width:10px;
+    }
 
 .task-edit{
     float:right;
