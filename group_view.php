@@ -7,6 +7,8 @@ $fullwidth = true;
 ?>
 <link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
+<link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+<script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 <?php
 if ($task_support === true) {
     ?>
@@ -14,8 +16,6 @@ if ($task_support === true) {
     <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/table.js"></script>
     <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
     <script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
-    <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
-    <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
     <?php
     require "Modules/process/Views/process_ui.php";
 }
@@ -372,7 +372,7 @@ JAVASCRIPT
     var userlist = [];
     var tags_used_in_group = [];
     var summary_for_search = [];
-    var task_support = <?php echo $task_support; ?> === 1 ? true : false;
+    var task_support = <?php echo $task_support === false ? 0 : 1; ?> === 1 ? true : false;
 
     // ----------------------------------------------------------------------------------------
     // Task: ini
@@ -1159,8 +1159,11 @@ echo $feed_settings['csvdownloadlimit_mb'];
             if ($(this).is(':checked'))
                 any_checked = true;
         })
-        if (any_checked)
+        if (any_checked) {
             $('.multiple-feeds-actions button').show();
+            if (task_support === false)
+                $('button.create-task').hide();
+        }
         else
             $('.multiple-feeds-actions button').hide();
         if (grouplist[selected_groupindex].role != 1)
