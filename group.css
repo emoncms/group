@@ -302,7 +302,7 @@ input.feed-tag-checkbox{
 min-width:10px;
     }
 
-.task-edit{
+.task-view, .task-edit-processlist{
     float:right;
-    margin:0 20px;
+    margin:0 10px;
 }

@@ -773,7 +773,7 @@ class Group {
             $session_userid = (int) $session_userid;
             $feedids = json_decode($feedids);
             $groupid = (int) $groupid;
-            $processlist = preg_replace('/([^0-9:],)/', '', $processlist);
+            $processlist = preg_replace('/([^A-Za-z0-9:,_])/', '', $processlist);
 
             $name = preg_replace('/[^\p{N}\p{L}_\s-:]/u', '', $name);
             $description = preg_replace('/[^\p{N}\p{L}_\s-:]/u', '', $description);
@@ -838,6 +838,25 @@ class Group {
             );
         }
         return $users;
+    }
+
+    public function set_processlist($session_userid, $taskid, $userid, $groupid, $processlist) {
+        if (is_null($this->task) != true) {
+        $session_userid = (int) $session_userid;
+        $taskid = (int) $taskid;
+        $userid = (int) $userid;
+        $processlist = preg_replace('/([^A-Za-z0-9:,_])/', '', $processlist);
+
+        if (!$this->is_group_admin($groupid, $session_userid))
+            $result = array("result" => false, 'message' => 'You are not administrator of this group');
+        elseif (!$this->administrator_rights_over_user($groupid, $userid))
+            $result = array("result" => false, 'message' => 'You haven\'t got enough right over user data');
+        elseif (!$this->is_group_member($groupid, $userid))
+            $result = array("result" => false, 'message' => 'User is not member of this group');
+        else
+            $result = $this->task->set_processlist($userid, $taskid, $processlist);
+        }
+        return $result;
     }
 
     // --------------------------------------------------------------------

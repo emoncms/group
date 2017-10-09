@@ -115,6 +115,13 @@ var group = {
             }});
         return result;
     },
+    'setProcessList': function (taskid, userid, groupid, processlist) {
+        var result = {};
+        $.ajax({url: path + "group/setprocesslist.json?id=" + taskid + "&userid=" + userid + "&groupid=" + groupid, method: "POST", data: "processlist=" + processlist, async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
 // Add mock data to users - Used during development
     'getapikeys': function (groupid) {
         var result = {};

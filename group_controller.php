@@ -95,6 +95,11 @@ function group_controller() {
             $result = $group->set_multifeed_processlist($session["userid"], get('groupid'), get('feedids'), post("processlist"), post("name"), post("description"), post("tag"), post("frequency"), post("run_on"));
         }
 
+        if ($route->action == 'setprocesslist') {
+            $route->format = "json";
+            $result = $group->set_processlist($session['userid'], get('id'), get('userid'), get('groupid'), post('processlist'));
+        }
+
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTIONS
         // --------------------------------------------------------------------------

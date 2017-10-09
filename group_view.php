@@ -561,7 +561,8 @@ JAVASCRIPT
                                     out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
                                     out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
                                     out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
-                                    out += "<div class='task-edit' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-edit' /></a></div>";
+                                    out += "<div class='task-view' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-eye-open' /></a></div>";
+                                    out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i class='icon-wrench' /></div>";
                                     out += "<div class='task-enabled' title='Enabled'>" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
                                     out += "</div>"; // task
                                 }
@@ -1332,7 +1333,20 @@ echo $feed_settings['csvdownloadlimit_mb'];
         });
         $('#processlistModal').attr('feedids', JSON.stringify(feedids));
     });
-
+    $("body").on('click', ".task-edit-processlist", function (e) {
+        e.stopPropagation();
+        var taskid = $(this).attr('taskid');
+        var user = userlist[$(this).attr('uindex')];
+        var task = user.taskslist.find(function (task_obj) {
+            return task_obj.id === taskid;
+        });
+        console.log(taskid);
+        processlist_ui.load(taskid, processlist_ui.decode(task.processList), '', null, null); // show processlist modal
+        $("#processlistModal #save-processlist").attr('action', 'edit');
+        $("#processlistModal #save-processlist").attr('taskid', taskid);
+        $("#processlistModal #save-processlist").attr('uid', user.userid);
+        $("#processlistModal #save-processlist").html('Ok');
+    });
     $('#taskCreate-confirm').on('click', function () {
         $('#task-create-message').hide();
         var name = $('#task-create-name').val();
@@ -1356,6 +1370,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $('#taskCreateModal').modal('hide');
             $('#processlistModal').hide();
             processlist_ui.load(0, processlist, 'Multi feed task -', null, null); // show processlist modal
+            $("#processlistModal #save-processlist").attr('action', 'create');
             // Remove actions from the first proccess in the processlist (Source multifeed) as we dont' want the user to be able toedit/remove it
             $('.edit-process[processid=0]').hide();
             $('.delete-process[processid=0]').hide();
@@ -1366,21 +1381,35 @@ echo $feed_settings['csvdownloadlimit_mb'];
     });
 
     $("#processlistModal").on('click', '#save-processlist', function () {
-        var feedids = JSON.parse($('#processlistModal').attr('feedids'));
-        var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
-        processlist = processlist.substring(processlist.indexOf(",") + 1); // We remove the first process (source multi-feed) as we are already sending the list of feedids in another variable, more convenient this way
-        var name = $('#processlistModal').attr('name');
-        var description = $('#processlistModal').attr('description');
-        var tag = $('#processlistModal').attr('tag');
-        var frequency = $('#processlistModal').attr('frequency');
-        var run_on = $('#processlistModal').attr('run_on');
+        if ($(this).attr('action') == 'create') { // We are creating task from the feeds ticked
+            var feedids = JSON.parse($('#processlistModal').attr('feedids'));
+            var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
+            processlist = processlist.substring(processlist.indexOf(",") + 1); // We remove the first process (source multi-feed) as we are already sending the list of feedids in another variable, more convenient this way
+            var name = $('#processlistModal').attr('name');
+            var description = $('#processlistModal').attr('description');
+            var tag = $('#processlistModal').attr('tag');
+            var frequency = $('#processlistModal').attr('frequency');
+            var run_on = $('#processlistModal').attr('run_on');
 
-        var result = group.setMultiFeedProcessList(feedids, processlist, selected_groupid, name, description, tag, frequency, run_on);
-        if (result.success) {
-            draw_userlist(selected_groupid);
-            $("#processlistModal").modal('hide');
-        } else {
-            alert('There have been some errors saving the process lists:\n' + result.message.replace(/\\n/g, '\n'));
+            var result = group.setMultiFeedProcessList(feedids, processlist, selected_groupid, name, description, tag, frequency, run_on);
+            if (result.success) {
+                draw_userlist(selected_groupid);
+                $("#processlistModal").modal('hide');
+            } else {
+                alert('There have been some errors saving the process lists:\n' + result.message.replace(/\\n/g, '\n'));
+            }
+        }
+        else { // we are editing the processlist of an existing task
+            var taskid = $(this).attr('taskid');
+            var uid = $(this).attr('uid');
+            var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
+            var result = group.setProcessList(taskid, uid, selected_groupid, processlist);
+            if (result.success != undefined && result.success == false)
+                alert(result.message);
+            else {
+                draw_userlist(selected_groupid);
+                $("#processlistModal").modal('hide');
+            }
         }
     });
 
@@ -1391,6 +1420,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
         // And also qwe make the "Changed press to save" button look like OK
         $('#processlistModal #save-processlist').html('Ok').removeClass('btn-warning').addClass('btn-success');
     });
+
+
 
 
 
@@ -1431,12 +1462,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
 
     /*setTimeout(function () {
      $('.user[uid="17"]').click();
-     $('.feed-tag-checkbox[tag=Test][uid=17]').click();
-     $('.create-task').click();
-     $('#task-create-name').val('Buenas noches');
-     $('#taskCreate-confirm').click();
-     $('#process-add').click();
-     $('#save-processlist').click();
+     $('.user[uid="17"] .task-edit-processlist').click();
      }, 300);*/
 
 
