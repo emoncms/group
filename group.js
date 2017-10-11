@@ -129,6 +129,13 @@ var group = {
             }});
         return result;
     },
+    'setTaskEnabled': function (value, taskid, userid, groupid) {
+        var result = {};
+        $.ajax({url: path + "group/settaskenabled.json?taskid=" + taskid + "&userid=" + userid + "&groupid=" + groupid + "&enabled=" + value, async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
 // Add mock data to users - Used during development
     'getapikeys': function (groupid) {
         var result = {};

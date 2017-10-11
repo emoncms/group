@@ -850,6 +850,27 @@ class Group {
         }
     }
 
+    public function set_task_enabled($session_userid, $taskid, $userid, $groupid, $enabled) {
+        if (is_null($this->task) != true) {
+            $session_userid = (int) $session_userid;
+            $taskid = (int) $taskid;
+            $groupid = (int) $groupid;
+            $userid = (int) $userid;
+            $enabled = (int) $enabled;
+
+            if (!$this->is_group_admin($groupid, $session_userid))
+                return array("success" => false, 'message' => 'You are not administrator of this group');
+            elseif (!$this->is_group_member($groupid, $userid))
+                return array("success" => false, 'message' => 'User is not member of the group');
+            elseif ($this->administrator_rights_over_user($groupid, $userid) != 'full')
+                return array("success" => false, 'message' => 'Administrator hasn\'t got enough enough rights over user\'s data');
+            elseif (!$this->task->task_belongs_to_user($taskid, $userid))
+                return array("success" => false, 'message' => 'Task doesn\'t belong to user');
+            else
+                return $this->task->set_fields($userid, $taskid, '{"enabled":' . ($enabled == 1 ? "true" : "false") . '}');
+        }
+    }
+
     private function get_group_users($groupid) {
         $result = $this->mysqli->query("SELECT userid, role, admin_rights FROM group_users WHERE groupid = $groupid");
         while ($row = $result->fetch_object()) {

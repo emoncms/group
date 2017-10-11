@@ -576,12 +576,12 @@ JAVASCRIPT
                                     out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
                                     out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
                                     out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
-                                    out += "<div class='task-enabled' title='Enabled'>" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
+                                    out += "<div class='task-enabled' style='cursor:pointer' title='Enabled' uindex=" + z + " taskid=" + task_again.id + ">" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
                                     if (userlist[z].admin_rights == 'full') {
                                         out += '<div id="task-actions">';
-                                        out += "<div class='task-delete' title='Delete task' uid=" + userlist[z].userid + " taskid=" + task_again.id + "><i class='icon-trash if-admin' style ='cursor:pointer'> </i></div> ";
+                                        out += "<div class='task-delete' title='Delete task' uid=" + userlist[z].userid + " taskid=" + task_again.id + "><i class='icon-trash if-admin' style='cursor:pointer'> </i></div> ";
                                         out += "<div class='task-view' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-eye-open' /></a></div>";
-                                        out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i class='icon-wrench' /></div>";
+                                        out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
                                         out += "</div>"; // task-actions                             
                                     }
                                     out += "</div>"; // task
@@ -806,6 +806,9 @@ JAVASCRIPT
         else
             $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', '');
     });
+    $('body').on('click', '.feed', function (e) {
+        e.stopPropagation();
+    });
     // ----------------------------------------------------------------------------------------
 // Action: Show tasks of a user
 // ----------------------------------------------------------------------------------------
@@ -814,6 +817,9 @@ JAVASCRIPT
         e.stopPropagation();
         var tag = $(this).attr('tag');
         $(this).find('.feed[tag="' + tag + '"]').toggle();
+    });
+    $('body').on('click', '.task', function (e) {
+        e.stopPropagation();
     });
 // ----------------------------------------------------------------------------------------
 // Action: Remove user
@@ -1385,6 +1391,33 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $("#process-select").val('task__feed_last_update_higher'); //Set default process to add
         $("#process-select").change();
     });
+
+
+    $("body").on('click', ".task-enabled", function (e) {
+        e.stopPropagation();
+        var taskid = $(this).attr('taskid');
+        var userindex = $(this).attr('uindex');
+        var uid = userlist[userindex].userid;
+        var task = userlist[userindex].taskslist.find(function (task) {
+            return task.id == taskid
+        });
+        var new_value = task.enabled == '1' ? 0 : 1;
+        var result = group.setTaskEnabled(new_value, taskid, uid, selected_groupid);
+        if (result.success != undefined && result.success == false)
+            alert(result.message);
+        else {
+            userlist = group.userlist(selected_groupid);
+            task = userlist[userindex].taskslist.find(function (task) {
+                return task.id == taskid
+            });
+            $(this).html(task.enabled == 1 ? 'On' : 'Off')
+        }
+    });
+
+
+
+
+
     $('#taskCreate-confirm').on('click', function () {
         $('#task-create-message').hide();
         var name = $('#task-create-name').val();
@@ -1499,10 +1532,10 @@ echo $feed_settings['csvdownloadlimit_mb'];
         }
     })
 
-    setTimeout(function () {
-        $('.task-edit-processlist[taskid="25"]').click();
-        //$('.user[uid="17"] .task-edit-processlist').click();
-    }, 100);
-
+    /*    setTimeout(function () {
+     $('.task-enabled[taskid="25"]').click();
+     //$('.user[uid="17"] .task-edit-processlist').click();
+     }, 100);
+     */
 
 </script>

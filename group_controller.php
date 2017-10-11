@@ -103,6 +103,10 @@ function group_controller() {
             $route->format = "json";
             $result = $group->delete_task($session['userid'], get('taskid'), get('userid'), get('groupid'));
         }
+        if ($route->action == 'settaskenabled') {
+            $route->format = "json";
+            $result = $group->set_task_enabled($session['userid'], get('taskid'), get('userid'), get('groupid'),get('enabled'));
+        }
 
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTIONS
