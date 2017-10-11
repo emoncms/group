@@ -572,7 +572,7 @@ JAVASCRIPT
                             // Add tasks tah have the current tag
                             userlist[z].taskslist.forEach(function (task_again, row) {
                                 if (task_again.tag == task.tag) {
-                                    out += "<div class='task hide' tag='" + task.tag + "' uid='" + userlist[z].userid + "'>";
+                                    out += "<div class='task hide' tag='" + task.tag + "' uid='" + userlist[z].userid + "' taskid='" + task_again.id + "'>";
                                     out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
                                     out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
                                     out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
@@ -1410,7 +1410,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
             task = userlist[userindex].taskslist.find(function (task) {
                 return task.id == taskid
             });
-            $(this).html(task.enabled == 1 ? 'On' : 'Off')
+            $(this).html(task.enabled == 1 ? 'On' : 'Off');
         }
     });
 
@@ -1480,7 +1480,19 @@ echo $feed_settings['csvdownloadlimit_mb'];
             if (result.success != undefined && result.success == false)
                 alert(result.message);
             else {
-                draw_userlist(selected_groupid);
+                userlist = group.userlist(selected_groupid);
+                var user = userlist.find(function (user) {
+                    return user.userid == uid;
+                });
+                var task = user.taskslist.find(function (task, index) {
+                    return task.id == taskid;
+                });
+                var row = user.taskslist.findIndex(function (task) {
+                    return task.id == taskid;
+                });
+                table.data = user.taskslist; // we use it to draw some task fields
+                $('.task[taskid=' + taskid + '] .task-processlist').html(table.fieldtypes.processlist.draw(table, row, '', 'processList'));
+         
                 $("#processlistModal").modal('hide');
             }
         }
