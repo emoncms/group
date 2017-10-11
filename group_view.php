@@ -1361,17 +1361,15 @@ echo $feed_settings['csvdownloadlimit_mb'];
     $("body").on('click', "#delete-task-action", function (e) {
         var uid = $('#delete-task-modal').attr('uid');
         var taskid = $('#delete-task-modal').attr('taskid');
-        
+
         var result = group.deleteTask(taskid, uid, selected_groupid);
-            if (result.success) {
-                draw_userlist(selected_groupid);
-                $("#delete-task-modal").modal('hide');
-            } else {
-                alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
-            }
+        if (result.success) {
+            draw_userlist(selected_groupid);
+            $("#delete-task-modal").modal('hide');
+        } else {
+            alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
+        }
     });
-
-
     $("body").on('click', ".task-edit-processlist", function (e) {
         e.stopPropagation();
         var taskid = $(this).attr('taskid');
@@ -1379,12 +1377,13 @@ echo $feed_settings['csvdownloadlimit_mb'];
         var task = user.taskslist.find(function (task_obj) {
             return task_obj.id === taskid;
         });
-        console.log(taskid);
         processlist_ui.load(taskid, processlist_ui.decode(task.processList), '', null, null); // show processlist modal
         $("#processlistModal #save-processlist").attr('action', 'edit');
         $("#processlistModal #save-processlist").attr('taskid', taskid);
         $("#processlistModal #save-processlist").attr('uid', user.userid);
         $("#processlistModal #save-processlist").html('Ok');
+        $("#process-select").val('task__feed_last_update_higher'); //Set default process to add
+        $("#process-select").change();
     });
     $('#taskCreate-confirm').on('click', function () {
         $('#task-create-message').hide();
@@ -1408,7 +1407,10 @@ echo $feed_settings['csvdownloadlimit_mb'];
             // Show hide modals
             $('#taskCreateModal').modal('hide');
             $('#processlistModal').hide();
-            processlist_ui.load(0, processlist, 'Multi feed task -', null, null); // show processlist modal
+            processlist_ui.load(0, processlist, 'Multi feed task -', null, null); // show processlist modal      
+            //Set default process to add
+            $("#process-select").val('task__feed_last_update_higher');
+            $("#process-select").change();
             $("#processlistModal #save-processlist").attr('action', 'create');
             // Remove actions from the first proccess in the processlist (Source multifeed) as we dont' want the user to be able toedit/remove it
             $('.edit-process[processid=0]').hide();
@@ -1418,7 +1420,6 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $('#processlistModal #save-processlist').html('Ok');
         }
     });
-
     $("#processlistModal").on('click', '#save-processlist', function () {
         if ($(this).attr('action') == 'create') { // We are creating task from the feeds ticked
             var feedids = JSON.parse($('#processlistModal').attr('feedids'));
@@ -1451,7 +1452,6 @@ echo $feed_settings['csvdownloadlimit_mb'];
             }
         }
     });
-
     $("#processlistModal").on('click', '#process-add', function () {
         // The addintion of a new process to the list redraws the table adding the edit and remove buttons to the "source multifeed" process> we removed them as we don't want the user to edit/remove that process
         $('.edit-process[processid=0]').hide();
@@ -1500,7 +1500,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
     })
 
     setTimeout(function () {
-        $('.user[uid="16"] .task-delete').click();
+        $('.task-edit-processlist[taskid="25"]').click();
         //$('.user[uid="17"] .task-edit-processlist').click();
     }, 100);
 
