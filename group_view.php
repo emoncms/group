@@ -1370,8 +1370,13 @@ echo $feed_settings['csvdownloadlimit_mb'];
 
         var result = group.deleteTask(taskid, uid, selected_groupid);
         if (result.success) {
-            draw_userlist(selected_groupid);
-            $("#delete-task-modal").modal('hide');
+            //draw_userlist(selected_groupid);
+            userlist = group.userlist(selected_groupid);
+            if ($('.task[taskid=' + taskid + ']').siblings().length > 0)
+                $('.task[taskid=' + taskid + ']').remove();
+            else
+                $('.task[taskid=' + taskid + ']').parents('.task-tag').remove();
+                $("#delete-task-modal").modal('hide');
         } else {
             alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
         }
@@ -1391,8 +1396,6 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $("#process-select").val('task__feed_last_update_higher'); //Set default process to add
         $("#process-select").change();
     });
-
-
     $("body").on('click', ".task-enabled", function (e) {
         e.stopPropagation();
         var taskid = $(this).attr('taskid');
@@ -1413,11 +1416,6 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $(this).html(task.enabled == 1 ? 'On' : 'Off');
         }
     });
-
-
-
-
-
     $('#taskCreate-confirm').on('click', function () {
         $('#task-create-message').hide();
         var name = $('#task-create-name').val();
@@ -1492,7 +1490,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
                 });
                 table.data = user.taskslist; // we use it to draw some task fields
                 $('.task[taskid=' + taskid + '] .task-processlist').html(table.fieldtypes.processlist.draw(table, row, '', 'processList'));
-         
+
                 $("#processlistModal").modal('hide');
             }
         }
