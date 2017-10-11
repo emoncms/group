@@ -99,6 +99,10 @@ function group_controller() {
             $route->format = "json";
             $result = $group->set_processlist($session['userid'], get('id'), get('userid'), get('groupid'), post('processlist'));
         }
+        if ($route->action == 'deletetask') {
+            $route->format = "json";
+            $result = $group->delete_task($session['userid'], get('taskid'), get('userid'), get('groupid'));
+        }
 
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTIONS

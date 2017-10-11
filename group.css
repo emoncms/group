@@ -280,6 +280,7 @@ input.feed-tag-checkbox{
 
 .task div{
     display:inline-block;
+    box-sizing: border-box;
 }
  .user-taskslist-inner > div {
     background-color:#c6c6c6;
@@ -296,13 +297,18 @@ input.feed-tag-checkbox{
 }
 .task-frequency{
     min-width:120px;
-    width:20%
+    width:20%;
+    margin: 0 15px
 }
 .task-enabled{
 min-width:10px;
+width:8%;
     }
 
-.task-view, .task-edit-processlist{
-    float:right;
-    margin:0 10px;
+#task-actions{
+    width:8%;
+    text-align:right
+}
+#task-actions div{
+   margin:0 5px;
 }

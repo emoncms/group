@@ -358,6 +358,21 @@ MODALS
     </div>
 </div>
 
+<!-- DELETE TASK -->
+<div id="delete-task-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="delete-task-modal-label" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="delete-task-modal-label">Delete task</h3>
+    </div>
+    <div class="modal-body">
+        <p>Are you sure you wish to delete this task?</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="delete-task-action" class="btn btn-danger">Delete</button>
+    </div>
+</div>
+
 <!-------------------------------------------------------------------------------------------
 JAVASCRIPT
 -------------------------------------------------------------------------------------------->
@@ -561,9 +576,14 @@ JAVASCRIPT
                                     out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
                                     out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
                                     out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
-                                    out += "<div class='task-view' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-eye-open' /></a></div>";
-                                    out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i class='icon-wrench' /></div>";
                                     out += "<div class='task-enabled' title='Enabled'>" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
+                                    if (userlist[z].admin_rights == 'full') {
+                                        out += '<div id="task-actions">';
+                                        out += "<div class='task-delete' title='Delete task' uid=" + userlist[z].userid + " taskid=" + task_again.id + "><i class='icon-trash if-admin' style ='cursor:pointer'> </i></div> ";
+                                        out += "<div class='task-view' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-eye-open' /></a></div>";
+                                        out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i class='icon-wrench' /></div>";
+                                        out += "</div>"; // task-actions                             
+                                    }
                                     out += "</div>"; // task
                                 }
                             });
@@ -1333,6 +1353,25 @@ echo $feed_settings['csvdownloadlimit_mb'];
         });
         $('#processlistModal').attr('feedids', JSON.stringify(feedids));
     });
+    $("body").on('click', ".task-delete", function (e) {
+        $('#delete-task-modal').attr('uid', $(this).attr('uid'));
+        $('#delete-task-modal').attr('taskid', $(this).attr('taskid'));
+        $('#delete-task-modal').modal('show');
+    });
+    $("body").on('click', "#delete-task-action", function (e) {
+        var uid = $('#delete-task-modal').attr('uid');
+        var taskid = $('#delete-task-modal').attr('taskid');
+        
+        var result = group.deleteTask(taskid, uid, selected_groupid);
+            if (result.success) {
+                draw_userlist(selected_groupid);
+                $("#delete-task-modal").modal('hide');
+            } else {
+                alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
+            }
+    });
+
+
     $("body").on('click', ".task-edit-processlist", function (e) {
         e.stopPropagation();
         var taskid = $(this).attr('taskid');
@@ -1460,10 +1499,10 @@ echo $feed_settings['csvdownloadlimit_mb'];
         }
     })
 
-    /*setTimeout(function () {
-     $('.user[uid="17"]').click();
-     $('.user[uid="17"] .task-edit-processlist').click();
-     }, 300);*/
+    setTimeout(function () {
+        $('.user[uid="16"] .task-delete').click();
+        //$('.user[uid="17"] .task-edit-processlist').click();
+    }, 100);
 
 
 </script>

@@ -122,6 +122,13 @@ var group = {
             }});
         return result;
     },
+    'deleteTask': function (taskid, userid, groupid) {
+        var result = {};
+        $.ajax({url: path + "group/deletetask.json?taskid=" + taskid + "&userid=" + userid + "&groupid=" + groupid, async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
 // Add mock data to users - Used during development
     'getapikeys': function (groupid) {
         var result = {};
