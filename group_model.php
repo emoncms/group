@@ -772,7 +772,7 @@ class Group {
             $session_userid = (int) $session_userid;
             $feedids = json_decode($feedids);
             $groupid = (int) $groupid;
-            $processlist = preg_replace('/([^A-Za-z0-9:,_])/', '', $processlist);
+            $processlist = preg_replace('/([^a-zA-Z0-9:,_{}(). ])/', '', $processlist);
 
             $name = preg_replace('/[^\p{N}\p{L}_\s-:]/u', '', $name);
             $description = preg_replace('/[^\p{N}\p{L}_\s-:]/u', '', $description);
@@ -890,7 +890,7 @@ class Group {
             $session_userid = (int) $session_userid;
             $taskid = (int) $taskid;
             $userid = (int) $userid;
-            $processlist = preg_replace('/([^A-Za-z0-9:, _])/', '', $processlist);
+            $processlist = preg_replace('/([^a-zA-Z0-9:,_{}(). ])/', '', $processlist);
 
             if (!$this->is_group_admin($groupid, $session_userid))
                 $result = array("result" => false, 'message' => 'You are not administrator of this group');
