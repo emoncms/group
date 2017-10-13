@@ -1376,7 +1376,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
                 $('.task[taskid=' + taskid + ']').remove();
             else
                 $('.task[taskid=' + taskid + ']').parents('.task-tag').remove();
-                $("#delete-task-modal").modal('hide');
+            $("#delete-task-modal").modal('hide');
         } else {
             alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
         }
@@ -1542,10 +1542,11 @@ echo $feed_settings['csvdownloadlimit_mb'];
         }
     })
 
-    /*    setTimeout(function () {
-     $('.task-enabled[taskid="25"]').click();
-     //$('.user[uid="17"] .task-edit-processlist').click();
-     }, 100);
-     */
+    /*setTimeout(function () {
+        $('.user[uid=16]').click();
+        $('.user[uid=16] .task-tag').click();
+        //$('.user[uid="17"] .task-edit-processlist').click();
+    }, 100);
+*/
 
 </script>
