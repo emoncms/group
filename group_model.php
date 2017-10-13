@@ -722,7 +722,7 @@ class Group {
             return $this->getrole($userid, $groupid);
     }
 
-    private function getrole($userid, $groupid) {
+    public function getrole($userid, $groupid) {
 // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;

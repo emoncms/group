@@ -391,7 +391,7 @@ JAVASCRIPT
 
     // ----------------------------------------------------------------------------------------
     // Task: ini
-    // ----------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------e-------------------
     if (task_support == true) {
         load_custom_table_fields();
         processlist_ui.init(1); // 1 means that contexttype is feeds and virtual feeds (other option is 1 for input)
@@ -513,7 +513,7 @@ JAVASCRIPT
                 // html user
                 out += "<div class='user' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-info'>";
-                if (userlist[z].admin_rights != 'full')
+                if (userlist[z].admin_rights != 'full' || my_role != 1)
                     out += "<div class='user-name'>" + userlist[z].username + "</div>";
                 else
                     out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "' username='" + userlist[z].username + "'>" + userlist[z].username + "</a></div>";
@@ -1543,10 +1543,10 @@ echo $feed_settings['csvdownloadlimit_mb'];
     })
 
     /*setTimeout(function () {
-        $('.user[uid=16]').click();
-        $('.user[uid=16] .task-tag').click();
-        //$('.user[uid="17"] .task-edit-processlist').click();
-    }, 100);
-*/
+     $('.user[uid=16]').click();
+     $('.user[uid=16] .task-tag').click();
+     //$('.user[uid="17"] .task-edit-processlist').click();
+     }, 100);
+     */
 
 </script>

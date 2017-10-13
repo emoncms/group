@@ -86,7 +86,7 @@ var group = {
         return result;
     },
     'getsessionuserrole': function (groupid) {
-        var result = {};
+        var result = 0;
         $.ajax({url: path + "group/getsessionuserrole", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});
