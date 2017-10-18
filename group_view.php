@@ -1393,7 +1393,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $("#processlistModal #save-processlist").attr('taskid', taskid);
         $("#processlistModal #save-processlist").attr('uid', user.userid);
         $("#processlistModal #save-processlist").html('Ok');
-        $("#process-select").val('task__feed_last_update_higher'); //Set default process to add
+        $("#process-select").val('task__feed_last_update_greater'); //Set default process to add
         $("#process-select").change();
     });
     $("body").on('click', ".task-enabled", function (e) {
@@ -1439,8 +1439,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $('#taskCreateModal').modal('hide');
             $('#processlistModal').hide();
             processlist_ui.load(0, processlist, 'Multi feed task -', null, null); // show processlist modal      
-            //Set default process to add
-            $("#process-select").val('task__feed_last_update_higher');
+            //Set default process to addtask__feed_last_update_higher
+            $("#process-select").val('task__feed_last_update_greater');
             $("#process-select").change();
             $("#processlistModal #save-processlist").attr('action', 'create');
             // Remove actions from the first proccess in the processlist (Source multifeed) as we dont' want the user to be able toedit/remove it

@@ -293,7 +293,7 @@ input.feed-tag-checkbox{
 }
 
 .task-processlist{
-    min-width:300px;
+    min-width:150px;
     width:30%
 }
 .task-frequency{
@@ -303,11 +303,11 @@ input.feed-tag-checkbox{
 }
 .task-enabled{
 min-width:10px;
-width:8%;
+width:6%;
     }
 
 #task-actions{
-    width:8%;
+    width:10%;
     text-align:right
 }
 #task-actions div{
