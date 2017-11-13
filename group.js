@@ -72,7 +72,7 @@ var group = {
         return result;
     },
     'userlist': function (groupid) {
-        var result = {};
+        var result = [];
         $.ajax({url: path + "group/userlist", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});

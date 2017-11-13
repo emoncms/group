@@ -9,18 +9,12 @@ $fullwidth = true;
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
 <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
-<?php
-if ($task_support === true) {
-    ?>
-    <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/task/task.js"></script>
-    <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/table.js"></script>
-    <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
-    <script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
-    <?php
-    require "Modules/process/Views/process_ui.php";
-}
-?>
-
+<?php if ($task_support === true) { ?>
+<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/task/task.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/table.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
+<?php } ?>
 <!-------------------------------------------------------------------------------------------
 MAIN
 -------------------------------------------------------------------------------------------->
@@ -372,6 +366,8 @@ MODALS
         <button id="delete-task-action" class="btn btn-danger">Delete</button>
     </div>
 </div>
+
+<?php if ($task_support === true) require "Modules/process/Views/process_ui.php"; ?>
 
 <!-------------------------------------------------------------------------------------------
 JAVASCRIPT
