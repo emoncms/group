@@ -39,7 +39,7 @@ var group = {
         var result = {};
         $.ajax({url: path + "group/setuserinfo", method: "POST", data: "groupid=" + groupid + "&userid=" + userid + "&username=" + username + "&name=" + name + "&email=" + email + "&bio=" + bio + "&timezone=" + timezone + "&location=" + location + "&role=" + role + "&password=" + password + "&tags=" + tags, dataType: 'json', async: false, success: function (data) {
                 result = data;
-               //console.log(result.responseText)
+                //console.log(result.responseText)
             }});
         return result;
     },
@@ -56,7 +56,7 @@ var group = {
                 result = data;
             }});
         return result;
-    },    
+    },
     'extendedgrouplist': function () {
         var result = {};
         $.ajax({url: path + "group/mygroups", dataType: 'json', async: false, success: function (data) {
@@ -72,7 +72,7 @@ var group = {
         return result;
     },
     'userlist': function (groupid) {
-        var result = {};
+        var result = [];
         $.ajax({url: path + "group/userlist", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});
@@ -86,19 +86,19 @@ var group = {
         return result;
     },
     'getsessionuserrole': function (groupid) {
-        var result = {};
+        var result = 0;
         $.ajax({url: path + "group/getsessionuserrole", data: "groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
                 result = data;
             }});
         return result;
     },
     /*'getrole': function (userid, groupid) {
-        var result = {};
-        $.ajax({url: path + "group/getrole", data: "userid=" + userid + "&groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
-                result = data;
-            }});
-        return result;
-    },*/
+     var result = {};
+     $.ajax({url: path + "group/getrole", data: "userid=" + userid + "&groupid=" + groupid, dataType: 'json', async: false, success: function (data) {
+     result = data;
+     }});
+     return result;
+     },*/
     'csvexport': function (groupid, feedid, start, end, interval, timeformat, name) {
         var result = {};
         var url = path + "group/csvexport.json?groupid=" + groupid + "&id=" + feedid + "&start=" + start + "&end=" + end + "&interval=" + interval + "&timeformat=" + timeformat + "&name=" + name;
@@ -107,6 +107,34 @@ var group = {
          result = data;
          }});
          return result;*/
+    },
+    'setMultiFeedProcessList': function (feedids, processlist, groupid, name, description, tag, frequency, run_on) {
+        var result = {};
+        $.ajax({url: path + "group/setmultifeedprocesslist.json?feedids=" + JSON.stringify(feedids) + "&groupid=" + groupid, method: "POST", data: "processlist=" + processlist + "&name=" + name + "&description=" + description + "&tag=" + tag + "&frequency=" + frequency + "&run_on=" + run_on, async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
+    'setProcessList': function (taskid, userid, groupid, processlist) {
+        var result = {};
+        $.ajax({url: path + "group/setprocesslist.json?id=" + taskid + "&userid=" + userid + "&groupid=" + groupid, method: "POST", data: "processlist=" + processlist, async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
+    'deleteTask': function (taskid, userid, groupid) {
+        var result = {};
+        $.ajax({url: path + "group/deletetask.json?taskid=" + taskid + "&userid=" + userid + "&groupid=" + groupid, async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
+    },
+    'setTaskEnabled': function (value, taskid, userid, groupid) {
+        var result = {};
+        $.ajax({url: path + "group/settaskenabled.json?taskid=" + taskid + "&userid=" + userid + "&groupid=" + groupid + "&enabled=" + value, async: false, success: function (data) {
+                result = data;
+            }});
+        return result;
     },
 // Add mock data to users - Used during development
     'getapikeys': function (groupid) {

@@ -22,6 +22,9 @@ You also need to update your emonCMS from here: [emonCMS with Group Module suppo
 - Edit user info
 - Added "tags" to user info to help categorize and add an extra level of grouping. An example of a tag could be "Heat Pump model", this can be added to a user and specify as its value the name of the HP. The UI helps reuse tag names in groups
 - Search functionality: looking for a word in user names, group names and user tags
+- [Task module support](https://github.com/carboncoop/task), when installed:
+	- Group member's tasks will be displayed under user feeds. 
+	- Tasks can be created for feeds in bulk
 
 ## Roles
 - Administrator: full access (create users, add member, create group graphs, etc)

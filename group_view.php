@@ -1,4 +1,6 @@
 <?php
+//http://jsfiddle.net/nhft183g/2/
+
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $fullwidth, $session;
 $fullwidth = true;
@@ -7,8 +9,12 @@ $fullwidth = true;
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
 <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
-
+<?php if ($task_support === true) { ?>
+<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/task/task.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/table.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
+<?php } ?>
 <!-------------------------------------------------------------------------------------------
 MAIN
 -------------------------------------------------------------------------------------------->
@@ -55,10 +61,11 @@ MAIN
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
             <div class="user-active-feeds">Active feeds</div>
-            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
+            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
             <div class="multiple-feeds-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
                 <button class="btn multiple-feed-download hide" title="Download feeds" type="multiple"><i class="icon-download"></i></button>                
+                <button class="btn create-task hide if-admin" title="Create task"><i class="icon-list"></i></button>                
             </div>
         </div>
         <div id="userlist-div" class="hide"></div>
@@ -111,7 +118,7 @@ MODALS
         <p>Password:<br>
             <input id="group-addmember-password" type="password"></p>
 
-        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -141,7 +148,7 @@ MODALS
             <input id="group-createuseraddtogroup-password" type="password"></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
-        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-createuseraddtogroup-role">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
@@ -193,7 +200,7 @@ MODALS
             <tr><td>Timezome</td><td><input class="edit-user-timezone" type="text"></input></td></tr>
             <tr><td>Password    <i class="icon-question-sign" title="Leave it blank if you don not wish to change it" /></td><td><input class="edit-user-password" type="password"></input></td></tr>
             <tr><td>Confirm password</td><td><input class="edit-user-confirm-password" type="password"></input></td></tr>
-            <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: access to the list of members, group dashboards and group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
+            <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
                 <td><select id="edit-user-role">
                         <option value=1>Administrator</option>
                         <option value=2>Sub-administrator</option>
@@ -322,6 +329,46 @@ MODALS
     </div>
 </div>
 
+<!-- CREATE TASK -->
+<div id="taskCreateModal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="taskCreateModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="taskCreateModalLabel"><?php echo _('Create task'); ?></h3>
+    </div>
+    <div class="modal-body">
+        <p><?php echo _('Once a task is created you will need to set up the Process List and enable it'); ?></p>
+        <table>
+            <tr><td><?php echo _('Name*'); ?></td><td><input id="task-create-name" type="text" /></td></tr>
+            <tr><td><?php echo _('Description'); ?></td><td><input id="task-create-description" type="text" /></td></tr>
+            <tr><td><?php echo _('Tag'); ?></td><td><input id="task-create-tag" type="text" /></td></tr>
+            <tr><td><?php echo _('Frequency'); ?></td><td id="task-create-frequency"></td></tr>
+            <tr><td><?php echo _('Start date'); ?></td><td><div class="input-append date" id="task-create-run-on" data-format="dd/MM/yyyy hh:mm"><input data-format="dd/MM/yyyy hh:mm" type="text" /><span class="add-on"> <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span></div></td></tr>
+        </table>
+        <div id="task-create-message" class="alert alert-block hide"></div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true"><?php echo _('Cancel'); ?></button>
+        <button id="taskCreate-confirm" class="btn btn-primary"><?php echo _('Create task'); ?></button>
+    </div>
+</div>
+
+<!-- DELETE TASK -->
+<div id="delete-task-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="delete-task-modal-label" aria-hidden="true" data-backdrop="static">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="delete-task-modal-label">Delete task</h3>
+    </div>
+    <div class="modal-body">
+        <p>Are you sure you wish to delete this task?</p>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+        <button id="delete-task-action" class="btn btn-danger">Delete</button>
+    </div>
+</div>
+
+<?php if ($task_support === true) require "Modules/process/Views/process_ui.php"; ?>
+
 <!-------------------------------------------------------------------------------------------
 JAVASCRIPT
 -------------------------------------------------------------------------------------------->
@@ -336,22 +383,35 @@ JAVASCRIPT
     var userlist = [];
     var tags_used_in_group = [];
     var summary_for_search = [];
-// ----------------------------------------------------------------------------------------
-// Draw: grouplist
-// ----------------------------------------------------------------------------------------
+    var task_support = <?php echo $task_support === false ? 0 : 1; ?> === 1 ? true : false;
+
+    // ----------------------------------------------------------------------------------------
+    // Task: ini
+    // ---------------------------------------------------------------------e-------------------
+    if (task_support == true) {
+        load_custom_table_fields();
+        processlist_ui.init(1); // 1 means that contexttype is feeds and virtual feeds (other option is 1 for input)
+    }
+
+    // ----------------------------------------------------------------------------------------
+    // Draw: grouplist
+    // ----------------------------------------------------------------------------------------
     draw_grouplist();
-// ----------------------------------------------------------------------------------------    
-// Startup group
-// ----------------------------------------------------------------------------------------
+
+    // ----------------------------------------------------------------------------------------    
+    // Startup group
+    // ----------------------------------------------------------------------------------------
     var selected_group = decodeURIComponent(window.location.hash).substring(1);
     console.log("Selectedgroup:" + selected_group)
     if (selected_group != "") {
-        for (var gindex in grouplist) {
-            if (grouplist[gindex].name == selected_group) {
-                $(".group[gindex=" + gindex + "]").addClass('activated');
-                draw_group(gindex);
+        setTimeout(function () { // We need some extra time to let processlist_ui.init(1) to finish
+            for (var gindex in grouplist) {
+                if (grouplist[gindex].name == selected_group) {
+                    $(".group[gindex=" + gindex + "]").addClass('activated');
+                    draw_group(gindex);
+                }
             }
-        }
+        }, 100);
     }
     else {
         $('.groupselected').hide();
@@ -406,6 +466,9 @@ JAVASCRIPT
                 for (var tag in userlist[z].tags)
                     if (!tags_used_in_group.includes(tag))
                         tags_used_in_group.push(tag);
+            // Replace feeds available for processes - processlist_ui.init(1) has loaded current user's ones, we are goin to add feeds of all users in the group
+            if (task_support == true)
+                processlist_load_group_users_feeds();
         }
 
         // Html
@@ -443,13 +506,13 @@ JAVASCRIPT
                     color = "#000";
                 // out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
 
-                // html
+                // html user
                 out += "<div class='user' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-info'>";
-                if (userlist[z].admin_rights != 'full')
+                if (userlist[z].admin_rights != 'full' || my_role != 1)
                     out += "<div class='user-name'>" + userlist[z].username + "</div>";
                 else
-                    out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></div>";
+                    out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "' username='" + userlist[z].username + "'>" + userlist[z].username + "</a></div>";
                 out += "<div class='user-active-feeds'><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></div> <div class='user-role'>" + role + "</div>";
                 out += "<div class='user-actions'>";
                 if (userlist[z].userid != my_userid) {
@@ -459,7 +522,10 @@ JAVASCRIPT
                 }
                 out += "</div>"; // user-actions
                 out += "</div>"; // user-info
+
+                // html feeds and tasks
                 out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
+                // Feeds                
                 out += "<div class='user-feedslist'>";
                 out += "<div class='user-feedslist-inner'>";
                 // Add tags
@@ -483,53 +549,56 @@ JAVASCRIPT
                         });
                         out += "</div>";
                     }
-
                 });
                 out += "</div>"; // user-feedslist-inner
                 out += "</div>"; // user-feedslist
-                //out += "<div class='user-inputs hide'></div>";
+
+                // Tasks div
+                if (task_support === true && userlist[z].taskslist.length > 0) {
+                    out += "<div class='user-tasks' groupid='" + groupid + "' userid='" + userlist[z].userid + "'>";
+                    out += "<div class='user-taskslist-inner'>";
+                    // Add tags
+                    var tags_list = [];
+                    table.data = userlist[z].taskslist; // we use it to draw some task fields
+                    userlist[z].taskslist.forEach(function (task) {
+                        if (tags_list.indexOf(task.tag) == -1) {
+                            tags_list.push(task.tag);
+                            out += "<div class='task-tag' tag='" + task.tag + "'>";
+                            out += "Tasks - " + (task.tag === '' ? 'NoGroup' : task.tag);
+                            // Add tasks tah have the current tag
+                            userlist[z].taskslist.forEach(function (task_again, row) {
+                                if (task_again.tag == task.tag) {
+                                    out += "<div class='task hide' tag='" + task.tag + "' uid='" + userlist[z].userid + "' taskid='" + task_again.id + "'>";
+                                    out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
+                                    out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
+                                    out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
+                                    out += "<div class='task-enabled' style='cursor:pointer' title='Enabled' uindex=" + z + " taskid=" + task_again.id + ">" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
+                                    if (userlist[z].admin_rights == 'full') {
+                                        out += '<div id="task-actions">';
+                                        out += "<div class='task-delete' title='Delete task' uid=" + userlist[z].userid + " taskid=" + task_again.id + "><i class='icon-trash if-admin' style='cursor:pointer'> </i></div> ";
+                                        out += "<div class='task-view' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-eye-open' /></a></div>";
+                                        out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
+                                        out += "</div>"; // task-actions                             
+                                    }
+                                    out += "</div>"; // task
+                                }
+                            });
+                            out += "</div>"; // task-tag
+                        }
+                    });
+                    out += "</div>"; // user-taskslist-inner                    
+                    out += "</div>"; // .user-tasks
+                }
+
+                // Close divs
                 out += "</div>"; // user-feeds-inputs
                 out += "</div>"; // user
             }
             $("#userlist-div").html(out); // Place userlist html in userlist table 
-            $('#userlist-div').show();
-            //$(".user-feedslist .feed").last().css("border-bottom","1px solid #aaa");
 
-            // Compile the user list html
-            /*var out = "";
-             for (var z in userlist) {
-             out += "<tr>";
-             if (my_role === 1 && userlist[z].admin_rights == "full")
-             out += "<td class='user' uid=" + userlist[z].userid + "><a href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "'>" + userlist[z].username + "</a></td>";
-             else
-             out += "<td class='user' uid=" + userlist[z].userid + ">" + userlist[z].username + "</td>";
-             // Active feeds
-             var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
-             var color = "#00aa00";
-             if (prc < 0.5)
-             color = "#aaaa00";
-             if (prc < 0.1)
-             color = "#aa0000";
-             if (userlist[z].totalfeeds == 0)
-             color = "#000";
-             out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
-             out += "<td>" + role + "</td>";
-             // Actions
-             if (userlist[z].userid == my_userid)
-             out += '<td></td>';
-             else
-             out += "<td><i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove User' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-             //Feeds list
-             if (my_role != 1 && my_role != 2)
-             out += '<td></td>';
-             else
-             out += "<td><i class='showfeeds icon-list-alt' style='cursor:pointer' index='" + z + "' title='Show feeds' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i></td > ";
-             // Close table row
-             out += "</tr>";
-             }
-             $("#userlist").append(out); // Place userlist html in userlist table 
-             $('#userlist-table').show();
-             */
+            // Show
+            $('#userlist-div').show();
+
         }
 
     }
@@ -589,6 +658,18 @@ JAVASCRIPT
 
         return "<span style='color:" + color + ";'>" + updated + "</span>";
     }
+
+    // Loads into processlist_ui.feedlist array feeds from all the users in the groups
+    function processlist_load_group_users_feeds() {
+        processlist_ui.feedlist = {};
+        userlist.forEach(function (user) {
+            user.feedslist.forEach(function (feed) {
+                processlist_ui.feedlist[feed.id] = JSON.parse(JSON.stringify(feed));
+                processlist_ui.feedlist[feed.id].name = user.username + ": " + feed.name;
+            });
+        });
+    }
+
 // ----------------------------------------------------------------------------------------
 // Action: click on group
 // ----------------------------------------------------------------------------------------
@@ -721,7 +802,22 @@ JAVASCRIPT
         else
             $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', '');
     });
+    $('body').on('click', '.feed', function (e) {
+        e.stopPropagation();
+    });
     // ----------------------------------------------------------------------------------------
+// Action: Show tasks of a user
+// ----------------------------------------------------------------------------------------
+
+    $('body').on('click', '.task-tag', function (e) {
+        e.stopPropagation();
+        var tag = $(this).attr('tag');
+        $(this).find('.feed[tag="' + tag + '"]').toggle();
+    });
+    $('body').on('click', '.task', function (e) {
+        e.stopPropagation();
+    });
+// ----------------------------------------------------------------------------------------
 // Action: Remove user
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".removeuser", function (e) {
@@ -1072,7 +1168,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
             return false;
         var time = tmp[1].split(":");
         if (time.length != 3)
-            return false;
+            time.push(0);
         return new Date(date[2], date[1] - 1, date[0], time[0], time[1], time[2], 0).getTime() / 1000;
     }
 
@@ -1086,10 +1182,15 @@ echo $feed_settings['csvdownloadlimit_mb'];
             if ($(this).is(':checked'))
                 any_checked = true;
         })
-        if (any_checked)
+        if (any_checked) {
             $('.multiple-feeds-actions button').show();
+            if (task_support === false)
+                $('button.create-task').hide();
+        }
         else
             $('.multiple-feeds-actions button').hide();
+        if (grouplist[selected_groupindex].role != 1)
+            $('.if-admin').hide();
     });
 // ----------------------------------------------------------------------------------------
 // Action: Untick tag checbox when all the feed checkboxes are unticked
@@ -1187,6 +1288,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".setuser", function (e) {
         e.stopPropagation();
+        alert('You are now logged as ' + $(this).attr('username'));
     });
 // ----------------------------------------------------------------------------------------
 // Sidebar
@@ -1219,6 +1321,189 @@ echo $feed_settings['csvdownloadlimit_mb'];
     $(window).resize(function () {
         sidebar_resize();
     });
+
+// ----------------------------------------------------------------------------------------
+// Tasks
+// ----------------------------------------------------------------------------------------
+    $("body").on('click', ".task-tag", function (e) {
+        e.stopPropagation();
+        var tag = $(this).attr('tag');
+        $(this).find('.task[tag="' + tag + '"]').toggle();
+    });
+    $("body").on('click', ".create-task", function (e) {
+        // Frequency field
+        $('#task-create-frequency').html(get_frequency_html({type: 'once_a_month'}));
+        add_frequency_html_events();
+        // Start date field
+        $('#task-create-run-on').datetimepicker({language: 'en-EN', useCurrent: true, weekStart: 1});
+        var now = new Date();
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes());
+        var picker = $('#task-create-run-on').data('datetimepicker');
+        picker.setLocalDate(today);
+        // Reset fields        
+        $('#task-create-message').hide();
+        $('#task-create-name').val('');
+        $('#task-create-description').val('');
+        $('#task-create-tag').val('');
+        $('#task-create-frequency [value="once_a_month"]').click();
+        $('#taskCreateModal').modal('show');
+
+        // Get all the checked feeds and store them into the ProcessList modal
+        var feedids = [];
+        $('.feed input[type=checkbox]:checked').each(function () {
+            feedids.push($(this).attr('fid'));
+        });
+        $('#processlistModal').attr('feedids', JSON.stringify(feedids));
+    });
+    $("body").on('click', ".task-delete", function (e) {
+        $('#delete-task-modal').attr('uid', $(this).attr('uid'));
+        $('#delete-task-modal').attr('taskid', $(this).attr('taskid'));
+        $('#delete-task-modal').modal('show');
+    });
+    $("body").on('click', "#delete-task-action", function (e) {
+        var uid = $('#delete-task-modal').attr('uid');
+        var taskid = $('#delete-task-modal').attr('taskid');
+
+        var result = group.deleteTask(taskid, uid, selected_groupid);
+        if (result.success) {
+            //draw_userlist(selected_groupid);
+            userlist = group.userlist(selected_groupid);
+            if ($('.task[taskid=' + taskid + ']').siblings().length > 0)
+                $('.task[taskid=' + taskid + ']').remove();
+            else
+                $('.task[taskid=' + taskid + ']').parents('.task-tag').remove();
+            $("#delete-task-modal").modal('hide');
+        } else {
+            alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
+        }
+    });
+    $("body").on('click', ".task-edit-processlist", function (e) {
+        e.stopPropagation();
+        var taskid = $(this).attr('taskid');
+        var user = userlist[$(this).attr('uindex')];
+        var task = user.taskslist.find(function (task_obj) {
+            return task_obj.id === taskid;
+        });
+        processlist_ui.load(taskid, processlist_ui.decode(task.processList), '', null, null); // show processlist modal
+        $("#processlistModal #save-processlist").attr('action', 'edit');
+        $("#processlistModal #save-processlist").attr('taskid', taskid);
+        $("#processlistModal #save-processlist").attr('uid', user.userid);
+        $("#processlistModal #save-processlist").html('Ok');
+        $("#process-select").val('task__feed_last_update_greater'); //Set default process to add
+        $("#process-select").change();
+    });
+    $("body").on('click', ".task-enabled", function (e) {
+        e.stopPropagation();
+        var taskid = $(this).attr('taskid');
+        var userindex = $(this).attr('uindex');
+        var uid = userlist[userindex].userid;
+        var task = userlist[userindex].taskslist.find(function (task) {
+            return task.id == taskid
+        });
+        var new_value = task.enabled == '1' ? 0 : 1;
+        var result = group.setTaskEnabled(new_value, taskid, uid, selected_groupid);
+        if (result.success != undefined && result.success == false)
+            alert(result.message);
+        else {
+            userlist = group.userlist(selected_groupid);
+            task = userlist[userindex].taskslist.find(function (task) {
+                return task.id == taskid
+            });
+            $(this).html(task.enabled == 1 ? 'On' : 'Off');
+        }
+    });
+    $('#taskCreate-confirm').on('click', function () {
+        $('#task-create-message').hide();
+        var name = $('#task-create-name').val();
+        if ($('#task-create-name').val() == '')
+            $('#task-create-message').html('<p>Name cannot be empty</p>').show();
+        else {
+            // Prepare process list
+            var processlist = new Array();
+            processlist[0] = new Array('group__source_multifeed', $('#processlistModal').attr('feedids').replace(/["\[\]]/gi, '').replace(/,/gi, '-'));
+            // Get other task fields    
+            var description = $('#task-create-description').val();
+            var tag = $('#task-create-tag').val();
+            var frequency = get_frequency_field('#task-create-frequency');
+            var run_on = parse_timepicker_time($('#task-create-run-on input').val());
+            $('#processlistModal').attr('name', name);
+            $('#processlistModal').attr('description', description);
+            $('#processlistModal').attr('tag', tag);
+            $('#processlistModal').attr('frequency', frequency);
+            $('#processlistModal').attr('run_on', run_on);
+            // Show hide modals
+            $('#taskCreateModal').modal('hide');
+            $('#processlistModal').hide();
+            processlist_ui.load(0, processlist, 'Multi feed task -', null, null); // show processlist modal      
+            //Set default process to addtask__feed_last_update_higher
+            $("#process-select").val('task__feed_last_update_greater');
+            $("#process-select").change();
+            $("#processlistModal #save-processlist").attr('action', 'create');
+            // Remove actions from the first proccess in the processlist (Source multifeed) as we dont' want the user to be able toedit/remove it
+            $('.edit-process[processid=0]').hide();
+            $('.delete-process[processid=0]').hide();
+            // Change the html of the buttons
+            $('#processlistModal #close').html('Cancel');
+            $('#processlistModal #save-processlist').html('Ok');
+        }
+    });
+    $("#processlistModal").on('click', '#save-processlist', function () {
+        if ($(this).attr('action') == 'create') { // We are creating task from the feeds ticked
+            var feedids = JSON.parse($('#processlistModal').attr('feedids'));
+            var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
+            processlist = processlist.substring(processlist.indexOf(",") + 1); // We remove the first process (source multi-feed) as we are already sending the list of feedids in another variable, more convenient this way
+            var name = $('#processlistModal').attr('name');
+            var description = $('#processlistModal').attr('description');
+            var tag = $('#processlistModal').attr('tag');
+            var frequency = $('#processlistModal').attr('frequency');
+            var run_on = $('#processlistModal').attr('run_on');
+
+            var result = group.setMultiFeedProcessList(feedids, processlist, selected_groupid, name, description, tag, frequency, run_on);
+            if (result.success) {
+                draw_userlist(selected_groupid);
+                $("#processlistModal").modal('hide');
+            } else {
+                alert('There have been some errors saving the process lists:\n' + result.message.replace(/\\n/g, '\n'));
+            }
+        }
+        else { // we are editing the processlist of an existing task
+            var taskid = $(this).attr('taskid');
+            var uid = $(this).attr('uid');
+            var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
+            var result = group.setProcessList(taskid, uid, selected_groupid, processlist);
+            if (result.success != undefined && result.success == false)
+                alert(result.message);
+            else {
+                userlist = group.userlist(selected_groupid);
+                var user = userlist.find(function (user) {
+                    return user.userid == uid;
+                });
+                var task = user.taskslist.find(function (task, index) {
+                    return task.id == taskid;
+                });
+                var row = user.taskslist.findIndex(function (task) {
+                    return task.id == taskid;
+                });
+                table.data = user.taskslist; // we use it to draw some task fields
+                $('.task[taskid=' + taskid + '] .task-processlist').html(table.fieldtypes.processlist.draw(table, row, '', 'processList'));
+
+                $("#processlistModal").modal('hide');
+            }
+        }
+    });
+    $("#processlistModal").on('click', '#process-add', function () {
+        // The addintion of a new process to the list redraws the table adding the edit and remove buttons to the "source multifeed" process> we removed them as we don't want the user to edit/remove that process
+        $('.edit-process[processid=0]').hide();
+        $('.delete-process[processid=0]').hide();
+        // And also qwe make the "Changed press to save" button look like OK
+        $('#processlistModal #save-processlist').html('Ok').removeClass('btn-warning').addClass('btn-success');
+    });
+
+
+
+
+
+
     // For development
     $('body').on('click', '#create-inputs-feeds', function () {
         var list_apikeys = group.getapikeys(selected_groupid);
@@ -1252,4 +1537,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
             }
         }
     })
+
+    /*setTimeout(function () {
+     $('.user[uid=16]').click();
+     $('.user[uid=16] .task-tag').click();
+     //$('.user[uid="17"] .task-edit-processlist').click();
+     }, 100);
+     */
+
 </script>
