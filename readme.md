@@ -7,9 +7,8 @@ This is not global administration for all users of an emonCMS installation (for 
 ![groups_snap_shot.png](files/groups_snap_shot.png)
 
 ## Installation
-As any other module: clone this repository in the Modules directory of your emonCMS installation and update database.
-You also need to update your emonCMS from here: [emonCMS with Group Module support](https://github.com/carboncoop/emoncms/tree/user_tags)
-
+As any other module: clone this repository in the Modules directory of your emonCMS installation and update database. 
+You will need the latest emoncms master branch v9.8.26 or newer.
 
 ## Features
 - Create groups
@@ -32,9 +31,9 @@ You also need to update your emonCMS from here: [emonCMS with Group Module suppo
 - Passive member: no access to group. The aim of the user is to be managed by the group administrator
 
 ## Graph module with Group support
-In order to display feeds from different members of a group in a graph you need to install the Graph module with Group support in [development branch of graph module in CarbonCoop](https://github.com/carboncoop/graph/tree/develop)
-![groups_snap_shot2.png](files/groups_snap_shot2.png)
+In order to display feeds from different members of a group in a graph you need the latest emoncms Graph module which has Group support [https://github.com/emoncms/graph](https://github.com/emoncms/graph)
 
+![groups_snap_shot2.png](files/groups_snap_shot2.png)
 
 ## Future developments (who knows when)
 - Add member to group with username and token (admnistrator can see and use user's feeds but has not got full access to his/her account)
