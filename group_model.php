@@ -496,13 +496,13 @@ class Group {
         }
 
 // Delete dashboards
-        $result = $mysqli->query("SHOW TABLES LIKE 'dashboard'");
+        $result = $this->mysqli->query("SHOW TABLES LIKE 'dashboard'");
         if ($result->num_rows > 0) {
             $result = $this->mysqli->query("DELETE FROM dashboard WHERE `userid` = '$userid_to_remove'");
         }
 
 // Delete graphs
-        $result = $mysqli->query("SHOW TABLES LIKE 'graph'");
+        $result = $this->mysqli->query("SHOW TABLES LIKE 'graph'");
         if ($result->num_rows > 0) {
             $result = $this->mysqli->query("DELETE FROM graph WHERE `userid` = '$userid_to_remove'");
         }
