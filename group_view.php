@@ -390,7 +390,7 @@ JAVASCRIPT
     // ---------------------------------------------------------------------e-------------------
     if (task_support == true) {
         load_custom_table_fields();
-        processlist_ui.init(1); // 1 means that contexttype is feeds and virtual feeds (other option is 1 for input)
+        processlist_ui.init(2); // 1 means that contexttype is feeds and virtual feeds (other option is 1 for input)
     }
 
     // ----------------------------------------------------------------------------------------
