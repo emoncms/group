@@ -331,10 +331,13 @@ class Group {
         else {
 // Search for the feed in user's groups
             foreach ($groups as $group) {
-                foreach ($group['users'] as $user) {
-                    foreach ($user['feedslist'] as $feed)
-                        if ($feedid == $feed['id'])
-                            $feed_found = true;
+                if(!array_key_exists('success', $group['users'])){ // if $session_user is not admin or subadmin of the group then $group['users']['success'] is false, otherwise it is an array of users
+                    foreach ($group['users'] as $user) {
+                        foreach ($user['feedslist'] as $feed){
+                            if ($feedid == $feed['id'])
+                                $feed_found = true;
+                        }
+                    }
                 }
             }
         }
