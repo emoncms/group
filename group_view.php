@@ -9,11 +9,12 @@ $fullwidth = true;
 <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
 <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
+<script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
 <?php if ($task_support === true) { ?>
-<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/task/task.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/table.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
-<script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
+    <script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/task/task.js"></script>
+    <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/table.js"></script>
+    <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
+    <script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
 <?php } ?>
 <!-------------------------------------------------------------------------------------------
 MAIN
@@ -1133,13 +1134,11 @@ echo $feed_settings['csvdownloadlimit_mb'];
 
         $('#feedExportModal').modal('hide');
         if ($(this).attr('export-type') == 'group') {
-            result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
+            var result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
         }
         else {
-            result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
+            var result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
         }
-        if (result.success == false)
-            alert(result.message);
     });
     function calculate_download_size(feedcount) {
         var export_start = parse_timepicker_time($("#export-start").val());
