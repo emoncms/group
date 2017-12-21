@@ -105,7 +105,7 @@ function group_controller() {
         }
         if ($route->action == 'settaskenabled') {
             $route->format = "json";
-            $result = $group->set_task_enabled($session['userid'], get('taskid'), get('userid'), get('groupid'),get('enabled'));
+            $result = $group->set_task_enabled($session['userid'], get('taskid'), get('userid'), get('groupid'), get('enabled'));
         }
 
         // --------------------------------------------------------------------------
@@ -122,9 +122,21 @@ function group_controller() {
                 if ($group->is_group_member($groupid, $userid) === true) {
                     // 3. Check that session user has full rights over user requested
                     if ($group->administrator_rights_over_user($groupid, $userid) === true) {
+                        // keep details of current user
                         $_SESSION['previous_userid'] = $session['userid'];
                         $_SESSION['previous_username'] = $session['username'];
-                        $_SESSION['userid'] = $userid;
+                        $_SESSION['previous_admin'] = $session['admin'];
+                        // Set new user
+                        $result = $mysqli->query("SELECT * FROM users WHERE id = '$userid'");
+                        if ($result->num_rows < 1) {
+                            $this->logout(); // user id does not exist
+                        }
+                        else {
+                            $new_user = $result->fetch_object();
+                            $_SESSION['userid'] = $userid;
+                            $_SESSION['username'] = $new_user->username;
+                            $_SESSION['admin'] = $new_user->admin;
+                        }
                         if (is_null(get('view')))
                             header("Location: ../user/view");
                         else if (get('view') == 'tasks')
@@ -145,16 +157,19 @@ function group_controller() {
             $route->format = "text";
 
             $_SESSION['userid'] = $_SESSION['previous_userid'];
+            $_SESSION['username'] = $_SESSION['previous_username'];
+            $_SESSION['admin'] = $_SESSION['previous_admin'];
             unset($_SESSION['previous_userid']);
             unset($_SESSION['previous_username']);
+            unset($_SESSION['previous_admin']);
             header("Location: ../group");
         }
 
         // Developemtn
-        if ($route->action == "getapikeys") {
-            $route->format = "json";
-            $result = $group->getapikeys($session['userid'], get("groupid"));
-        }
+        /* if ($route->action == "getapikeys") {
+          $route->format = "json";
+          $result = $group->getapikeys($session['userid'], get("groupid"));
+          } */
     }
 
     //---------------------------
