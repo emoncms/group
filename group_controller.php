@@ -221,7 +221,7 @@ function group_controller() {
         // group/getfeed/data.json?id=111&start=1500566400000&end=1501172100000&interval=900&skipmissing=0&limitinterval=undefined"
         if ($route->action == "getfeed") {
             $route->format = "json";
-            $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'));
+            $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'), get('mode'));
         }
     }
 
@@ -230,7 +230,7 @@ function group_controller() {
     //---------------------------
     if ($route->action == "getfeed") { // When displaying a public feed for example in a public dashboard
         $route->format = "json";
-        $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'));
+        $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'),get('mode'));
     }
 
     return array('content' => $result, 'fullwidth' => false);

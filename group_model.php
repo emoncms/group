@@ -313,7 +313,7 @@ class Group {
     }
 
 // Searches for a feedid in all the groups the user has access to. If feed is public or user has the right to accessit, it returns the feed
-    public function getfeed($session_userid, $subaction, $feedid, $start, $end, $interval, $skipmissing, $limitinterval) {
+    public function getfeed($session_userid, $subaction, $feedid, $start, $end, $interval, $skipmissing, $limitinterval, $mode) {
 // Input sanitisation
         $session_userid = (int) $session_userid;
         $feedid = (int) $feedid;
@@ -331,9 +331,9 @@ class Group {
         else {
 // Search for the feed in user's groups
             foreach ($groups as $group) {
-                if(!array_key_exists('success', $group['users'])){ // if $session_user is not admin or subadmin of the group then $group['users']['success'] is false, otherwise it is an array of users
+                if (!array_key_exists('success', $group['users'])) { // if $session_user is not admin or subadmin of the group then $group['users']['success'] is false, otherwise it is an array of users
                     foreach ($group['users'] as $user) {
-                        foreach ($user['feedslist'] as $feed){
+                        foreach ($user['feedslist'] as $feed) {
                             if ($feedid == $feed['id'])
                                 $feed_found = true;
                         }
@@ -350,7 +350,10 @@ class Group {
             $data = $this->feed->get_data($feedid, $start, $end, $interval, $skipmissing, $limitinterval);
         }
         elseif ($subaction == 'average') {
-            $data = $this->feed->get_average($feedid, $start, $end, $outinterval);
+            if (!is_null($interval))
+                $data = $this->feed->get_average($feedid, $start, $end, $interval);
+            else
+                $data = $this->feed->get_average_DMY($feedid, $start, $end, $mode);
         }
         return $data;
     }
