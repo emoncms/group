@@ -4,7 +4,7 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 
 function group_controller() {
-    global $session, $route, $mysqli, $redis, $user, $feed_settings;
+    global $session, $route, $mysqli, $redis, $user, $feed_settings, $log;
 
     $result = false;
 
@@ -116,6 +116,10 @@ function group_controller() {
             $groupid = (int) get('groupid');
             $userid = (int) get('userid');
 
+            $log_str = "user: " . $session['username'] . ", userid " .
+                    $session['userid'] . ' and admin ' . $session['admin'] .
+                    " is loging as userid " . $userid;
+
             // 1. Check that session user is an administrator of the group requested
             if ($group->is_group_admin($groupid, $session["userid"]) === true) {
                 // 2. Check that user requested is a member of group requested
@@ -136,20 +140,27 @@ function group_controller() {
                             $_SESSION['userid'] = $userid;
                             $_SESSION['username'] = $new_user->username;
                             $_SESSION['admin'] = $new_user->admin;
+                            $log_str .=  ", username " . $new_user->username . ' and admin ' . $new_user->admin;
+                            $log->warn($log_str);
                         }
                         if (is_null(get('view')))
                             header("Location: ../user/view");
                         else if (get('view') == 'tasks')
                             header("Location: ../task/list#" . get('tag'));
                     }
-                    else
+                    else {
                         $result = "ERROR: You haven't got rights to access this user";
-                } else {
+                        $log->error($result . ' - ' . $log_str);
+                    }
+                }
+                else {
                     $result = "ERROR: User is not a member of group";
+                    $log->error($result . ' - ' . $log_str);
                 }
             }
             else {
                 $result = "ERROR: You are not an administrator of this group";
+                $log->error($result . ' - ' . $log_str);
             }
         }
 
@@ -230,7 +241,7 @@ function group_controller() {
     //---------------------------
     if ($route->action == "getfeed") { // When displaying a public feed for example in a public dashboard
         $route->format = "json";
-        $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'),get('mode'));
+        $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'), get('mode'));
     }
 
     return array('content' => $result, 'fullwidth' => false);
