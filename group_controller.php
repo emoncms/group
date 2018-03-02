@@ -1,4 +1,5 @@
 <?php
+
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
 
@@ -106,7 +107,15 @@ function group_controller() {
             $route->format = "json";
             $result = $group->set_task_enabled($session['userid'], get('taskid'), get('userid'), get('groupid'), get('enabled'));
         }
-
+        if ($route->action == 'updateemoncms') {
+            if ($session['admin'] == 1) {
+                $route->format = "json";
+                require_once "Modules/update/update_model.php";
+                $update = new Update();
+                $result = $update->update('emoncms', 'nothing');
+                $a=3;
+            }
+        }
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTIONS
         // --------------------------------------------------------------------------
@@ -139,7 +148,7 @@ function group_controller() {
                             $_SESSION['userid'] = $userid;
                             $_SESSION['username'] = $new_user->username;
                             $_SESSION['admin'] = $new_user->admin;
-                            $log_str .=  ", username " . $new_user->username . ' and admin ' . $new_user->admin;
+                            $log_str .= ", username " . $new_user->username . ' and admin ' . $new_user->admin;
                             $log->warn($log_str);
                         }
                         if (is_null(get('view')))
