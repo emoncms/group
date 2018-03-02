@@ -113,7 +113,16 @@ function group_controller() {
                 require_once "Modules/update/update_model.php";
                 $update = new Update();
                 $result = $update->update('emoncms', 'nothing');
-                $a=3;
+                $a = 3;
+            }
+        }
+        if ($route->action == 'fixuserschema') {
+            if ($session['admin'] == 1) {
+                $route->format = "json";
+                $result = $mysqli->query("ALTER TABLE `users` CHANGE `tags` `tags` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;");
+                if ($result === false){
+                    $result = $mysqli->error;
+                }
             }
         }
         // --------------------------------------------------------------------------
