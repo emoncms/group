@@ -23,7 +23,7 @@ var group = {
     },
     'createuseraddtogroup': function (groupid, email, username, password, role) {
         var result = {};
-        $.ajax({url: path + "group/createuseraddtogroup", data: "groupid=" + groupid + "&email=" + email + "&username=" + username + "&password=" + password + "&role=" + role, dataType: 'json', async: false, success: function (data) {
+        $.ajax({url: path + "group/createuseraddtogroup", data: "groupid=" + groupid + "&email=" + email + "&username=" + username + "&password=" + password + "&role=" + role, dataType: 'json', async: false, complete: function (data) {
                 result = data;
             }});
         return result;
