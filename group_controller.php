@@ -24,7 +24,7 @@ function group_controller() {
     }
 
 
-    include "Modules/group/group_model.php";
+    require_once "Modules/group/group_model.php";
     $group = new Group($mysqli, $redis, $user, $feed, $input, $task);
 
 
@@ -116,6 +116,15 @@ function group_controller() {
                 $a = 3;
             }
         }
+        /*if ($route->action == 'updatetheme') {
+            if ($session['admin'] == 1) {
+                $route->format = "json";
+                require_once "Modules/update/update_model.php";
+                $update = new Update();
+                $result = $update->update('themes', 'nef');
+                $a = 3;
+            }
+        }*/
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTIONS
         // --------------------------------------------------------------------------
