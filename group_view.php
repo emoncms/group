@@ -62,7 +62,7 @@ MAIN
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
             <div class="user-active-feeds">Active feeds</div>
-            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
+            <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
             <div class="multiple-feeds-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
                 <button class="btn multiple-feed-download hide" title="Download feeds" type="multiple"><i class="icon-download"></i></button>                
@@ -119,11 +119,11 @@ MODALS
         <p>Password:<br>
             <input id="group-addmember-password" type="password"></p>
 
-        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
-            <option value=3>Member</option>
+            <!--<option value=3>Member</option>-->
             <option value=0 selected>Passive member</option>
         </select>
 
@@ -149,11 +149,11 @@ MODALS
             <input id="group-createuseraddtogroup-password" type="password"></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
-        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
+        <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-createuseraddtogroup-role">
             <option value=1>Administrator</option>
             <option value=2>Sub-administrator</option>
-            <option value=3>Member</option>
+            <!--<option value=3>Member</option>-->
             <option value=0 selected>Passive member</option>
         </select>
         <div id="createuseraddtogroup-message"></div>
@@ -201,11 +201,11 @@ MODALS
             <tr><td>Timezome</td><td><input class="edit-user-timezone" type="text"></input></td></tr>
             <tr><td>Password    <i class="icon-question-sign" title="Leave it blank if you don not wish to change it" /></td><td><input class="edit-user-password" type="password"></input></td></tr>
             <tr><td>Confirm password</td><td><input class="edit-user-confirm-password" type="password"></input></td></tr>
-            <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Member: view access to dashboards&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
+            <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
                 <td><select id="edit-user-role">
                         <option value=1>Administrator</option>
                         <option value=2>Sub-administrator</option>
-                        <option value=3>Member</option>
+                        <!--<option value=3>Member</option>-->
                         <option value=0 selected>Passive member</option>
                     </select>
                 </td>
@@ -492,8 +492,11 @@ JAVASCRIPT
                     case 2:
                         role = 'Sub-administrator';
                         break;
-                    case 3:
-                        role = 'Member';
+                        /*case 3:
+                         role = 'Member';
+                         break;*/
+                    default:
+                        role = "Invalid role";
                         break;
                 }
                 // Active feeds colors
