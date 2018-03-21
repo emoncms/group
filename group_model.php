@@ -773,7 +773,7 @@ class Group {
         return $download;
     }
 
-    public function set_multifeed_processlist($session_userid, $groupid, $feedids, $processlist, $name, $description, $tag, $frequency, $run_on) {
+    public function set_multifeed_processlist($session_userid, $groupid, $feedids, $processlist, $name, $description, $tag, $frequency, $run_on, $belongs_to) {
         if (is_null($this->task) != true) {
             $session_userid = (int) $session_userid;
             $feedids = json_decode($feedids);
@@ -788,6 +788,7 @@ class Group {
             $enabled = 1;
 
             $errors = '';
+            $group = $this->get_group($groupid, $session_userid);
 
             if ($this->is_group_admin($groupid, $session_userid)) {
 // Fetch all users in group and their feeds
@@ -802,14 +803,22 @@ class Group {
                         foreach ($user['feeds'] as $feed) {
                             if ($feed['id'] == $feedid) {
                                 $found = true;
-                                if ($user['admin_rights'] != 'full') {
+                                if ($belongs_to == 'feed-user' && $user['admin_rights'] != 'full') {
                                     $this->log->warn("User $session_userid is trying to create a task for user " . $user['userid'] . " but hasn't got full rights");
                                     $errors .= 'Not enough rights over ' . $user['username'];
                                 }
                                 else {
-                                    $taskid = $this->task->create_task($user['userid'], $feed['name'] . ': ' . $name, $description, $tag, $frequency, $run_on, $enabled);
+                                    if ($belongs_to == 'feed-user') {
+                                        $userid = $user['userid'];
+                                        $task_name = $feed['name'] . ': ' . $name;
+                                    }
+                                    else { // if ($belongs_to == 'session-user')
+                                        $userid = $session_userid;
+                                        $task_name = $group['name'] . ': ' . $user['username'] . ': ' . $feed['name'] . ': ' . $name;
+                                    }
+                                    $taskid = $this->task->create_task($userid, $task_name, $description, $tag, $frequency, $run_on, $enabled);
                                     if (is_numeric($taskid))  // if is not a number there was an error creating the task
-                                        $result = $this->task->set_processlist($user['userid'], $taskid, "task__get_feed_id:" . $feedid . "," . $processlist); // We add the Source Feed process to the process list
+                                        $result = $this->task->set_processlist($userid, $taskid, "task__get_feed_id:" . $feedid . "," . $processlist); // We add the Source Feed process to the process list
                                     else {
                                         $this->log->info("Problem creating task " . $taskid['message']);
                                         $errors .= $user['username'] . ": " . $feed['name'] . ' - ' . $taskid['message'] . '\n';
@@ -908,6 +917,33 @@ class Group {
                 $result = $this->task->set_processlist($userid, $taskid, $processlist);
         }
         return $result;
+    }
+
+    public function get_group($groupid, $session_userid) {
+        $groupid = (int) $groupid;
+        $session_userid = (int) $session_userid;
+        if ($this->is_group_member($groupid, $session_userid) == false)
+            return false;
+        else {
+            $stmt = $this->mysqli->prepare("SELECT name, description, organization, area, visibility, access FROM groups WHERE id = ?");
+            $stmt->bind_param("i", $groupid);
+            if (!$stmt->execute())
+                return false;
+            $stmt->store_result();
+            if ($stmt->num_rows != 1)
+                return false;
+            $stmt->bind_result($name, $description, $organization, $area, $visibility, $access);
+            $row = $stmt->fetch();
+            $group = array(
+                'name' => $name,
+                'description' => $description,
+                'organization' => $organization,
+                'area' => $area,
+                'visibility' => $visibility,
+                'access' => $access,
+            );
+            return $group;
+        }
     }
 
 // --------------------------------------------------------------------

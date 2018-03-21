@@ -339,6 +339,12 @@ MODALS
     <div class="modal-body">
         <p><?php echo _('Once a task is created you will need to set up the Process List and enable it'); ?></p>
         <table>
+            <tr>
+                <td style="width:125px"><?php echo _('Task belongs to'); ?></td>
+                <td id="task-create-belongs-to">
+                    <input name="belongs-to" type="radio" value="session-user" /><?php echo _('Current user') ?>
+                    <br /><input name="belongs-to" type="radio" value="feed-user" checked /><?php echo _("Feed's owner") ?>
+                </td></tr>
             <tr><td><?php echo _('Name*'); ?></td><td><input id="task-create-name" type="text" /></td></tr>
             <tr><td><?php echo _('Description'); ?></td><td><input id="task-create-description" type="text" /></td></tr>
             <tr><td><?php echo _('Tag'); ?></td><td><input id="task-create-tag" type="text" /></td></tr>
@@ -1424,10 +1430,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
             var processlist = new Array();
             processlist[0] = new Array('group__source_multifeed', $('#processlistModal').attr('feedids').replace(/["\[\]]/gi, '').replace(/,/gi, '-'));
             // Get other task fields    
-            var description = $('#task-create-description').val();
+        var belongs_to =   $('#task-create-belongs-to input[name=belongs-to]:checked').val();  
+        var description = $('#task-create-description').val();
             var tag = $('#task-create-tag').val();
             var frequency = get_frequency_field('#task-create-frequency');
             var run_on = parse_timepicker_time($('#task-create-run-on input').val());
+            $('#processlistModal').attr('belongs-to', belongs_to);
             $('#processlistModal').attr('name', name);
             $('#processlistModal').attr('description', description);
             $('#processlistModal').attr('tag', tag);
@@ -1459,8 +1467,9 @@ echo $feed_settings['csvdownloadlimit_mb'];
             var tag = $('#processlistModal').attr('tag');
             var frequency = $('#processlistModal').attr('frequency');
             var run_on = $('#processlistModal').attr('run_on');
+            var belongs_to = $('#processlistModal').attr('belongs-to');
 
-            var result = group.setMultiFeedProcessList(feedids, processlist, selected_groupid, name, description, tag, frequency, run_on);
+            var result = group.setMultiFeedProcessList(feedids, processlist, selected_groupid, name, description, tag, frequency, run_on, belongs_to);
             if (result.success) {
                 draw_userlist(selected_groupid);
                 $("#processlistModal").modal('hide');

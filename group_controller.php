@@ -92,7 +92,7 @@ function group_controller() {
         // 
         if ($route->action == "setmultifeedprocesslist") {
             $route->format = "json";
-            $result = $group->set_multifeed_processlist($session["userid"], get('groupid'), get('feedids'), post("processlist"), post("name"), post("description"), post("tag"), post("frequency"), post("run_on"));
+            $result = $group->set_multifeed_processlist($session["userid"], get('groupid'), get('feedids'), post("processlist"), post("name"), post("description"), post("tag"), post("frequency"), post("run_on"), post('belongs_to'));
         }
 
         if ($route->action == 'setprocesslist') {

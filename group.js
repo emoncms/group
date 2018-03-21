@@ -108,9 +108,9 @@ var group = {
          }});
          return result;*/
     },
-    'setMultiFeedProcessList': function (feedids, processlist, groupid, name, description, tag, frequency, run_on) {
+    'setMultiFeedProcessList': function (feedids, processlist, groupid, name, description, tag, frequency, run_on, belongs_to) {
         var result = {};
-        $.ajax({url: path + "group/setmultifeedprocesslist.json?feedids=" + JSON.stringify(feedids) + "&groupid=" + groupid, method: "POST", data: "processlist=" + processlist + "&name=" + name + "&description=" + description + "&tag=" + tag + "&frequency=" + frequency + "&run_on=" + run_on, async: false, success: function (data) {
+        $.ajax({url: path + "group/setmultifeedprocesslist.json?feedids=" + JSON.stringify(feedids) + "&groupid=" + groupid, method: "POST", data: "processlist=" + processlist + "&name=" + name + "&description=" + description + "&tag=" + tag + "&frequency=" + frequency + "&run_on=" + run_on + "&belongs_to=" + belongs_to, async: false, success: function (data) {
                 result = data;
             }});
         return result;
