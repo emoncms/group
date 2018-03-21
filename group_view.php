@@ -343,7 +343,7 @@ MODALS
                 <td style="width:125px"><?php echo _('Task belongs to'); ?></td>
                 <td id="task-create-belongs-to">
                     <input name="belongs-to" type="radio" value="session-user" /><?php echo _('Current user') ?>
-                    <br /><input name="belongs-to" type="radio" value="feed-user" checked /><?php echo _("Feed's owner") ?>
+                    <br /><input name="belongs-to" type="radio" value="feed-user" checked /><?php echo _("Feed owner") ?>
                 </td></tr>
             <tr><td><?php echo _('Name*'); ?></td><td><input id="task-create-name" type="text" /></td></tr>
             <tr><td><?php echo _('Description'); ?></td><td><input id="task-create-description" type="text" /></td></tr>
