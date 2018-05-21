@@ -419,8 +419,7 @@ JAVASCRIPT
                 }
             }
         }, 100);
-    }
-    else {
+    } else {
         $('.groupselected').hide();
         $("#nogroupselected").show(); // Hide no group selected alert
     }
@@ -462,11 +461,15 @@ JAVASCRIPT
             $('#userlist-alert h4').html('No users to show');
             $('#userlist-alert p').html(userlist.message);
             $('#userlist-alert').show();
-        }
-        else {
+        } else {
             // Sort userlist
             userlist.sort(function (a, b) {
-                return b.activefeeds - a.activefeeds;
+                var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
+                if (nameA < nameB) //sort string ascending
+                    return -1;
+                if (nameA > nameB)
+                    return 1;
+                return 0; //default return value (no sorting)
             });
             // Fill tags_used_in_group
             for (var z in userlist)
@@ -808,8 +811,7 @@ JAVASCRIPT
         var uid = $(this).attr('uid');
         if ($(this).is(':checked')) {
             $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', 'checked');
-        }
-        else
+        } else
             $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', '');
     });
     $('body').on('click', '.feed', function (e) {
@@ -841,8 +843,7 @@ JAVASCRIPT
         var admin_rights = $(this).attr("admin-rights");
         if (admin_rights != "full") {
             $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', true);
-        }
-        else {
+        } else {
             $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', false);
         }
 
@@ -856,15 +857,13 @@ JAVASCRIPT
             if (what_to_do == 'remove-from-group') {
                 $('#remove-user-modal-step-2').html('<p>Are you sure you want to remove this user from group?</p>');
                 $(this).attr('action', 'remove-from-group');
-            }
-            else {
+            } else {
                 $('#remove-user-modal-step-2').html('<p>Are you sure you wish to completely delete this user from the database?</p><p>All the data will be lost</p>');
                 $(this).attr('action', 'delete-from-database');
             }
             $('#remove-user-modal-step-2').show();
             $('#remove-user-action').html('Done')
-        }
-        else if (action == "remove-from-group") {
+        } else if (action == "remove-from-group") {
             $('#remove-user-modal').modal('hide');
             var userid = $('#remove-user-modal').attr("uid");
             var result = group.removeuser(selected_groupid, userid);
@@ -873,8 +872,7 @@ JAVASCRIPT
             } else {
                 draw_userlist(selected_groupid);
             }
-        }
-        else if (action == "delete-from-database") {
+        } else if (action == "delete-from-database") {
             $('#remove-user-modal').modal('hide');
             var userid = $('#remove-user-modal').attr("uid");
             var result = group.fullremoveuser(selected_groupid, userid);
@@ -1144,8 +1142,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('#feedExportModal').modal('hide');
         if ($(this).attr('export-type') == 'group') {
             var result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
-        }
-        else {
+        } else {
             var result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
         }
     });
@@ -1194,8 +1191,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $('.multiple-feeds-actions button').show();
             if (task_support === false)
                 $('button.create-task').hide();
-        }
-        else
+        } else
             $('.multiple-feeds-actions button').hide();
         if (grouplist[selected_groupindex].role != 1)
             $('.if-admin').hide();
@@ -1263,8 +1259,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
                         if (user.tags[tag].indexOf(typed) != -1) {
                             $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
                             $('.search-list-tags-show').show();
-                        }
-                        else if (tag.indexOf(typed) != -1) {
+                        } else if (tag.indexOf(typed) != -1) {
                             $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
                             $('.search-list-tags-show').show();
                         }
@@ -1430,8 +1425,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
             var processlist = new Array();
             processlist[0] = new Array('group__source_multifeed', $('#processlistModal').attr('feedids').replace(/["\[\]]/gi, '').replace(/,/gi, '-'));
             // Get other task fields    
-        var belongs_to =   $('#task-create-belongs-to input[name=belongs-to]:checked').val();  
-        var description = $('#task-create-description').val();
+            var belongs_to = $('#task-create-belongs-to input[name=belongs-to]:checked').val();
+            var description = $('#task-create-description').val();
             var tag = $('#task-create-tag').val();
             var frequency = get_frequency_field('#task-create-frequency');
             var run_on = parse_timepicker_time($('#task-create-run-on input').val());
@@ -1476,8 +1471,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
             } else {
                 alert('There have been some errors saving the process lists:\n' + result.message.replace(/\\n/g, '\n'));
             }
-        }
-        else { // we are editing the processlist of an existing task
+        } else { // we are editing the processlist of an existing task
             var taskid = $(this).attr('taskid');
             var uid = $(this).attr('uid');
             var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
