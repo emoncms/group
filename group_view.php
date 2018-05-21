@@ -61,7 +61,10 @@ MAIN
         </div>
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
-            <div class="user-active-feeds">Active feeds</div>
+            <div class="user-active-feeds">Feeds <i title="- Green: update time < 25s
+- Amber: 25s < update time < 60s
+- Orange: 60s < update time < 2h
+- Redr: 2h < update time" class=" icon-question-sign"></i></div>
             <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
             <div class="multiple-feeds-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
@@ -509,16 +512,21 @@ JAVASCRIPT
                         break;
                 }
                 // Active feeds colors
-                var prc = userlist[z].activefeeds / userlist[z].totalfeeds;
-                var color = "#00aa00";
-                if (prc < 0.5)
-                    color = "#aaaa00";
-                if (prc < 0.1)
-                    color = "#aa0000";
-                if (userlist[z].totalfeeds == 0)
-                    color = "#000";
-                // out += "<td><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></td>";
-
+                var green = 0, amber = 0, orange = 0, red = 0;
+                var color_green = "rgb(50,200,50)", color_amber = "rgb(240,180,20)", color_orange = "rgb(255,125,20)", color_red = "rgb(255,0,0)";
+                var now = Date.now() / 1000;
+                var diff = 0;
+                userlist[z].feedslist.forEach(function (feed) {
+                    diff = now - feed.time;
+                    if (diff < 25)
+                        green++;
+                    else if (diff < 60)
+                        amber++;
+                    else if (diff < 7200)
+                        orange++;
+                    else
+                        red++;
+                });
                 // html user
                 out += "<div class='user' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-info'>";
@@ -526,7 +534,8 @@ JAVASCRIPT
                     out += "<div class='user-name'>" + userlist[z].username + "</div>";
                 else
                     out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "' username='" + userlist[z].username + "'>" + userlist[z].username + "</a></div>";
-                out += "<div class='user-active-feeds'><b><span style='color:" + color + "'>" + userlist[z].activefeeds + "</span>/" + userlist[z].totalfeeds + "</b></div> <div class='user-role'>" + role + "</div>";
+                out += "<div class='user-active-feeds'><b> <span style='color:" + color_green + "'>" + green + "</span>" + " <span style='color:" + color_amber + "'>" + amber + "</span>" + " <span style='color:" + color_orange + "'>" + orange + "</span>" + " <span style='color:" + color_red + "'>" + red + "</span>" + "</b></div>";
+                out += "<div class='user-role'>" + role + "</div>";
                 out += "<div class='user-actions'>";
                 if (userlist[z].userid != my_userid) {
                     if (userlist[z].admin_rights == 'full')

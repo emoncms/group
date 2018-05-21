@@ -228,30 +228,24 @@ class Group {
         $userlist = array();
         $result = $this->mysqli->query("SELECT userid,role,admin_rights FROM group_users WHERE groupid = $groupid");
         while ($row = $result->fetch_object()) {
-// Get feeds and calculate number of active feeds
+            // Get feeds
             $userfeeds = $this->feed->get_user_feeds($row->userid);
-            $active = 0;
             $total = 0;
-            $now = time();
-            foreach ($userfeeds as $feed) {
-                $diff = $now - $feed['time'];
-                if ($diff < (3600 * 24 * 2))
-                    $active++;
+            foreach ($userfeeds as $feed)
                 $total++;
-            }
 
-// Get inputs
+            // Get inputs
             $userinputs = $this->input->get_inputs($row->userid);
 
-// Get tasks
+            // Get tasks
             $user_tasks = array();
             if (is_null($this->task) === false)
                 $user_tasks = $this->task->get_tasks($row->userid);
 
-// Get user info
+            // Get user info
             $u = $this->user->get($row->userid);
 
-// Add everything to the array
+            // Add everything to the array
             $userlist[] = array(
                 "userid" => (int) $row->userid,
                 "username" => $u->username,
@@ -259,7 +253,6 @@ class Group {
                 "role" => (int) $row->role,
                 "admin_rights" => $row->admin_rights,
                 // feeds an inputs
-                "activefeeds" => (int) $active,
                 "totalfeeds" => (int) $total,
                 "feedslist" => $userfeeds,
                 "inputslist" => $userinputs,
