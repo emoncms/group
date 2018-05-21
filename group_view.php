@@ -527,6 +527,10 @@ JAVASCRIPT
                     else
                         red++;
                 });
+                green = green > 0 ? green : '&nbsp;';
+                amber = amber > 0 ? amber : '&nbsp;';
+                orange = orange > 0 ? orange : '&nbsp;';
+                red = red > 0 ? red : '&nbsp;';
                 // html user
                 out += "<div class='user' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-info'>";
