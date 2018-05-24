@@ -9,6 +9,9 @@
   Part of the OpenEnergyMonitor project:
   http://openenergymonitor.org
 
+  Group module has been developed by Carbon Co-op
+  https://carbon.coop/
+ 
  */
 
 // Access
