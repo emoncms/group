@@ -279,7 +279,6 @@ class Group {
         foreach ($groups as &$group) {
             $group['users'] = $this->userlist($session_userid, $group['groupid']); // only groups where the session_user is admin or subadmin will return the list of users
         }
-        $sdf = 1;
         return $groups;
     }
 
@@ -972,8 +971,8 @@ class Group {
         }
         return array("result" => $total, "count" => $count);
     }
-
-    // Development    
+    
+     // Development    
     /*public function getapikeys($sessions_user, $groupid) {
     // Input sanitisation
         $groupid = (int) $groupid;
