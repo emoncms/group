@@ -11,7 +11,7 @@
 
   Group module has been developed by Carbon Co-op
   https://carbon.coop/
- 
+
  */
 
 // Access
@@ -40,7 +40,7 @@ class Group {
 
     // Create group, add creator user as administrator
     public function create($userid, $name, $description, $organization, $area, $visibility, $access) {
-    // Input sanitisation
+        // Input sanitisation
         $userid = (int) $userid;
         $name = preg_replace('/[^\w\s-:]/', '', $name);
         $description = preg_replace('/[^\w\s-:]/', '', $description);
@@ -138,7 +138,7 @@ class Group {
 
     // Add user to a group if admin user knows account username and password
     public function add_user_auth($admin_userid, $groupid, $username, $password, $role) {
-    // Input sanitisation
+        // Input sanitisation
         $admin_userid = (int) $admin_userid;
         $groupid = (int) $groupid;
         $role = (int) $role;
@@ -317,14 +317,14 @@ class Group {
         // Load all the groups the user has access (including users and feeds
         $groups = $this->mygroups($session_userid);
 
-    // Check if feed is public
+        // Check if feed is public
         $feed_is_public = false;
         $feed_found = false;
         $f = $this->feed->get($feedid);
         if ($f['public'])
             $feed_is_public = true;
         else {
-    // Search for the feed in user's groups
+            // Search for the feed in user's groups
             foreach ($groups as $group) {
                 if (!array_key_exists('success', $group['users'])) { // if $session_user is not admin or subadmin of the group then $group['users']['success'] is false, otherwise it is an array of users
                     foreach ($group['users'] as $user) {
@@ -763,7 +763,7 @@ class Group {
             $download = $this->feed->csv_export($feedid, $start, $end, $interval, $timezone, $name);
         else
             $download = $this->feed->csv_export_multi($feedid, $start, $end, $interval, $timezone, $name);
-        
+
         return $download;
     }
 
@@ -940,6 +940,20 @@ class Group {
         }
     }
 
+    public function get_groupid($group_name) {
+        $group_name = preg_replace('/[^\w\s-:]/', '', $group_name);
+        $stmt = $this->mysqli->prepare("SELECT id FROM groups WHERE name = ?");
+        $stmt->bind_param("s", $group_name);
+        if (!$stmt->execute())
+            return false;
+        $stmt->store_result();
+        if ($stmt->num_rows != 1)
+            return false;
+        $stmt->bind_result($groupid);
+        $row = $stmt->fetch();
+        return $groupid;
+    }
+
 // --------------------------------------------------------------------
 // Aggregation
 // --------------------------------------------------------------------
@@ -974,21 +988,20 @@ class Group {
         }
         return array("result" => $total, "count" => $count);
     }
-    
-     // Development    
-    /*public function getapikeys($sessions_user, $groupid) {
-    // Input sanitisation
-        $groupid = (int) $groupid;
-        $sessions_user = (int) $sessions_user;
 
-        $userlist = $this->userlist($sessions_user, $groupid);
+    // Development    
+    /* public function getapikeys($sessions_user, $groupid) {
+      // Input sanitisation
+      $groupid = (int) $groupid;
+      $sessions_user = (int) $sessions_user;
 
-        $asd = 0;
-        foreach ($userlist as $user) {
-            if ($this->is_group_admin($groupid, $sessions_user) && $this->administrator_rights_over_user($groupid, $user['userid']))
-                $list[] = $this->user->get_apikey_write($user['userid']);
-        }
-        return $list;
-    }*/
+      $userlist = $this->userlist($sessions_user, $groupid);
 
+      $asd = 0;
+      foreach ($userlist as $user) {
+      if ($this->is_group_admin($groupid, $sessions_user) && $this->administrator_rights_over_user($groupid, $user['userid']))
+      $list[] = $this->user->get_apikey_write($user['userid']);
+      }
+      return $list;
+      } */
 }
