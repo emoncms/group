@@ -535,7 +535,7 @@ class Group {
     }
 
     // Used to enforce unique group names
-    private function exists_name($group_name) {
+    public function exists_name($group_name) {
         // Input sanitisation
         $group_name = preg_replace('/[^\w\s-:]/', '', $group_name);
 
