@@ -632,7 +632,7 @@ class Group {
 
         // Password
         if ($password != '') {
-            $result = $this->user->set_password($to_set_userid, $password);
+            $result = $this->set_password($to_set_userid, $password);
             if ($result['success'] == false) {
                 $this->log->error('Password ' . $to_set_userid . ' not updated ' . '$groupid');
                 $result['message'] = 'User info updated except role and/or password - ' . $result['message'];
@@ -653,6 +653,17 @@ class Group {
         return $result;
     }
 
+    private function set_password($userid, $new) {
+        $userid = intval($userid);
+        if (strlen($new) < 4 || strlen($new) > 250)
+            return array('success' => false, 'message' => _("Password length error"));
+        $hash = hash('sha256', $new);
+        $salt = md5(uniqid(rand(), true));
+        $password = hash('sha256', $salt . $hash);
+        $this->mysqli->query("UPDATE users SET password = '$password', salt = '$salt' WHERE id = '$userid'");
+        return array('success' => true);
+    }
+    
     public function is_group_member($groupid, $userid) {
         // Input sanitisation
         $userid = (int) $userid;
