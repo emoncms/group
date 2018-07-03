@@ -132,7 +132,7 @@ MODALS
             <input id="group-addmember-username" type="text"></p>
 
         <p>Password:<br>
-            <input id="group-addmember-password" type="password"> <i class="icon-eye-open show-password"></i></p>
+            <input id="group-addmember-password" type="password"> <i class="icon-eye-open show-password"></i><span class="generate-password" style="cursor:pointer"> Generate pasword</span></p>
 
         <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
@@ -161,7 +161,7 @@ MODALS
         <p>Username:<br>
             <input id="group-createuseraddtogroup-username" type="text"></p>
         <p>Password:<br>
-            <input id="group-createuseraddtogroup-password" type="password"> <i class="icon-eye-open show-password"> </i></p>
+            <input id="group-createuseraddtogroup-password" type="password"> <i class="icon-eye-open show-password"> </i> <span class="generate-password" style="cursor:pointer"> Generate pasword</span></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
         <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
@@ -709,6 +709,17 @@ JAVASCRIPT
                 processlist_ui.feedlist[feed.id].name = user.username + ": " + feed.name;
             });
         });
+    }
+
+    // Generate random password
+    function generatePassword() {
+        var length = 8,
+                charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
+                retVal = "";
+        for (var i = 0, n = charset.length; i < length; ++i) {
+            retVal += charset.charAt(Math.floor(Math.random() * n));
+        }
+        return retVal;
     }
 
 // ----------------------------------------------------------------------------------------
@@ -1388,7 +1399,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
         }, 100);
     });
 // ----------------------------------------------------------------------------------------
-// Show password
+// Passwords
 // ----------------------------------------------------------------------------------------
     $('#group-addmember-modal .show-password').hover(function () {
         $('#group-addmember-password').attr('type', 'text');
@@ -1402,6 +1413,15 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('#group-createuseraddtogroup-password').attr('type', 'password');
         $('#group-createuseraddtogroup-password-confirm').attr('type', 'password');
     });
+    $('#group-addmember-modal').on('click','.generate-password', function(){
+        var pwd = generatePassword();
+        $('#group-addmember-password').val(pwd);
+    })
+    $('#group-createuseraddtogroup-modal').on('click','.generate-password', function(){
+        var pwd = generatePassword();
+        $('#group-createuseraddtogroup-password').val(pwd);
+        $('#group-createuseraddtogroup-password-confirm').val(pwd);
+    })
 
 // ----------------------------------------------------------------------------------------
 // Other
