@@ -1,5 +1,4 @@
 <?php
-
 /*
   All Emoncms code is released under the GNU Affero General Public License.
   See COPYRIGHT.txt and LICENSE.txt.
@@ -11,7 +10,7 @@
 
   Group module has been developed by Carbon Co-op
   https://carbon.coop/
- 
+
  */
 
 defined('EMONCMS_EXEC') or die('Restricted access');
@@ -75,9 +74,9 @@ MAIN
         <div class="table-headers hide groupselected">
             <div class="user-name">Username</div>
             <div class="user-active-feeds">Feeds <i title="- Green: update time < 25s
-- Amber: 25s < update time < 60s
-- Orange: 60s < update time < 2h
-- Redr: 2h < update time" class=" icon-question-sign"></i></div>
+                                                    - Amber: 25s < update time < 60s
+                                                    - Orange: 60s < update time < 2h
+                                                    - Redr: 2h < update time" class=" icon-question-sign"></i></div>
             <div class="user-role">Role <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i></div>
             <div class="multiple-feeds-actions">
                 <button class="btn feed-graph hide" title="Graph view"><i class="icon-eye-open"></i></button>                
@@ -133,7 +132,7 @@ MODALS
             <input id="group-addmember-username" type="text"></p>
 
         <p>Password:<br>
-            <input id="group-addmember-password" type="password"></p>
+            <input id="group-addmember-password" type="password"> <i class="icon-eye-open show-password"></i></p>
 
         <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
@@ -162,7 +161,7 @@ MODALS
         <p>Username:<br>
             <input id="group-createuseraddtogroup-username" type="text"></p>
         <p>Password:<br>
-            <input id="group-createuseraddtogroup-password" type="password"></p>
+            <input id="group-createuseraddtogroup-password" type="password"> <i class="icon-eye-open show-password"> </i></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
         <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
@@ -435,7 +434,8 @@ JAVASCRIPT
                 }
             }
         }, 100);
-    } else {
+    }
+    else {
         $('.groupselected').hide();
         $("#nogroupselected").show(); // Hide no group selected alert
     }
@@ -477,7 +477,8 @@ JAVASCRIPT
             $('#userlist-alert h4').html('No users to show');
             $('#userlist-alert p').html(userlist.message);
             $('#userlist-alert').show();
-        } else {
+        }
+        else {
             // Sort userlist
             userlist.sort(function (a, b) {
                 var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
@@ -500,7 +501,8 @@ JAVASCRIPT
         // Html
         if (userlist.success != undefined) {
             alert(userlist.message);
-        } else {
+        }
+        else {
             // Hide alert message
             $('#userlist-alert').hide();
             var out = "";
@@ -738,7 +740,8 @@ JAVASCRIPT
         var result = group.create(name, description, organization, area, visibility, access);
         if (!result.success) {
             alert(result.message);
-        } else {
+        }
+        else {
             $('#group-create-modal').modal('hide');
             draw_grouplist();
         }
@@ -766,7 +769,8 @@ JAVASCRIPT
         var result = group.editgroup(selected_groupid, name, description, organization, area, visibility, access);
         if (!result.success) {
             alert(result.message);
-        } else {
+        }
+        else {
             draw_grouplist();
             $('#groupname').html(grouplist[selected_groupindex].name);
             $('#groupdescription').html(grouplist[selected_groupindex].description);
@@ -788,7 +792,8 @@ JAVASCRIPT
         var result = group.addmemberauth(selected_groupid, username, password, access);
         if (!result.success) {
             alert(result.message);
-        } else {
+        }
+        else {
             $('#group-addmember-modal').modal('hide');
             draw_userlist(selected_groupid);
         }
@@ -813,7 +818,8 @@ JAVASCRIPT
             var result = group.createuseraddtogroup(selected_groupid, email, username, password, role);
             if (!result.success) {
                 alert(result.message);
-            } else {
+            }
+            else {
                 $('#group-createuseraddtogroup-modal').modal('hide');
                 draw_userlist(selected_groupid);
             }
@@ -837,7 +843,8 @@ JAVASCRIPT
         var uid = $(this).attr('uid');
         if ($(this).is(':checked')) {
             $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', 'checked');
-        } else
+        }
+        else
             $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', '');
     });
     $('body').on('click', '.feed', function (e) {
@@ -869,7 +876,8 @@ JAVASCRIPT
         var admin_rights = $(this).attr("admin-rights");
         if (admin_rights != "full") {
             $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', true);
-        } else {
+        }
+        else {
             $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', false);
         }
 
@@ -883,28 +891,33 @@ JAVASCRIPT
             if (what_to_do == 'remove-from-group') {
                 $('#remove-user-modal-step-2').html('<p>Are you sure you want to remove this user from group?</p>');
                 $(this).attr('action', 'remove-from-group');
-            } else {
+            }
+            else {
                 $('#remove-user-modal-step-2').html('<p>Are you sure you wish to completely delete this user from the database?</p><p>All the data will be lost</p>');
                 $(this).attr('action', 'delete-from-database');
             }
             $('#remove-user-modal-step-2').show();
             $('#remove-user-action').html('Done')
-        } else if (action == "remove-from-group") {
+        }
+        else if (action == "remove-from-group") {
             $('#remove-user-modal').modal('hide');
             var userid = $('#remove-user-modal').attr("uid");
             var result = group.removeuser(selected_groupid, userid);
             if (!result.success) {
                 alert(result.message);
-            } else {
+            }
+            else {
                 draw_userlist(selected_groupid);
             }
-        } else if (action == "delete-from-database") {
+        }
+        else if (action == "delete-from-database") {
             $('#remove-user-modal').modal('hide');
             var userid = $('#remove-user-modal').attr("uid");
             var result = group.fullremoveuser(selected_groupid, userid);
             if (!result.success) {
                 alert(result.message);
-            } else {
+            }
+            else {
                 draw_userlist(selected_groupid);
             }
         }
@@ -1030,7 +1043,8 @@ JAVASCRIPT
         var result = group.deletegroup(selected_groupid);
         if (!result.success) {
             alert(result.message);
-        } else {
+        }
+        else {
             draw_grouplist();
             $("#groupname").html("Users");
             $("#groupdescription").html("");
@@ -1071,7 +1085,8 @@ JAVASCRIPT
             $("#SelectedExport").html("Download " + feedids.length + " feeds");
             $("#export").attr('name', selected_group);
             calculate_download_size(feedids.length);
-        } else {
+        }
+        else {
             $("#export").attr('export-type', "feed");
             $("#export").attr('feedid', $(this).attr('fid'));
             var name = $(this).attr('tag') + ":" + $(this).attr('name');
@@ -1113,7 +1128,8 @@ JAVASCRIPT
         $("#export-timezone-offset").prop("disabled", $("#export-timeformat").prop('checked'));
         if ($("#export").attr('export-type') == 'group') {
             var downloadsize = calculate_download_size($("#export").attr('feedcount'));
-        } else {
+        }
+        else {
             calculate_download_size(1);
         }
     });
@@ -1121,7 +1137,8 @@ JAVASCRIPT
     {
         if ($("#export").attr('export-type') == 'group') {
             var downloadsize = calculate_download_size($("#export").attr('feedcount'));
-        } else {
+        }
+        else {
             calculate_download_size(1);
         }
     });
@@ -1168,7 +1185,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('#feedExportModal').modal('hide');
         if ($(this).attr('export-type') == 'group') {
             var result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
-        } else {
+        }
+        else {
             var result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
         }
     });
@@ -1217,7 +1235,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $('.multiple-feeds-actions button').show();
             if (task_support === false)
                 $('button.create-task').hide();
-        } else
+        }
+        else
             $('.multiple-feeds-actions button').hide();
         if (grouplist[selected_groupindex].role != 1)
             $('.if-admin').hide();
@@ -1285,7 +1304,64 @@ echo $feed_settings['csvdownloadlimit_mb'];
                         if (user.tags[tag].indexOf(typed) != -1) {
                             $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
                             $('.search-list-tags-show').show();
-                        } else if (tag.indexOf(typed) != -1) {
+                        }
+                        else if (tag.indexOf(typed) != -1) {
+                            $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                            $('.search-list-tags-show').show();
+                        }
+                    }
+                });
+            });
+        }
+    });
+    $("body").on('click', '.search-match', function (e) {
+        var groupid = $(this).attr('groupid');
+        var userid = $(this).attr('userid');
+        var tag = $(this).attr('tag');
+        $('.group[gid=' + groupid + ']').click();
+        $('.user[uid=' + userid + ']').click();
+    });
+    $("body").on('focusout', '#search-box', function (e) {
+        setTimeout(function () { // we delay the execution to allow the click on .search-match to happen
+            $('.search-list-groups-show').hide();
+            $('.search-list-users-show').hide();
+            $('.search-list-tags-show').hide();
+            $('#search-list-groups').html('');
+            $('#search-list-users').html('');
+            $('#search-list-tags').html('');
+        }, 100);
+    });
+    // ----------------------------------------------------------------------------------------
+// Action: search
+// ----------------------------------------------------------------------------------------
+    $("body").on('focus', '#search-box', function (e) {
+        summary_for_search = group.extendedgrouplist();
+    });
+    $("body").on('keyup', '#search-box', function (e) {
+        $('.search-list-groups-show').hide();
+        $('.search-list-users-show').hide();
+        $('.search-list-tags-show').hide();
+        $('#search-list-groups').html('');
+        $('#search-list-users').html('');
+        $('#search-list-tags').html('');
+        var typed = $('#search-box').val();
+        if (typed.length > 2) {
+            summary_for_search.forEach(function (group) {
+                if (group.name.indexOf(typed) != -1) {
+                    $('#search-list-groups').append('<p class="search-match" groupid="' + group.groupid + '">' + group.name + '</p>');
+                    $('.search-list-groups-show').show();
+                }
+                group.users.forEach(function (user) {
+                    if (user.username.indexOf(typed) != -1) {
+                        $('#search-list-users').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '">' + group.name + ': ' + user.username + '</p>');
+                        $('.search-list-users-show').show();
+                    }
+                    for (var tag in user.tags) {
+                        if (user.tags[tag].indexOf(typed) != -1) {
+                            $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                            $('.search-list-tags-show').show();
+                        }
+                        else if (tag.indexOf(typed) != -1) {
                             $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
                             $('.search-list-tags-show').show();
                         }
@@ -1312,6 +1388,21 @@ echo $feed_settings['csvdownloadlimit_mb'];
         }, 100);
     });
 // ----------------------------------------------------------------------------------------
+// Show password
+// ----------------------------------------------------------------------------------------
+    $('#group-addmember-modal .show-password').hover(function () {
+        $('#group-addmember-password').attr('type', 'text');
+    }, function () {
+        $('#group-addmember-password').attr('type', 'password');
+    });
+    $('#group-createuseraddtogroup-modal .show-password').hover(function () {
+        $('#group-createuseraddtogroup-password').attr('type', 'text');
+        $('#group-createuseraddtogroup-password-confirm').attr('type', 'text');
+    }, function () {
+        $('#group-createuseraddtogroup-password').attr('type', 'password');
+        $('#group-createuseraddtogroup-password-confirm').attr('type', 'password');
+    });
+
 // ----------------------------------------------------------------------------------------
 // Other
 // ----------------------------------------------------------------------------------------
@@ -1339,7 +1430,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
             $(".sidebar").css("left", "0");
             $("#wrapper").css("padding-left", "0");
             $("#sidebar-open").show();
-        } else {
+        }
+        else {
             $(".sidebar").css("left", "250px");
             $("#wrapper").css("padding-left", "250px");
             $("#sidebar-open").hide();
@@ -1402,7 +1494,8 @@ echo $feed_settings['csvdownloadlimit_mb'];
             else
                 $('.task[taskid=' + taskid + ']').parents('.task-tag').remove();
             $("#delete-task-modal").modal('hide');
-        } else {
+        }
+        else {
             alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
         }
     });
@@ -1494,10 +1587,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
             if (result.success) {
                 draw_userlist(selected_groupid);
                 $("#processlistModal").modal('hide');
-            } else {
+            }
+            else {
                 alert('There have been some errors saving the process lists:\n' + result.message.replace(/\\n/g, '\n'));
             }
-        } else { // we are editing the processlist of an existing task
+        }
+        else { // we are editing the processlist of an existing task
             var taskid = $(this).attr('taskid');
             var uid = $(this).attr('uid');
             var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
