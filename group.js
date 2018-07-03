@@ -136,6 +136,15 @@ var group = {
             }});
         return result;
     },
+    'sendlogindetails': function (groupid, email, userid, password, role) {
+        var result = {};
+        $.ajax({url: path + "group/sendlogindetails", data: "groupid=" + groupid + "&email=" + email + "&userid=" + userid + "&password=" + password + "&role=" + role, dataType: 'json', async: false, success: function (data) {
+                result = data;
+                //console.log(data.responseText);
+            }});
+        return result;
+    },
+    
 // Add mock data to users - Used during development
     'getapikeys': function (groupid) {
         var result = {};

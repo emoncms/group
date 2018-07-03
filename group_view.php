@@ -171,6 +171,7 @@ MODALS
             <!--<option value=3>Member</option>-->
             <option value=0 selected>Passive member</option>
         </select>
+        <p style='margin-left:15px'><input type="checkbox" id="group-createuseraddtogroup-send-email" /> Send login details to user's email</p>
         <div id="createuseraddtogroup-message"></div>
 
     </div>
@@ -823,6 +824,7 @@ JAVASCRIPT
         var password = $("#group-createuseraddtogroup-password").val();
         var confirm_password = $("#group-createuseraddtogroup-password-confirm").val();
         var role = $("#group-createuseraddtogroup-role").val();
+        var send_email = $('#group-createuseraddtogroup-send-email').prop('checked');
         if (password != confirm_password)
             $("#createuseraddtogroup-message").html("<div class='alert alert-error'>Passwords do not match</div>");
         else {
@@ -831,8 +833,20 @@ JAVASCRIPT
                 alert(result.message);
             }
             else {
-                $('#group-createuseraddtogroup-modal').modal('hide');
-                draw_userlist(selected_groupid);
+                if (send_email) {
+                    result = group.sendlogindetails(selected_groupid, email, result.userid, password, role);
+                    if (!result.success) {
+                        alert("User created\n\n" + result.message);
+                    }
+                    else {
+                        $('#group-createuseraddtogroup-modal').modal('hide');
+                        draw_userlist(selected_groupid);
+                    }
+                }
+                else {
+                    $('#group-createuseraddtogroup-modal').modal('hide');
+                    draw_userlist(selected_groupid);
+                }
             }
         }
     });
@@ -1413,11 +1427,11 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('#group-createuseraddtogroup-password').attr('type', 'password');
         $('#group-createuseraddtogroup-password-confirm').attr('type', 'password');
     });
-    $('#group-addmember-modal').on('click','.generate-password', function(){
+    $('#group-addmember-modal').on('click', '.generate-password', function () {
         var pwd = generatePassword();
         $('#group-addmember-password').val(pwd);
     })
-    $('#group-createuseraddtogroup-modal').on('click','.generate-password', function(){
+    $('#group-createuseraddtogroup-modal').on('click', '.generate-password', function () {
         var pwd = generatePassword();
         $('#group-createuseraddtogroup-password').val(pwd);
         $('#group-createuseraddtogroup-password-confirm').val(pwd);
@@ -1643,6 +1657,15 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('.delete-process[processid=0]').hide();
         // And also qwe make the "Changed press to save" button look like OK
         $('#processlistModal #save-processlist').html('Ok').removeClass('btn-warning').addClass('btn-success');
+    });
+
+    // development
+    $(document).ready(function () {
+        $('#createuseraddtogroup').click();
+        $('#group-createuseraddtogroup-email').val('cagabi@lapiluka.org');
+        $('#group-createuseraddtogroup-username').val('cagabi654');
+        $('#group-createuseraddtogroup-modal .generate-password').click();
+        $('#group-createuseraddtogroup-modal #group-createuseraddtogroup-send-email').click();
     });
 
 </script>

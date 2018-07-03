@@ -133,7 +133,7 @@ class Group {
         }
 
         $this->log->info("User $add_userid:$username added to group " . $groupid);
-        return array('success' => true, 'message' => _("User $add_userid:$username added"));
+        return array('success' => true, 'message' => _("User $add_userid:$username added"), 'userid' => $add_userid);
     }
 
     // Add user to a group if admin user knows account username and password
@@ -663,7 +663,7 @@ class Group {
         $this->mysqli->query("UPDATE users SET password = '$password', salt = '$salt' WHERE id = '$userid'");
         return array('success' => true);
     }
-    
+
     public function is_group_member($groupid, $userid) {
         // Input sanitisation
         $userid = (int) $userid;
@@ -963,6 +963,52 @@ class Group {
         $stmt->bind_result($groupid);
         $row = $stmt->fetch();
         return $groupid;
+    }
+
+    public function send_login_details($admin_userid, $groupid, $email_address, $userid, $password, $role) {
+        // Input sanitisation
+        $admin_userid = (int) $admin_userid;
+        $groupid = (int) $groupid;
+        $role = (int) $role;
+        $userid = (int) $userid;
+        // email, username and password checked within $user model
+
+        if (!$this->exists($groupid)) {
+            $this->log->warn("Group " . $groupid . " does not exist");
+            return array('success' => false, 'message' => _("Group does not exist"));
+        }
+
+        // 1. Check that user is a group administrator
+        if (!$this->is_group_admin($groupid, $admin_userid)) {
+            $this->log->warn("You haven't got enough permissions to add a member to this group - Session userid: " . $admin_userid);
+            return array('success' => false, 'message' => _("You haven't got enough permissions over this group"));
+        }
+
+        // 2. Check that userid belongs to group
+        $result = $this->is_group_member($groupid, $userid);
+        if (!$result) {
+            return array('success' => false, 'message' => _("Error, user doesn't belong to group"));
+        }
+
+        // 3. Send email
+        global $appname, $path;
+        $username = $this->user->get_username($userid);
+        require "Lib/email.php";
+        $email = new Email();
+        //$email->from(from);
+        $email->to($email_address);
+        $email->subject(_("Your new user account in $appname"));
+        $email->body(_("<p>An administrator has created a new account for you</p>"
+                        . "<ul><li>Username: $username</li><li>Password: $password</li></ul>"
+                        . "<p>You can login in <a href='$path'>$path</a></p>"));
+        $result = $email->send();
+        if (!$result['success']) {
+            $this->log->error("Email send returned error. emailto=" . $email_address . " message='" . $result['message'] . "'");
+            return array('success' => false, 'message' => _("Email could not be sent to user. Error: " . $result['message']));
+        }
+
+        $this->log->info("Email sent to $email_address");
+        return array('success' => true);
     }
 
 // --------------------------------------------------------------------
