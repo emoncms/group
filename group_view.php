@@ -1660,12 +1660,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
     });
 
     // development
-    $(document).ready(function () {
+   /* $(document).ready(function () {
         $('#createuseraddtogroup').click();
         $('#group-createuseraddtogroup-email').val('cagabi@lapiluka.org');
         $('#group-createuseraddtogroup-username').val('cagabi654');
         $('#group-createuseraddtogroup-modal .generate-password').click();
         $('#group-createuseraddtogroup-modal #group-createuseraddtogroup-send-email').click();
-    });
+    });*/
 
 </script>
