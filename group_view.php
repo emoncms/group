@@ -63,10 +63,10 @@ MAIN
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
             <!--<div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>-->
-            <div id="deletegroup" class="if-admin groupselected"><i class="icon-trash"></i>Delete group</div>
-            <div id="editgroup" class="if-admin groupselected"><i class="icon-edit"></i> Edit Group</div>
-            <div id="createuseraddtogroup" class="if-admin groupselected"><i class="icon-plus"></i>Create User</div>
-            <div id="addmember" class="if-admin groupselected"><i class="icon-plus"></i>Add Member</div>
+            <button id="deletegroup" class="btn if-admin groupselected"><i class="icon-trash"></i> Delete group</button>
+            <button id="editgroup" class="btn if-admin groupselected"><i class="icon-edit"></i> Edit Group</button>
+            <button id="createuseraddtogroup" class="btn if-admin groupselected"><i class="icon-plus"></i> Create User</button>
+            <button id="addmember" class="btn if-admin groupselected"><i class="icon-plus"></i> Add Member</button>
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
 
@@ -132,7 +132,8 @@ MODALS
             <input id="group-addmember-username" type="text"></p>
 
         <p>Password:<br>
-            <input id="group-addmember-password" type="password"> <i class="icon-eye-open show-password"></i><span class="generate-password" style="cursor:pointer"> Generate pasword</span></p>
+            <input id="group-addmember-password" type="password">
+            <button class="generate-password btn" style="margin-bottom: 10px"><i class="icon-eye-open show-password"></i> Generate pasword</button></p>
 
         <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
@@ -161,7 +162,8 @@ MODALS
         <p>Username:<br>
             <input id="group-createuseraddtogroup-username" type="text"></p>
         <p>Password:<br>
-            <input id="group-createuseraddtogroup-password" type="password"> <i class="icon-eye-open show-password"> </i> <span class="generate-password" style="cursor:pointer"> Generate pasword</span></p>
+            <input id="group-createuseraddtogroup-password" type="password">
+            <button class="generate-password btn" style="margin-bottom: 10px"><i class="icon-eye-open show-password"></i> Generate pasword</button></p>
         <p>Confirm password:<br>
             <input id="group-createuseraddtogroup-password-confirm" type="password"></p>
         <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
@@ -171,9 +173,11 @@ MODALS
             <!--<option value=3>Member</option>-->
             <option value=0 selected>Passive member</option>
         </select>
-        <p style='margin-left:15px'><input type="checkbox" id="group-createuseraddtogroup-send-email" /> Send login details to user's email</p>
-        <div id="createuseraddtogroup-message"></div>
+        <p style='margin-left:5px'>
+            <input type="checkbox" id="group-createuseraddtogroup-send-email" style="margin-bottom: 8px; width: 20px; height: 20px">
+            <label for="group-createuseraddtogroup-send-email" style="display: inline-block">Send login details to user's email</label></p>
 
+        <div id="createuseraddtogroup-message"></div>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
@@ -190,8 +194,8 @@ MODALS
     <div class="modal-body">
         <span id="remove-user-modal-step-1">
             <p>What do you want to do?</p>
-            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="remove-from-group" /><span>Remove user from group</span></div>
-            <div  class="radio"><input type="radio" name="removeuser-whattodo" value="delete" /><span>Completely remove user from database</span></div>
+            <div  class="radio"><input type="radio" name="removeuser-whattodo" id="removeuser-from-group" value="remove-from-group" /><label for="removeuser-from-group">Remove user from group</label></div>
+            <div  class="radio"><input type="radio" name="removeuser-whattodo" id="removeuser-delete" value="delete" /><label for="removeuser-delete">Completely remove user from database</label></div>
         </span>
         <span id="remove-user-modal-step-2" style="display:none"></span>
     </div>
@@ -550,17 +554,24 @@ JAVASCRIPT
                 // html user
                 out += "<div class='user' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-info'>";
-                if (userlist[z].admin_rights != 'full' || my_role != 1)
-                    out += "<div class='user-name'>" + userlist[z].username + "</div>";
-                else
-                    out += "<div class='user-name'><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "' username='" + userlist[z].username + "'>" + userlist[z].username + "</a></div>";
+                out += "<div class='user-name'>" + userlist[z].username + "</div>";
                 out += "<div class='user-active-feeds'><b> <span style='color:" + color_green + "'>" + green + "</span>" + " <span style='color:" + color_amber + "'>" + amber + "</span>" + " <span style='color:" + color_orange + "'>" + orange + "</span>" + " <span style='color:" + color_red + "'>" + red + "</span>" + "</b></div>";
                 out += "<div class='user-role'>" + role + "</div>";
                 out += "<div class='user-actions'>";
                 if (userlist[z].userid != my_userid) {
-                    if (userlist[z].admin_rights == 'full')
-                        out += "<i class='edit-user icon-edit if-admin'  style='cursor:pointer' title='Edit user' uid=" + userlist[z].userid + " uindex=" + z + "> </i>";
-                    out += "<i class='removeuser icon-trash if-admin' style='cursor:pointer' title='Remove user from group' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "> </i>";
+                    if (userlist[z].admin_rights == 'full') {
+                        if (my_role == 1) {
+                            out += "<button title='Log in as user'" +
+                                            " class='btn setuser if-admin'" +
+                                            " gid=" + selected_groupid +
+                                            " uid=" + userlist[z].userid +
+                                            " username='" + userlist[z].username + "'>" +
+                                            "    <i class='icon-user'></i>" +
+                                    "</button>";
+                        }
+                        out += "<button title='Edit user' class='btn edit-user if-admin' uid=" + userlist[z].userid + " uindex=" + z + "><i class='icon-edit'></i></button>";
+                    }
+                    out += "<button title='Remove user' class='btn removeuser if-admin' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "><i class='icon-trash'></i></button>";
                 }
                 out += "</div>"; // user-actions
                 out += "</div>"; // user-info
@@ -618,7 +629,14 @@ JAVASCRIPT
                                     if (userlist[z].admin_rights == 'full') {
                                         out += '<div id="task-actions">';
                                         out += "<div class='task-delete' title='Delete task' uid=" + userlist[z].userid + " taskid=" + task_again.id + "><i class='icon-trash if-admin' style='cursor:pointer'> </i></div> ";
-                                        out += "<div class='task-view' title=\"Edit task in user's account\"><a class='setuser' href='" + path + "group/setuser?groupid=" + selected_groupid + "&userid=" + userlist[z].userid + "&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "' username='" + userlist[z].username + "'><i class='icon-eye-open' /></a></div>";
+                                        out += "<div class='task-view setuser'"
+                                                    ' title="Edit task in user\'s account"' +
+                                                    " gid=" + selected_groupid +
+                                                    " uid=" + userlist[z].userid +
+                                                    " username='" + userlist[z].username  + "'" +
+                                                    " extra='&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "'>" +
+                                                    "    <i class='icon-eye-open' style='cursor:pointer'></i>" +
+                                                "</div>";
                                         out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
                                         out += "</div>"; // task-actions                             
                                     }
@@ -1442,7 +1460,14 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // ----------------------------------------------------------------------------------------
     $("body").on('click', ".setuser", function (e) {
         e.stopPropagation();
+
+        var extra = $(this).attr('extra');
+        extra = extra ? extra : "";
+
         alert('You are now logged as ' + $(this).attr('username'));
+        window.location = path + "group/setuser?groupid=" + $(this).attr('gid') +
+                                 "&userid=" + $(this).attr('uid') +
+                                 extra;
     });
 // ----------------------------------------------------------------------------------------
 // Sidebar
