@@ -6,3 +6,5 @@ Given a version number MAJOR.MINOR.PATCH:
 - PATCH version MUST be incremented if only backwards compatible bug fixes are introduced. A bug fix is defined as an internal change that fixes incorrect behaviour.
 
 
+## For Version 1.0.1
+ - Issue 39: full remove of user using delete_user method and hook

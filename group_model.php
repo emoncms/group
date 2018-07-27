@@ -468,7 +468,7 @@ class Group {
 
         // Check that user is an admin of group
         if (!$this->is_group_admin($groupid, $session_userid)) {
-            $this->log->error('Cannot delete group, sesion user is not admin - Session userid ' . $userid);
+            $this->log->error('Cannot delete user, sesion user is not admin - Session userid ' . $userid);
             return array('success' => false, 'message' => _("User is not a member or does not have access to group"));
         }
 
@@ -484,39 +484,12 @@ class Group {
             return array('success' => false, 'message' => _("Administrator has not got right over users"));
         }
 
-        // Delete inputs
-        $list_of_inputs = $this->input->getlist($userid_to_remove);
-        foreach ($list_of_inputs as $input) {
-            $this->input->delete($userid_to_remove, $input['id']);
-        }
-
-        // Delete feeds        
-        $list_of_feeds = $this->feed->get_user_feeds($userid_to_remove);
-        foreach ($list_of_feeds as $feed) {
-            $this->feed->delete($feed['id']);
-        }
-
-        // Delete dashboards
-        $result = $this->mysqli->query("SHOW TABLES LIKE 'dashboard'");
-        if ($result->num_rows > 0) {
-            $result = $this->mysqli->query("DELETE FROM dashboard WHERE `userid` = '$userid_to_remove'");
-        }
-
-        // Delete graphs
-        $result = $this->mysqli->query("SHOW TABLES LIKE 'graph'");
-        if ($result->num_rows > 0) {
-            $result = $this->mysqli->query("DELETE FROM graph WHERE `userid` = '$userid_to_remove'");
-        }
-
-        // Remove from group
-        $result = $this->remove_user($session_userid, $groupid, $userid_to_remove);
-        if ($result['success'] == false)
-            return array('success' => false, 'message' => _("User could not be deleted"));
-
-        // Remove from users table
-        $result = $this->mysqli->query("DELETE FROM users WHERE `id` = '$userid_to_remove'");
-        $this->log->info('User ' . $userid_to_remove . ' completely removed - Session userid ' . $session_userid);
-        return array('success' => true, 'message' => _("User completely removed"));
+        // Remove user
+        require "Modules/user/deleteuser.php";
+        $result = "PERMANENT DELETE:\n";
+        $result .= delete_user($userid_to_remove, "permanentdelete");
+        $result .= call_hook('on_delete_user', ['userid' => $userid_to_remove, 'mode' => 'permanentdelete']);
+        return array('success' => true, 'message' => $result);
     }
 
     // Basic check if group of id exists
