@@ -446,7 +446,7 @@ JAVASCRIPT
     // ----------------------------------------------------------------------------------------
     // Draw: grouplist
     // ----------------------------------------------------------------------------------------
-    draw_grouplist();
+    refresh_grouplist();
 
     // ----------------------------------------------------------------------------------------    
     // Startup group
@@ -458,7 +458,7 @@ JAVASCRIPT
             for (var gindex in grouplist) {
                 if (grouplist[gindex].name == selected_group) {
                     $(".group[gindex=" + gindex + "]").addClass('activated');
-                    draw_group(gindex);
+                    select_group(gindex);
                 }
             }
         }, 100);
@@ -472,8 +472,14 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Functions
 // ----------------------------------------------------------------------------------------
+    function refresh_grouplist() {
+        group.grouplist(function(groups) {
+            grouplist = groups
+            draw_grouplist()
+        })
+    }
+
     function draw_grouplist() {
-        grouplist = group.grouplist();
         var out = "";
         for (var z in grouplist) {
             out += "<div class='group' gindex=" + z + " gid=" + grouplist[z].groupid + ">" + grouplist[z].name + "</div>";
@@ -481,32 +487,41 @@ JAVASCRIPT
         $("#grouplist").html(out);
     }
 
-    function draw_group(gindex) {
-        var groupid = grouplist[gindex].groupid;
-        selected_groupid = groupid;
-        selected_groupindex = gindex;
-        draw_userlist(groupid);
-        $("#groupname").html(grouplist[gindex].name); // Place group name in title
-        $("#groupdescription").html(grouplist[gindex].description); // Place group description in title
+    function select_group(index) {
+        selected_groupindex = index;
+        selected_groupid = grouplist[index].groupid;
+        draw_group();
+        refresh_userlist(selected_groupid);
+    }
+
+    function draw_group() {
+        var group = grouplist[selected_groupindex];
+
+        $("#groupname").html(group.name); // Place group name in title
+        $("#groupdescription").html(group.description); // Place group description in title
         $('.groupselected').show();
         $("#nogroupselected").hide(); // Hide no group selected alert
-        if (grouplist[gindex].role != 1)
+        if (group.role != 1)
             $('.if-admin').hide();
     }
 
-    function draw_userlist(groupid) {
+    function refresh_userlist(groupid) {
         // Get session user role in group
-        my_role = group.getsessionuserrole(groupid);
-        // Load listof members
-        userlist = group.userlist(groupid);
-        if (userlist.success == false) {
-            $('#userlist-div').hide();
-            $('#userlist-table').hide();
-            $('#userlist-alert h4').html('No users to show');
-            $('#userlist-alert p').html(userlist.message);
-            $('#userlist-alert').show();
-        }
-        else {
+        group.getsessionuserrole(groupid, function(result) {
+            my_role = result
+
+            // Load list of members
+            group.userlist(groupid, draw_userlist, function fail(message) {
+                $('#userlist-div').hide();
+                $('#userlist-table').hide();
+                $('#userlist-alert h4').html('No users to show');
+                $('#userlist-alert p').html(userlist.message);
+                $('#userlist-alert').show();
+            });
+        });
+    }
+
+    function draw_userlist(userlist) {
             // Sort userlist
             userlist.sort(function (a, b) {
                 var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
@@ -524,13 +539,9 @@ JAVASCRIPT
             // Replace feeds available for processes - processlist_ui.init(1) has loaded current user's ones, we are goin to add feeds of all users in the group
             if (task_support == true)
                 processlist_load_group_users_feeds();
-        }
 
-        // Html
-        if (userlist.success != undefined) {
-            alert(userlist.message);
-        }
-        else {
+            // Html
+
             // Hide alert message
             $('#userlist-alert').hide();
             var out = "";
@@ -601,7 +612,7 @@ JAVASCRIPT
 
                 // html feeds and tasks
                 out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
-                // Feeds                
+                // Feeds
                 out += "<div class='user-feedslist'>";
                 out += "<div class='user-feedslist-inner'>";
                 // Add tags
@@ -661,7 +672,7 @@ JAVASCRIPT
                                                 "    <i class='icon-eye-open' style='cursor:pointer'></i>" +
                                                 "</div>";
                                         out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
-                                        out += "</div>"; // task-actions                             
+                                        out += "</div>"; // task-actions
                                     }
                                     out += "</div>"; // task
                                 }
@@ -669,7 +680,7 @@ JAVASCRIPT
                             out += "</div>"; // task-tag
                         }
                     });
-                    out += "</div>"; // user-taskslist-inner                    
+                    out += "</div>"; // user-taskslist-inner
                     out += "</div>"; // .user-tasks
                 }
 
@@ -677,13 +688,10 @@ JAVASCRIPT
                 out += "</div>"; // user-feeds-inputs
                 out += "</div>"; // user
             }
-            $("#userlist-div").html(out); // Place userlist html in userlist table 
+            $("#userlist-div").html(out); // Place userlist html in userlist table
 
             // Show
             $('#userlist-div').show();
-
-        }
-
     }
 
     // Format value dynamically  (copied from feedlist_view.php)
@@ -774,62 +782,65 @@ JAVASCRIPT
         // Get selected group from attributes
         var gindex = $(this).attr("gindex");
         document.location.hash = grouplist[gindex].name
-        draw_group(gindex);
+        select_group(gindex);
     });
+
 // ----------------------------------------------------------------------------------------
 // Action: Group creation
 // ----------------------------------------------------------------------------------------
+
     $("body").on('click', '#groupcreate', function () {
         $('#group-create-modal input').val('');
         $('#group-create-modal').modal('show');
     });
+
     $("body").on('click', "#group-create-action", function () {
-        var name = $("#group-create-name").val();
-        var description = $("#group-create-description").val();
-        var organization = $("#group-create-organization").val() || 'N/A';
-        var area = $("#group-create-area").val() || 'N/A';
-        var visibility = $("#group-create-visibility").val() || 'private';
-        var access = $("#group-create-access").val() || 'closed';
-        var result = group.create(name, description, organization, area, visibility, access);
-        if (!result.success) {
-            alert(result.message);
-        }
-        else {
+        var data = {
+            name: $("#group-create-name").val(),
+            description: $("#group-create-description").val(),
+            organization: $("#group-create-organization").val() || 'N/A',
+            area: $("#group-create-area").val() || 'N/A',
+            visibility: $("#group-create-visibility").val() || 'private',
+            access: $("#group-create-access").val() || 'closed'
+        };
+
+        group.create(data, function(result) {
             $('#group-create-modal').modal('hide');
-            draw_grouplist();
-        }
-    }
-    );
+            refresh_grouplist();
+        });
+    });
+
 // ----------------------------------------------------------------------------------------
 // Action: Edit group
 // ----------------------------------------------------------------------------------------
     $("body").on('click', "#editgroup", function () {
-        $("#edit-group-name").val(grouplist[selected_groupindex].name);
-        $("#edit-group-description").val(grouplist[selected_groupindex].description);
-        $("#edit-group-organization").val(grouplist[selected_groupindex].organization);
-        $("#edit-group-area").val(grouplist[selected_groupindex].area);
-        $("#edit-group-visibility").val(grouplist[selected_groupindex].visibility);
-        $("#edit-group-access").val(grouplist[selected_groupindex].access);
+        var group = grouplist[selected_groupindex];
+        $("#edit-group-name").val(group.name);
+        $("#edit-group-description").val(group.description);
+        $("#edit-group-organization").val(group.organization);
+        $("#edit-group-area").val(group.area);
+        $("#edit-group-visibility").val(group.visibility);
+        $("#edit-group-access").val(group.access);
         $('#edit-group-modal').modal('show');
     });
     $("body").on('click', '#edit-group-action', function () {
-        var name = $("#edit-group-name").val();
-        var description = $("#edit-group-description").val();
-        var organization = $("#edit-group-organization").val() || 'N/A';
-        var area = $("#edit-group-area").val() || 'N/A';
-        var visibility = $("#edit-group-visibility").val() || 'private';
-        var access = $("#edit-group-access").val() || 'closed';
-        var result = group.editgroup(selected_groupid, name, description, organization, area, visibility, access);
-        if (!result.success) {
-            alert(result.message);
+        var data = {
+            groupid: selected_groupid,
+            name: $("#edit-group-name").val(),
+            description: $("#edit-group-description").val(),
+            organization: $("#edit-group-organization").val() || 'N/A',
+            area: $("#edit-group-area").val() || 'N/A',
+            visibility: $("#edit-group-visibility").val() || 'private',
+            access: $("#edit-group-access").val() || 'closed',
         }
-        else {
-            draw_grouplist();
-            $('#groupname').html(grouplist[selected_groupindex].name);
-            $('#groupdescription').html(grouplist[selected_groupindex].description);
+
+        group.editgroup(data, function(result) {
+            refresh_grouplist();
+            setTimeout(draw_group, 100);
             $('#edit-group-modal').modal('hide');
-        }
+        })
     });
+
 // ----------------------------------------------------------------------------------------
 // Action: Add member
 // ----------------------------------------------------------------------------------------
@@ -839,21 +850,22 @@ JAVASCRIPT
         $('#group-addmember-modal').modal('show');
     });
     $("body").on('click', "#group-addmember-action", function () {
-        var username = $("#group-addmember-username").val();
-        var password = $("#group-addmember-password").val();
-        var access = $("#group-addmember-access").val();
-        var result = group.addmemberauth(selected_groupid, username, password, access);
-        if (!result.success) {
-            alert(result.message);
-        }
-        else {
+        var data = {
+            groupid: selected_groupid,
+            username: $("#group-addmember-username").val(),
+            password: $("#group-addmember-password").val(),
+            role: $("#group-addmember-access").val(),
+        };
+
+        group.addmemberauth(data, function() {
             $('#group-addmember-modal').modal('hide');
-            draw_userlist(selected_groupid);
-        }
+            refresh_userlist(selected_groupid);
+        });
     });
 // ----------------------------------------------------------------------------------------
 // Action: Create user and add to group
 // ----------------------------------------------------------------------------------------
+
     $("body").on('click', "#createuseraddtogroup", function () {
         $('#group-createuseraddtogroup-modal input').val('');
         $("#group-createuseraddtogroup-role").val(0);
@@ -861,42 +873,46 @@ JAVASCRIPT
         $('#group-createuseraddtogroup-email-body').val('');
         $('#group-createuseraddtogroup-modal').modal('show');
     });
+
     $("body").on('click', "#group-createuseraddtogroup-action", function () {
-        var name = $("#group-createuseraddtogroup-name").val();
-        var email = $("#group-createuseraddtogroup-email").val();
-        var username = $("#group-createuseraddtogroup-username").val();
-        var password = $("#group-createuseraddtogroup-password").val();
-        var confirm_password = $("#group-createuseraddtogroup-password-confirm").val();
-        var role = $("#group-createuseraddtogroup-role").val();
+        var data = {
+            groupid: selected_groupid,
+            email: $("#group-createuseraddtogroup-email").val(),
+            username: $("#group-createuseraddtogroup-username").val(),
+            password: $("#group-createuseraddtogroup-password").val(),
+            role: $("#group-createuseraddtogroup-role").val(),
+            name: $("#group-createuseraddtogroup-name").val(),
+        };
+
         var send_email = $('#group-createuseraddtogroup-send-email').prop('checked');
-        var subject = $('#group-createuseraddtogroup-email-subject').val();
-        var body = $('#group-createuseraddtogroup-email-body').val();
-        var send_copy = $('#group-createuseraddtogroup-send-copy').prop('checked');
-        if (password != confirm_password)
+        var confirm_password = $("#group-createuseraddtogroup-password-confirm").val();
+
+        if (data.password != confirm_password) {
             $("#createuseraddtogroup-message").html("<div class='alert alert-error'>Passwords do not match</div>");
-        else {
-            var result = group.createuseraddtogroup(selected_groupid, email, username, password, role, name);
-            if (!result.success) {
-                alert(result.message);
-            }
-            else {
-                if (send_email) {
-                    result = group.sendlogindetails(selected_groupid, result.userid, password, subject, body, send_copy);
-                    if (!result.success) {
-                        alert("User created but there was a problem sending the email\n\n" + result.message);
-                    }
-                    else {
-                        $('#group-createuseraddtogroup-modal').modal('hide');
-                        draw_userlist(selected_groupid);
-                    }
-                }
-                else {
-                    $('#group-createuseraddtogroup-modal').modal('hide');
-                    draw_userlist(selected_groupid);
-                }
-            }
+            return;
         }
+
+        group.createuseraddtogroup(data, function(result) {
+            if (send_email) {
+                var emailData = {
+                    groupid: selected_groupid,
+                    userid: result.userid,
+                    password: data.password,
+                    emailsubject: $('#group-createuseraddtogroup-email-subject').val(),
+                    template: $('#group-createuseraddtogroup-email-body').val(),
+                    sendcopy: $('#group-createuseraddtogroup-send-copy').prop('checked'),
+                }
+
+                group.sendlogindetails(emailData, function() {}, function fail(msg) {
+                    alert("User created but there was a problem sending the email:\n\n" + msg);
+                })
+            }
+
+            $('#group-createuseraddtogroup-modal').modal('hide');
+            refresh_userlist(selected_groupid);
+        });
     });
+
 // ----------------------------------------------------------------------------------------
 // Action: Show feeds of a user
 // ----------------------------------------------------------------------------------------
@@ -972,25 +988,27 @@ JAVASCRIPT
         }
         else if (action == "remove-from-group") {
             $('#remove-user-modal').modal('hide');
-            var userid = $('#remove-user-modal').attr("uid");
-            var result = group.removeuser(selected_groupid, userid);
-            if (!result.success) {
-                alert(result.message);
+
+            var data = {
+                groupid: selected_groupid,
+                userid: $('#remove-user-modal').attr("uid")
             }
-            else {
-                draw_userlist(selected_groupid);
-            }
+
+            group.removeuser(data, function() {
+                refresh_userlist(selected_groupid);
+            });
         }
         else if (action == "delete-from-database") {
             $('#remove-user-modal').modal('hide');
-            var userid = $('#remove-user-modal').attr("uid");
-            var result = group.fullremoveuser(selected_groupid, userid);
-            if (!result.success) {
-                alert(result.message);
+
+            var data = {
+                groupid: selected_groupid,
+                userid: $('#remove-user-modal').attr("uid")
             }
-            else {
-                draw_userlist(selected_groupid);
-            }
+
+            group.fullremoveuser(data, function() {
+                refresh_userlist(selected_groupid);
+            });
         }
     });
 // ----------------------------------------------------------------------------------------
@@ -1024,55 +1042,53 @@ JAVASCRIPT
         $('#edit-user-modal').modal('show');
     });
     $("body").on('click', "#edit-user-action", function () {
-        var userid = $('#edit-user-action').attr("uid");
-        var username = $('.edit-user-username').val();
-        var name = $('.edit-user-name').val();
-        var email = $('.edit-user-email').val();
-        var location = $('.edit-user-location').val();
-        var bio = $('.edit-user-bio').val();
-        var timezone = $('.edit-user-timezone').val();
-        var role = $('#edit-user-role').val();
-        var subject = $('#edit-user-email-subject').val();
-        var body = $('#edit-user-email-body').val();
-        var send_email = $('#edit-user-send-email').prop('checked');
-        var send_copy = $('#edit-user-send-copy').prop('checked');
-        var password = $('.edit-user-password').val();
-        var password_confirmation = $('.edit-user-confirm-password').val();
         var tags = {};
         $('#edit-user-tagslist div').each(function () {
             tags[$(this).attr('name')] = $(this).attr('value');
         });
-        tags = JSON.stringify(tags);
-        var ready_to_save = true;
-        if (password != '') {
-            if (password != password_confirmation) {
-                $('#edit-user-modal-message').show();
-                ready_to_save = false;
-            }
+
+        var data = {
+            groupid: selected_groupid,
+            userid: $('#edit-user-action').attr("uid"),
+            username: $('.edit-user-username').val(),
+            name: $('.edit-user-name').val(),
+            email: $('.edit-user-email').val(),
+            location: $('.edit-user-location').val(),
+            bio: $('.edit-user-bio').val(),
+            timezone: $('.edit-user-timezone').val(),
+            role: $('#edit-user-role').val(),
+            password: $('.edit-user-password').val(),
+            tags: JSON.stringify(tags),
+        };
+
+        var send_email = $('#edit-user-send-email').prop('checked');
+        var password_confirmation = $('.edit-user-confirm-password').val();
+
+        if (data.password == '' || data.password != password_confirmation) {
+            $('#edit-user-modal-message').show();
+            return;
         }
-        if (ready_to_save) {
-            var result = group.setuserinfo(userid, selected_groupid, username, name, email, location, bio, timezone, role, password, tags);
-            if (result.success != true)
-                alert(result.message);
-            else{
-                if (send_email) {
-                    result = group.sendlogindetails(selected_groupid, userid, password, subject, body, send_copy);
-                    if (!result.success) {
-                        alert("User edited but there was a problem sending the email\n\n" + result.message);
-                    }
-                    else {                        
-                        $('#edit-user-modal').modal('hide');
-                        draw_userlist(selected_groupid);
-                        $('#edit-user-modal-message').hide();
-                    }
+
+        group.setuserinfo(data, function() {
+            if (send_email) {
+                var emailData = {
+                    groupid: selected_groupid,
+                    userid: result.userid,
+                    password: data.password,
+                    emailsubject: $('#edit-user-email-subject').val(),
+                    template: $('#edit-user-email-body').val(),
+                    sendcopy: $('#edit-user-send-copy').prop('checked'),
                 }
-                else {
-                    $('#edit-user-modal').modal('hide');
-                    draw_userlist(selected_groupid);
-                    $('#edit-user-modal-message').hide();
-                }
+
+                group.sendlogindetails(data, function() {}, function fail(msg) {
+                    alert("User created but there was a problem sending the email:\n\n" + msg);
+                })
             }
-        }
+
+            $('#edit-user-modal').modal('hide');
+            $('#edit-user-modal-message').hide();
+            refresh_userlist(selected_groupid);
+        })
     });
     $("body").on('click', ".edit-user-tag-add", function () {
         $('#edit-user-modal-message-tag').hide();
@@ -1130,17 +1146,13 @@ JAVASCRIPT
     });
     $("body").on('click', "#delete-group-action", function () {
         $('#delete-group-modal').modal('hide');
-        var result = group.deletegroup(selected_groupid);
-        if (!result.success) {
-            alert(result.message);
-        }
-        else {
-            draw_grouplist();
+        group.deletegroup(selected_groupid, function() {
+            refresh_grouplist();
             $("#groupname").html("Users");
             $("#groupdescription").html("");
             $('.groupselected').hide();
             $("#nogroupselected").show();
-        }
+        });
     });
 // ----------------------------------------------------------------------------------------
 // Action: 
@@ -1266,19 +1278,27 @@ echo $feed_settings['csvdownloadlimit_mb'];
             var downloadsize = calculate_download_size($(this).attr('feedcount'));
         else
             var downloadsize = calculate_download_size(1);
-        if (downloadsize > (downloadlimit * 1048576)) {
+
+        if (downloadsize > (downloadlimit * 1024 * 1024)) {
             var r = confirm("Estimated download file size is large.\nServer could take a long time or abort depending on stored data size.\Limit is " + downloadlimit + "MB.\n\nTry exporting anyway?");
             if (!r)
                 return false;
         }
 
         $('#feedExportModal').modal('hide');
-        if ($(this).attr('export-type') == 'group') {
-            var result = group.csvexport(selected_groupid, $(this).attr('feedids'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
-        }
-        else {
-            var result = group.csvexport(selected_groupid, $(this).attr('feedid'), export_start + export_timezone_offset, export_end + export_timezone_offset, export_interval, export_timeformat, $(this).attr('name'));
-        }
+
+        var feedids = $(this).attr('export-type') == 'group' ?
+                                        $(this).attr('feedids') :
+                                        $(this).attr('feedid');
+
+        window.open(path + "group/csvexport" +
+            "?groupid=" + selected_groupid +
+            "&id=" + feedids +
+            "&start=" + (export_start + export_timezone_offset) +
+            "&end=" + (export_end + export_timezone_offset) +
+            "&interval=" + export_interval +
+            "&timeformat=" + export_timeformat +
+            "&name=" + $(this).attr('name'));
     });
     function calculate_download_size(feedcount) {
         var export_start = parse_timepicker_time($("#export-start").val());
@@ -1369,7 +1389,9 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // Action: search
 // ----------------------------------------------------------------------------------------
     $("body").on('focus', '#search-box', function (e) {
-        summary_for_search = group.extendedgrouplist();
+        group.extendedgrouplist(function(data) {
+            summary_for_search = data;
+        });
     });
     $("body").on('keyup', '#search-box', function (e) {
         $('.search-list-groups-show').hide();
@@ -1425,7 +1447,9 @@ echo $feed_settings['csvdownloadlimit_mb'];
 // Action: search
 // ----------------------------------------------------------------------------------------
     $("body").on('focus', '#search-box', function (e) {
-        summary_for_search = group.extendedgrouplist();
+        group.extendedgrouplist(function(data) {
+            summary_for_search = data;
+        });
     });
     $("body").on('keyup', '#search-box', function (e) {
         $('.search-list-groups-show').hide();
@@ -1595,22 +1619,20 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('#delete-task-modal').modal('show');
     });
     $("body").on('click', "#delete-task-action", function (e) {
-        var uid = $('#delete-task-modal').attr('uid');
-        var taskid = $('#delete-task-modal').attr('taskid');
+        var data = {
+            taskid: $('#delete-task-modal').attr('taskid'),
+            userid: $('#delete-task-modal').attr('uid'),
+            groupid: selected_groupid,
+        }
 
-        var result = group.deleteTask(taskid, uid, selected_groupid);
-        if (result.success) {
-            //draw_userlist(selected_groupid);
-            userlist = group.userlist(selected_groupid);
+        group.deleteTask(data, function (result) {
+            $("#delete-task-modal").modal('hide');
+
             if ($('.task[taskid=' + taskid + ']').siblings().length > 0)
                 $('.task[taskid=' + taskid + ']').remove();
             else
                 $('.task[taskid=' + taskid + ']').parents('.task-tag').remove();
-            $("#delete-task-modal").modal('hide');
-        }
-        else {
-            alert('There have been some problems deleting the task:\n' + result.message.replace(/\\n/g, '\n'));
-        }
+        });
     });
     $("body").on('click', ".task-edit-processlist", function (e) {
         e.stopPropagation();
@@ -1629,23 +1651,24 @@ echo $feed_settings['csvdownloadlimit_mb'];
     });
     $("body").on('click', ".task-enabled", function (e) {
         e.stopPropagation();
-        var taskid = $(this).attr('taskid');
+
         var userindex = $(this).attr('uindex');
-        var uid = userlist[userindex].userid;
-        var task = userlist[userindex].taskslist.find(function (task) {
-            return task.id == taskid
-        });
-        var new_value = task.enabled == '1' ? 0 : 1;
-        var result = group.setTaskEnabled(new_value, taskid, uid, selected_groupid);
-        if (result.success != undefined && result.success == false)
-            alert(result.message);
-        else {
-            userlist = group.userlist(selected_groupid);
-            task = userlist[userindex].taskslist.find(function (task) {
+        var user = userlist[userindex];
+
+        var data = {
+            taskid: $(this).attr('taskid'),
+            userid: user.userid,
+            groupid: selected_groupid,
+            enabled: task.enabled == '1' ? 0 : 1,
+        };
+
+        group.setTaskEnabled(data, function() {
+            var task = user.taskslist.find(function (task) {
                 return task.id == taskid
             });
+
             $(this).html(task.enabled == 1 ? 'On' : 'Off');
-        }
+        });
     });
     $('#taskCreate-confirm').on('click', function () {
         $('#task-create-message').hide();
@@ -1685,49 +1708,59 @@ echo $feed_settings['csvdownloadlimit_mb'];
         }
     });
     $("#processlistModal").on('click', '#save-processlist', function () {
-        if ($(this).attr('action') == 'create') { // We are creating task from the feeds ticked
-            var feedids = JSON.parse($('#processlistModal').attr('feedids'));
+        // We are creating task from the feeds ticked
+        if ($(this).attr('action') == 'create') {
+            // We remove the first process (source multi-feed) as we are already
+            // sending the list of feedids in another variable, more convenient this way
             var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
-            processlist = processlist.substring(processlist.indexOf(",") + 1); // We remove the first process (source multi-feed) as we are already sending the list of feedids in another variable, more convenient this way
-            var name = $('#processlistModal').attr('name');
-            var description = $('#processlistModal').attr('description');
-            var tag = $('#processlistModal').attr('tag');
-            var frequency = $('#processlistModal').attr('frequency');
-            var run_on = $('#processlistModal').attr('run_on');
-            var belongs_to = $('#processlistModal').attr('belongs-to');
+            processlist = processlist.substring(processlist.indexOf(",") + 1);
 
-            var result = group.setMultiFeedProcessList(feedids, processlist, selected_groupid, name, description, tag, frequency, run_on, belongs_to);
-            if (result.success) {
-                draw_userlist(selected_groupid);
+            var data = {
+                groupid: selected_groupid,
+                feedids: $('#processlistModal').attr('feedids'),
+                processlist: processlist,
+                name: $('#processlistModal').attr('name'),
+                description: $('#processlistModal').attr('description'),
+                tag: $('#processlistModal').attr('tag'),
+                frequency: $('#processlistModal').attr('frequency'),
+                run_on: $('#processlistModal').attr('run_on'),
+                belongs_to: $('#processlistModal').attr('belongs-to'),
+            };
+
+            var result = group.setMultiFeedProcessList(data, function win() {
+                refresh_userlist(selected_groupid);
                 $("#processlistModal").modal('hide');
-            }
-            else {
-                alert('There have been some errors saving the process lists:\n' + result.message.replace(/\\n/g, '\n'));
-            }
+            }, function fail() {
+                alert('There have been some errors saving the process lists:\n' + message.replace(/\\n/g, '\n'));
+            });
         }
         else { // we are editing the processlist of an existing task
-            var taskid = $(this).attr('taskid');
-            var uid = $(this).attr('uid');
-            var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
-            var result = group.setProcessList(taskid, uid, selected_groupid, processlist);
-            if (result.success != undefined && result.success == false)
-                alert(result.message);
-            else {
-                userlist = group.userlist(selected_groupid);
-                var user = userlist.find(function (user) {
-                    return user.userid == uid;
-                });
-                var task = user.taskslist.find(function (task, index) {
-                    return task.id == taskid;
-                });
-                var row = user.taskslist.findIndex(function (task) {
-                    return task.id == taskid;
-                });
-                table.data = user.taskslist; // we use it to draw some task fields
-                $('.task[taskid=' + taskid + '] .task-processlist').html(table.fieldtypes.processlist.draw(table, row, '', 'processList'));
-
-                $("#processlistModal").modal('hide');
+            var data = {
+                id: $(this).attr('taskid'),
+                userid: $(this).attr('uid'),
+                groupid: selected_groupid,
+                processlist: processlist_ui.encode(processlist_ui.contextprocesslist),
             }
+
+            group.setProcessList(data, function () {
+                group.userlist(selected_groupid, function (list) {
+                    var user = list.find(function (user) {
+                        return user.userid == uid;
+                    });
+                    var task = user.taskslist.find(function (task, index) {
+                        return task.id == taskid;
+                    });
+                    var row = user.taskslist.findIndex(function (task) {
+                        return task.id == taskid;
+                    });
+                    table.data = user.taskslist; // we use it to draw some task fields
+                    $('.task[taskid=' + taskid + '] .task-processlist').html(
+                        table.fieldtypes.processlist.draw(table, row, '', 'processList')
+                    );
+
+                    $("#processlistModal").modal('hide');
+                });
+            });
         }
     });
     $("#processlistModal").on('click', '#process-add', function () {

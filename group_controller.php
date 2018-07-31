@@ -104,10 +104,9 @@ function group_controller() {
             $result = $group->setuserinfo($session["userid"], post('groupid'), post("userid"), post('username'), post('name'), post('email'), post('bio'), post('timezone'), post('location'), post('role'), post('password'), post('tags'));
         }
 
-        // 
         if ($route->action == "setmultifeedprocesslist") {
             $route->format = "json";
-            $result = $group->set_multifeed_processlist($session["userid"], get('groupid'), get('feedids'), post("processlist"), post("name"), post("description"), post("tag"), post("frequency"), post("run_on"), post('belongs_to'));
+            $result = $group->set_multifeed_processlist($session["userid"], post('groupid'), post('feedids'), post("processlist"), post("name"), post("description"), post("tag"), post("frequency"), post("run_on"), post('belongs_to'));
         }
 
         if ($route->action == 'setprocesslist') {
