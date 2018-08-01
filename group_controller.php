@@ -11,7 +11,7 @@
 
   Group module has been developed by Carbon Co-op
   https://carbon.coop/
- 
+
  */
 
 
@@ -31,7 +31,7 @@ function group_controller() {
 
     $task = null;
     $result = $mysqli->query("SHOW TABLES LIKE 'tasks'");
-    if ($result->num_rows > 0) {
+    if (is_file("Modules/task/task_model")) {
         require_once "Modules/process/process_model.php";
         $process = new Process($mysqli, $input, $feed, $user->get_timezone($session['userid']));
         require_once "Modules/task/task_model.php";
@@ -131,21 +131,21 @@ function group_controller() {
                 $a = 3;
             }
         }
-        
+
         // group/sendlogindetails?groupid=1&email=EMAIL&username=USERNAME&password=PASSWORD&role=1
         if ($route->action == "sendlogindetails") {
             $route->format = "json";
             $result = $group->send_login_details($session["userid"], get("groupid"), get('email'), get("userid"), get("password"), get("role"));
         }
-        /*if ($route->action == 'updatetheme') {
-            if ($session['admin'] == 1) {
-                $route->format = "json";
-                require_once "Modules/update/update_model.php";
-                $update = new Update();
-                $result = $update->update('themes', 'nef');
-                $a = 3;
-            }
-        }*/
+        /* if ($route->action == 'updatetheme') {
+          if ($session['admin'] == 1) {
+          $route->format = "json";
+          require_once "Modules/update/update_model.php";
+          $update = new Update();
+          $result = $update->update('themes', 'nef');
+          $a = 3;
+          }
+          } */
         // --------------------------------------------------------------------------
         // SPECIAL USER SWITCHING FUNCTIONS
         // --------------------------------------------------------------------------
