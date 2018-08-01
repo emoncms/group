@@ -28,6 +28,7 @@ $fullwidth = true;
     <script type="text/javascript" src="<?php echo $path; ?>Lib/tablejs/custom-table-fields.js"></script>
     <script type="text/javascript" src="<?php echo $path; ?>Modules/task/task-custom-table-fields.js"></script>
 <?php } ?>
+
 <!-------------------------------------------------------------------------------------------
 MAIN
 -------------------------------------------------------------------------------------------->
@@ -99,6 +100,9 @@ MAIN
 <!-------------------------------------------------------------------------------------------
 MODALS
 -------------------------------------------------------------------------------------------->
+
+<div id="snackbar"></div>
+
 <!-- GROUP CREATE -->
 <div id="group-create-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="group-create-modal-label" aria-hidden="true" data-backdrop="static">
     <div class="modal-header">
@@ -472,6 +476,16 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
 // Functions
 // ----------------------------------------------------------------------------------------
+
+    function snackbar(text) {
+        var snackbar = document.getElementById("snackbar");
+        snackbar.innerHTML = text;
+        snackbar.className = "show";
+        setTimeout(function() {
+            snackbar.className = snackbar.className.replace("show", "");
+        }, 3000);
+    }
+
     function refresh_grouplist() {
         group.grouplist(function(groups) {
             grouplist = groups

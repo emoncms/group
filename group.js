@@ -13,6 +13,10 @@ var group = {
                     msg = data.message ? data.message.replace(/\\n/g, '\n') : 'Error'
                     fail(msg)
                 } else {
+                    if (typeof(data) === 'object' && 'message' in data && snackbar) {
+                        snackbar(data.message);
+                    }
+
                     succeed(data)
                 }
             },
