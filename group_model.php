@@ -100,12 +100,12 @@ class Group {
         }
     }
 
-    public function createuseraddtogroup($admin_userid, $groupid, $email, $username, $password, $role) {
+    public function createuseraddtogroup($admin_userid, $groupid, $email, $username, $password, $role, $name) {
         // Input sanitisation
         $admin_userid = (int) $admin_userid;
         $groupid = (int) $groupid;
         $role = (int) $role;
-        // email, username and password checked within $user model
+        // email, username and password checked within $user model and $name
 
         if (!$this->exists($groupid)) {
             $this->log->warn("Group " . $groupid . " does not exist");
@@ -125,6 +125,11 @@ class Group {
             return $result;
         }
         $add_userid = $result["userid"];
+        
+        // 2.1 Add name
+        $user_data = $this->user->get($add_userid);
+        $user_data->name = $name;
+        $result = $this->user->set($add_userid, $user_data);
 
         // 3. Add user to group 
         if (!$this->add_user($groupid, $add_userid, $role, $admin_rights = 'full')) {
@@ -938,12 +943,12 @@ class Group {
         return $groupid;
     }
 
-    public function send_login_details($admin_userid, $groupid, $email_address, $userid, $password, $role) {
+    public function send_login_details($admin_userid, $groupid, $userid, $password, $email_subject, $email_body, $send_copy) {
         // Input sanitisation
         $admin_userid = (int) $admin_userid;
         $groupid = (int) $groupid;
-        $role = (int) $role;
         $userid = (int) $userid;
+        $send_copy = $send_copy === 'true' ? true : false;
         // email, username and password checked within $user model
 
         if (!$this->exists($groupid)) {
@@ -963,24 +968,42 @@ class Group {
             return array('success' => false, 'message' => _("Error, user doesn't belong to group"));
         }
 
-        // 3. Send email
+        // 3. Prepare subject and body
         global $appname, $path;
         $username = $this->user->get_username($userid);
+        $name = $this->user->get_name($userid);
+        $role = $this->getrole($userid, $groupid);
+        switch ($role) {
+            case 0: $role = 'Passive member';
+                break;
+            case 1: $role = 'Administrator';
+                break;
+            case 2: $role = 'Subadministrator';
+                break;
+            case 3: $role = 'Member';
+                break;
+            default: $role = 'Not valid';
+                break;
+        }
+        $wildcards = array("{{name}}", "{{username}}", "{{password}}", "{{role}}", "{{appname}}", "{{path}}");
+        $replace_with = array($name, $username, $password, $role, $appname, $path);
+        $email_subject = str_replace($wildcards, $replace_with, $email_subject);
+        $email_body = str_replace($wildcards, $replace_with, $email_body);
+
+        // 4. Send email
         require "Lib/email.php";
         $email = new Email();
-        //$email->from(from);
-        $email->to($email_address);
-        $email->subject(_("Your new user account in $appname"));
-        $email->body(_("<p>An administrator has created a new account for you</p>"
-                        . "<ul><li>Username: $username</li><li>Password: $password</li></ul>"
-                        . "<p>You can login in <a href='$path'>$path</a></p>"));
+        $email->to($this->user->get_email($userid));
+        if ($send_copy)
+            $email->bcc($this->user->get_email($admin_userid));
+        $email->subject($email_subject);
+        $email->body($email_body);
         $result = $email->send();
         if (!$result['success']) {
-            $this->log->error("Email send returned error. emailto=" . $email_address . " message='" . $result['message'] . "'");
+            $this->log->error("Email send returned error - Message='" . $result['message'] . "'");
             return array('success' => false, 'message' => _("Email could not be sent to user. Error: " . $result['message']));
         }
 
-        $this->log->info("Email sent to $email_address");
         return array('success' => true);
     }
 

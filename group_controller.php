@@ -77,7 +77,7 @@ function group_controller() {
         // group/createuseraddtogroup?groupid=1&email=EMAIL&username=USERNAME&password=PASSWORD&role=1
         if ($route->action == "createuseraddtogroup") {
             $route->format = "json";
-            $result = $group->createuseraddtogroup($session["userid"], get("groupid"), get('email'), get("username"), get("password"), get("role"));
+            $result = $group->createuseraddtogroup($session["userid"], prop("groupid"), prop('email'), prop("username"), prop("password"), prop("role"), prop('name'));
         }
 
         // group/removeuser?groupid=1&userid=1
@@ -135,7 +135,7 @@ function group_controller() {
         // group/sendlogindetails?groupid=1&email=EMAIL&username=USERNAME&password=PASSWORD&role=1
         if ($route->action == "sendlogindetails") {
             $route->format = "json";
-            $result = $group->send_login_details($session["userid"], get("groupid"), get('email'), get("userid"), get("password"), get("role"));
+            $result = $group->send_login_details($session["userid"], prop("groupid"), prop("userid"), prop("password"), prop("emailsubject"), prop("template"), prop('sendcopy'));
         }
         /* if ($route->action == 'updatetheme') {
           if ($session['admin'] == 1) {

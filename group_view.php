@@ -14,7 +14,7 @@
  */
 
 defined('EMONCMS_EXEC') or die('Restricted access');
-global $path, $fullwidth, $session;
+global $path, $fullwidth, $session, $appname;
 $fullwidth = true;
 ?>
 <link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
@@ -157,6 +157,8 @@ MODALS
         <h3 id="group-addmember-modal-label">Create user and add to group</h3>
     </div>
     <div class="modal-body">
+        <p>Name:<br>
+            <input id="group-createuseraddtogroup-name" type="text"></p>
         <p>Email:<br>
             <input id="group-createuseraddtogroup-email" type="email"></p>
         <p>Username:<br>
@@ -174,8 +176,17 @@ MODALS
             <option value=0 selected>Passive member</option>
         </select>
         <p style='margin-left:5px'>
-            <input type="checkbox" id="group-createuseraddtogroup-send-email" style="margin-bottom: 8px; width: 20px; height: 20px">
-            <label for="group-createuseraddtogroup-send-email" style="display: inline-block">Send login details to user's email</label></p>
+            <input type="checkbox" id="group-createuseraddtogroup-send-email" class="toogle-email-div" style="margin-bottom: 8px; width: 20px; height: 20px">
+            <label for="group-createuseraddtogroup-send-email" style="display: inline-block">Send login details to user's email</label>
+        </p>
+        <div id="group-createuseraddtogroup-email-div" class="email-div" style="display:none">
+            <p>Subject</p>
+            <input type="text" id="group-createuseraddtogroup-email-subject" />
+            <p>Body (in html)</p>
+            <textarea id="group-createuseraddtogroup-email-body"></textarea>
+            <input type="checkbox" id="group-createuseraddtogroup-send-copy" /><label for="group-createuseraddtogroup-send-copy" style="display: inline-block">Send me a copy</label>
+            <p>You can use the following wildcards: {{name}}, {{username}}, {{password}}, {{role}}, {{appname}}<i class="icon-question-sign" title="<?php echo $appname?>" /></i> and {{path}}<i class="icon-question-sign" title="<?php echo $path?>"> </i></p>
+        </div>
 
         <div id="createuseraddtogroup-message"></div>
     </div>
@@ -240,12 +251,24 @@ MODALS
                 </td>
             </tr>
         </table>
+        <p style='margin-left:5px'>
+            <input type="checkbox" id="edit-user-send-email" class="toogle-email-div" style="margin-bottom: 8px; width: 20px; height: 20px">
+            <label for="edit-user-send-email" style="display: inline-block">Send login details to user's email</label>
+        </p>
+        <div id="edit-user-email-div" class="email-div" style="display:none">
+            <p>Subject</p>
+            <input type="text" id="edit-user-email-subject" />
+            <p>Body (in html)</p>
+            <textarea id="edit-user-email-body"></textarea>
+            <input type="checkbox" id="edit-user-send-copy" /><label for="edit-user-send-copy" style="display: inline-block">Send me a copy</label>
+            <p>You can use the following wildcards: {{name}}, {{username}}, {{password}}<i class="icon-question-sign" title="Password can only be sent when you are updating it" /></i>, {{role}}, {{appname}}<i class="icon-question-sign" title="<?php echo $appname?>" /></i> and {{path}}<i class="icon-question-sign" title="<?php echo $path?>"> </i></p>
+        </div>
         <div id="edit-user-modal-message" class="hide"><div class="alert alert-error">Passwords do not match</div></div>
         <div id="edit-user-modal-message-tag" class="hide alert alert-error"></div>
     </div>
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-        <button id="edit-user-action" action="next" class="btn btn-primary">Next</button>
+        <button id="edit-user-action" action="next" class="btn btn-primary">Ok</button>
     </div>
 </div>
 
@@ -562,11 +585,11 @@ JAVASCRIPT
                     if (userlist[z].admin_rights == 'full') {
                         if (my_role == 1) {
                             out += "<button title='Log in as user'" +
-                                            " class='btn setuser if-admin'" +
-                                            " gid=" + selected_groupid +
-                                            " uid=" + userlist[z].userid +
-                                            " username='" + userlist[z].username + "'>" +
-                                            "    <i class='icon-user'></i>" +
+                                    " class='btn setuser if-admin'" +
+                                    " gid=" + selected_groupid +
+                                    " uid=" + userlist[z].userid +
+                                    " username='" + userlist[z].username + "'>" +
+                                    "    <i class='icon-user'></i>" +
                                     "</button>";
                         }
                         out += "<button title='Edit user' class='btn edit-user if-admin' uid=" + userlist[z].userid + " uindex=" + z + "><i class='icon-edit'></i></button>";
@@ -630,12 +653,12 @@ JAVASCRIPT
                                         out += '<div id="task-actions">';
                                         out += "<div class='task-delete' title='Delete task' uid=" + userlist[z].userid + " taskid=" + task_again.id + "><i class='icon-trash if-admin' style='cursor:pointer'> </i></div> ";
                                         out += "<div class='task-view setuser'"
-                                                    ' title="Edit task in user\'s account"' +
-                                                    " gid=" + selected_groupid +
-                                                    " uid=" + userlist[z].userid +
-                                                    " username='" + userlist[z].username  + "'" +
-                                                    " extra='&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "'>" +
-                                                    "    <i class='icon-eye-open' style='cursor:pointer'></i>" +
+                                        ' title="Edit task in user\'s account"' +
+                                                " gid=" + selected_groupid +
+                                                " uid=" + userlist[z].userid +
+                                                " username='" + userlist[z].username + "'" +
+                                                " extra='&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "'>" +
+                                                "    <i class='icon-eye-open' style='cursor:pointer'></i>" +
                                                 "</div>";
                                         out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
                                         out += "</div>"; // task-actions                             
@@ -834,27 +857,33 @@ JAVASCRIPT
     $("body").on('click', "#createuseraddtogroup", function () {
         $('#group-createuseraddtogroup-modal input').val('');
         $("#group-createuseraddtogroup-role").val(0);
+        $('#group-createuseraddtogroup-modal input[type=checkbox]').prop('checked', false);
+        $('#group-createuseraddtogroup-email-body').val('');
         $('#group-createuseraddtogroup-modal').modal('show');
     });
     $("body").on('click', "#group-createuseraddtogroup-action", function () {
+        var name = $("#group-createuseraddtogroup-name").val();
         var email = $("#group-createuseraddtogroup-email").val();
         var username = $("#group-createuseraddtogroup-username").val();
         var password = $("#group-createuseraddtogroup-password").val();
         var confirm_password = $("#group-createuseraddtogroup-password-confirm").val();
         var role = $("#group-createuseraddtogroup-role").val();
         var send_email = $('#group-createuseraddtogroup-send-email').prop('checked');
+        var subject = $('#group-createuseraddtogroup-email-subject').val();
+        var body = $('#group-createuseraddtogroup-email-body').val();
+        var send_copy = $('#group-createuseraddtogroup-send-copy').prop('checked');
         if (password != confirm_password)
             $("#createuseraddtogroup-message").html("<div class='alert alert-error'>Passwords do not match</div>");
         else {
-            var result = group.createuseraddtogroup(selected_groupid, email, username, password, role);
+            var result = group.createuseraddtogroup(selected_groupid, email, username, password, role, name);
             if (!result.success) {
                 alert(result.message);
             }
             else {
                 if (send_email) {
-                    result = group.sendlogindetails(selected_groupid, email, result.userid, password, role);
+                    result = group.sendlogindetails(selected_groupid, result.userid, password, subject, body, send_copy);
                     if (!result.success) {
-                        alert("User created\n\n" + result.message);
+                        alert("User created but there was a problem sending the email\n\n" + result.message);
                     }
                     else {
                         $('#group-createuseraddtogroup-modal').modal('hide');
@@ -896,7 +925,6 @@ JAVASCRIPT
     // ----------------------------------------------------------------------------------------
 // Action: Show tasks of a user
 // ----------------------------------------------------------------------------------------
-
     $('body').on('click', '.task-tag', function (e) {
         e.stopPropagation();
         var tag = $(this).attr('tag');
@@ -1004,6 +1032,10 @@ JAVASCRIPT
         var bio = $('.edit-user-bio').val();
         var timezone = $('.edit-user-timezone').val();
         var role = $('#edit-user-role').val();
+        var subject = $('#edit-user-email-subject').val();
+        var body = $('#edit-user-email-body').val();
+        var send_email = $('#edit-user-send-email').prop('checked');
+        var send_copy = $('#edit-user-send-copy').prop('checked');
         var password = $('.edit-user-password').val();
         var password_confirmation = $('.edit-user-confirm-password').val();
         var tags = {};
@@ -1022,9 +1054,24 @@ JAVASCRIPT
             var result = group.setuserinfo(userid, selected_groupid, username, name, email, location, bio, timezone, role, password, tags);
             if (result.success != true)
                 alert(result.message);
-            $('#edit-user-modal').modal('hide');
-            draw_userlist(selected_groupid);
-            $('#edit-user-modal-message').hide();
+            else{
+                if (send_email) {
+                    result = group.sendlogindetails(selected_groupid, userid, password, subject, body, send_copy);
+                    if (!result.success) {
+                        alert("User edited but there was a problem sending the email\n\n" + result.message);
+                    }
+                    else {                        
+                        $('#edit-user-modal').modal('hide');
+                        draw_userlist(selected_groupid);
+                        $('#edit-user-modal-message').hide();
+                    }
+                }
+                else {
+                    $('#edit-user-modal').modal('hide');
+                    draw_userlist(selected_groupid);
+                    $('#edit-user-modal-message').hide();
+                }
+            }
         }
     });
     $("body").on('click', ".edit-user-tag-add", function () {
@@ -1466,8 +1513,15 @@ echo $feed_settings['csvdownloadlimit_mb'];
 
         alert('You are now logged as ' + $(this).attr('username'));
         window.location = path + "group/setuser?groupid=" + $(this).attr('gid') +
-                                 "&userid=" + $(this).attr('uid') +
-                                 extra;
+                "&userid=" + $(this).attr('uid') +
+                extra;
+    });
+    $("body").on('click', '.toogle-email-div', function () {
+        if ($(this).is(':checked'))
+            $(this).parents('.modal').find('.email-div').show();
+        else
+            $(this).parents('.modal').find('.email-div').hide();
+
     });
 // ----------------------------------------------------------------------------------------
 // Sidebar
@@ -1685,12 +1739,16 @@ echo $feed_settings['csvdownloadlimit_mb'];
     });
 
     // development
-   /* $(document).ready(function () {
+    $(document).ready(function () {
+        $('[gindex="1"]').click();
         $('#createuseraddtogroup').click();
         $('#group-createuseraddtogroup-email').val('cagabi@lapiluka.org');
-        $('#group-createuseraddtogroup-username').val('cagabi654');
+        $('#group-createuseraddtogroup-username').val(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
         $('#group-createuseraddtogroup-modal .generate-password').click();
         $('#group-createuseraddtogroup-modal #group-createuseraddtogroup-send-email').click();
-    });*/
+        $('#group-createuseraddtogroup-email-body').val('{{username}}  body  {{password}}');
+        $('#group-createuseraddtogroup-email-subject').val('{{username}}  subject  {{password}}');
+        //$('#group-createuseraddtogroup-send-copy').click();
+    });
 
 </script>

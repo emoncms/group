@@ -21,10 +21,12 @@ var group = {
             }});
         return result;
     },
-    'createuseraddtogroup': function (groupid, email, username, password, role) {
+    'createuseraddtogroup': function (groupid, email, username, password, role, name) {
         var result = {};
-        $.ajax({url: path + "group/createuseraddtogroup", data: "groupid=" + groupid + "&email=" + email + "&username=" + username + "&password=" + password + "&role=" + role, dataType: 'json', async: false, success: function (data) {
+        $.ajax({url: path + "group/createuseraddtogroup", method: "POST", data: "groupid=" + groupid + "&email=" + email + "&username=" + username + "&password=" + password + "&role=" + role + "&name=" + name, dataType: 'json', async: false, success: function (data) {
                 result = data;
+            }, complete: function (result) {
+                console.log(result.responseText)
             }});
         return result;
     },
@@ -136,15 +138,16 @@ var group = {
             }});
         return result;
     },
-    'sendlogindetails': function (groupid, email, userid, password, role) {
+    'sendlogindetails': function (groupid, userid, password, email_subject, email_template, send_copy) {
         var result = {};
-        $.ajax({url: path + "group/sendlogindetails", data: "groupid=" + groupid + "&email=" + email + "&userid=" + userid + "&password=" + password + "&role=" + role, dataType: 'json', async: false, success: function (data) {
+        $.ajax({url: path + "group/sendlogindetails", method: "POST", data: "groupid=" + groupid + "&userid=" + userid + "&password=" + password + "&emailsubject=" + email_subject + "&template=" + email_template + "&sendcopy=" + send_copy, dataType: 'json', async: false, success: function (data) {
                 result = data;
-                //console.log(data.responseText);
-            }});
+            }, complete: function (result) {
+                console.log(result.responseText);
+            }
+        });
         return result;
     },
-    
 // Add mock data to users - Used during development
     'getapikeys': function (groupid) {
         var result = {};

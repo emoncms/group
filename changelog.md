@@ -6,5 +6,6 @@ Given a version number MAJOR.MINOR.PATCH:
 - PATCH version MUST be incremented if only backwards compatible bug fixes are introduced. A bug fix is defined as an internal change that fixes incorrect behaviour.
 
 
-## For Version 1.0.1
+## Commits for Version 1.0.1 - We are in prerelease state
  - Issue 39: full remove of user using delete_user method and hook
+ - Issue 48: added send email to the edit modal. Also added input for email subject and body (in edit modal but also in createuserandaddtogroup
