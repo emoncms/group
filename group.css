@@ -336,3 +336,9 @@ input.feed-tag-checkbox{
     width: 100%;
     height:100px
 }
+
+/* Feed ages */
+.age-new { color: rgb(50,200,50); }
+.age-recent { color: rgb(240,180,20); }
+.age-stale { color: rgb(255,125,20); }
+.age-ancient { color: rgb(255,0,0); }

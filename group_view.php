@@ -452,6 +452,12 @@ JAVASCRIPT
     var EMAIL_BODY = "<p>Username: {{username}}<br>\nPassword: {{password}}</p>\n<p>Login at <a href='{{path}}'>{{path}}</a>";
 <?php } ?>
 
+    // All in seconds
+    var AGE_NEW = 0;
+    var AGE_RECENT = 25;
+    var AGE_STALE = 60;
+    var AGE_ANCIENT = 60 * 60 * 2; // 2 hours
+
     // ----------------------------------------------------------------------------------------
     // Task: ini
     // ---------------------------------------------------------------------e-------------------
@@ -573,16 +579,15 @@ JAVASCRIPT
                 }
                 // Active feeds colors
                 var green = 0, amber = 0, orange = 0, red = 0;
-                var color_green = "rgb(50,200,50)", color_amber = "rgb(240,180,20)", color_orange = "rgb(255,125,20)", color_red = "rgb(255,0,0)";
                 var now = Date.now() / 1000;
                 var diff = 0;
                 userlist[z].feedslist.forEach(function (feed) {
                     diff = now - feed.time;
-                    if (diff < 25)
+                    if (diff < AGE_RECENT)
                         green++;
-                    else if (diff < 60)
+                    else if (diff < AGE_STALE)
                         amber++;
-                    else if (diff < 7200)
+                    else if (diff < AGE_ANCIENT)
                         orange++;
                     else
                         red++;
@@ -595,7 +600,12 @@ JAVASCRIPT
                 out += "<div class='user' uid='" + userlist[z].userid + "'>";
                 out += "<div class='user-info'>";
                 out += "<div class='user-name'>" + userlist[z].username + "</div>";
-                out += "<div class='user-active-feeds'><b> <span style='color:" + color_green + "'>" + green + "</span>" + " <span style='color:" + color_amber + "'>" + amber + "</span>" + " <span style='color:" + color_orange + "'>" + orange + "</span>" + " <span style='color:" + color_red + "'>" + red + "</span>" + "</b></div>";
+                out += "<div class='user-active-feeds'><b> "+
+                    "<span class='age-new'>" + green + "</span> " +
+                    "<span class='age-recent'>" + amber + "</span> " +
+                    "<span class='age-stale'>" + orange + "</span> " +
+                    "<span class='age-ancient'>" + red + "</span>" +
+                    "</b></div>";
                 out += "<div class='user-role'>" + role + "</div>";
                 out += "<div class='user-actions'>";
                 if (userlist[z].userid != my_userid) {
@@ -748,15 +758,19 @@ JAVASCRIPT
         else if (secs > 180)
             updated = mins.toFixed(0) + " mins";
         secs = Math.abs(secs);
-        var color = "rgb(255,0,0)";
-        if (secs < 25)
-            color = "rgb(50,200,50)"
-        else if (secs < 60)
-            color = "rgb(240,180,20)";
-        else if (secs < (3600 * 2))
-            color = "rgb(255,125,20)"
 
-        return "<span style='color:" + color + ";'>" + updated + "</span>";
+        var ageClass;
+
+        if (secs < AGE_RECENT)
+            ageClass = "age-new";
+        else if (secs < AGE_STALE)
+            ageClass = "age-recent";
+        else if (secs < AGE_ANCIENT)
+            ageClass = "age-stale";
+        else
+            ageClass = "age-ancient";
+
+        return "<span class=" + ageClass + ">" + updated + "</span>";
     }
 
     // Loads into processlist_ui.feedlist array feeds from all the users in the groups
