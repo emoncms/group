@@ -71,27 +71,26 @@ class Group {
         $visibility = $visibility == 'public' ? 'public' : 'private';
         $access = $access == 'open' ? 'open' : 'closed';
 
-
         if ($this->exists_name($name)) {
-            $this->log->warn("Cannot create group,  already exists");
-            return array('success' => false, 'message' => _("Cannot create group,  already exists"));
+            $this->log->warn("Cannot create group as a group with that name already exists");
+            return array('success' => false, 'message' => _("Cannot create group as a group with that name already exists"));
         }
 
-        $stmt = $this->mysqli->prepare("INSERT INTO groups (name,description, organization, area, visibility, access) VALUES (?,?,?,?,?,?)");
+        $stmt = $this->mysqli->prepare("INSERT INTO groups (name, description, organization, area, visibility, access) VALUES (?,?,?,?,?,?)");
         $stmt->bind_param("ssssss", $name, $description, $organization, $area, $visibility, $access);
         if (!$stmt->execute()) {
             $this->log->error("Error creating group, problem with sql statement");
-            return array('success' => false, 'message' => _("Error creating group"));
+            return array('success' => false, 'message' => _("Couldn't create group"));
         }
         $groupid = $this->mysqli->insert_id;
 
         if (!$this->add_user($groupid, $userid, 1)) {
-            $this->log->error("Error adding user to group " . $groupid);
-            return array('success' => false, 'message' => _("Error adding user to group"));
+            $this->log->error("Error adding user $userid to group $groupid");
+            return array('success' => false, 'message' => _("Group created, but couldn't add you to it"));
         }
 
         $this->log->info("Group $groupid added");
-        return array('success' => true, 'groupid' => $groupid, 'message' => _("Group $groupid added"));
+        return array('success' => true, 'groupid' => $groupid, 'message' => _("Group '$name' added"));
     }
 
     // Edit group
@@ -116,12 +115,14 @@ class Group {
             $stmt->bind_param("ssssssi", $name, $description, $organization, $area, $visibility, $access, $groupid);
             if (!$stmt->execute()) {
                 $this->log->error("Error editing group, problem with sql statement");
-                return array('success' => false, 'message' => _("Error editing group"));
+                return array('success' => false, 'message' => _("Error updating group"));
             }
             $this->log->info("Group edited");
-            return array('success' => true, 'message' => _("Group edited"));
+            return array('success' => true, 'message' => _("Group updated"));
+
         }
         else {
+
             $this->log->warning("Error editing group, You are not administrator of the group - Session userid: " . $admin_userid);
             return array('success' => false, 'message' => _("You are not administrator of the group"));
         }
@@ -140,14 +141,14 @@ class Group {
         // email, username and password checked within $user model and $name
 
         if (!$this->exists($groupid)) {
-            $this->log->warn("Group " . $groupid . " does not exist");
+            $this->log->warn("Group $groupid does not exist");
             return array('success' => false, 'message' => _("Group does not exist"));
         }
 
         // 1. Check that user is a group administrator
         if (!$this->is_group_admin($groupid, $admin_userid)) {
-            $this->log->warn("You haven't got enough permissions to add a member to this group - Session userid: " . $admin_userid);
-            return array('success' => false, 'message' => _("You haven't got enough permissions to add a member to this group"));
+            $this->log->warn("User $admin_userid called createuseraddtogroup without permission");
+            return array('success' => false, 'message' => _("You don't have permission to add someone to this group"));
         }
 
         // 2. Check username and password, return
@@ -163,14 +164,14 @@ class Group {
         $user_data->name = $name;
         $result = $this->user->set($add_userid, $user_data);
 
-        // 3. Add user to group 
+        // 3. Add user to group
         if (!$this->add_user($groupid, $add_userid, $role, $admin_rights = 'full')) {
             $this->log->error("Error adding user to group");
-            return array('success' => false, 'message' => _("Error adding user to group"));
+            return array('success' => false, 'message' => _("User created, but couldn't add to group"));
         }
 
         $this->log->info("User $add_userid:$username added to group " . $groupid);
-        return array('success' => true, 'message' => _("User $add_userid:$username added"), 'userid' => $add_userid);
+        return array('success' => true, 'message' => _("User '$username' created and added to group"), 'userid' => $add_userid);
     }
 
     // Add user to a group if admin user knows account username and password
@@ -596,7 +597,7 @@ class Group {
             $this->log->error('Cannot add user to group, error in query');
             return false;
         }
-        $this->log->info('User ' . $userid . ' added to group ' . '$groupid');
+        $this->log->info("User $userid added to group $groupid");
         return true;
     }
 
