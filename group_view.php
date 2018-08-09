@@ -15,6 +15,7 @@
 
 defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $fullwidth, $session, $appname;
+global $groups_email_subject, $groups_email_body;
 $fullwidth = true;
 ?>
 <link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
@@ -439,8 +440,8 @@ JAVASCRIPT
     var EMAIL_SUBJECT = <?= json_encode($groups_email_subject) ?>;
     var EMAIL_BODY = <?= json_encode($groups_email_body) ?>;
 <?php } else { ?>
-    var EMAIL_SUBJECT = "Your EmonCMS login";
-    var EMAIL_BODY = "Username: {{username}}\nPassword: {{password}}\n\nLogin at {{path}}"
+    var EMAIL_SUBJECT = "Your {{appname}} login";
+    var EMAIL_BODY = "<p>Username: {{username}}<br>\nPassword: {{password}}</p>\n<p>Login at <a href='{{path}}'>{{path}}</a>";
 <?php } ?>
 
     // ----------------------------------------------------------------------------------------
