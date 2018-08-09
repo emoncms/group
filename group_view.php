@@ -231,7 +231,15 @@ MODALS
             <tr><td>Location</td><td><input class="edit-user-location" type="text"></input></td></tr>
             <tr><td>Bio</td><td><input class="edit-user-bio" type="text"></input></td></tr>
             <tr><td>Timezome</td><td><input class="edit-user-timezone" type="text"></input></td></tr>
-            <tr><td>Password    <i class="icon-question-sign" title="Leave it blank if you don not wish to change it" /></td><td><input class="edit-user-password" type="password"></input></td></tr>
+            <tr>
+                <td>Password <i class="icon-question-sign" title="Leave it blank if you don't wish to change it"></i></td>
+                <td>
+                    <input class="edit-user-password" type="password">
+                    <button class="generate-password btn" style="margin-bottom: 10px">
+                        <i class="icon-eye-open"></i> Generate new
+                    </button>
+                </td>
+            </tr>
             <tr><td>Confirm password</td><td><input class="edit-user-confirm-password" type="password"></input></td></tr>
             <tr><td>Role in group   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</td>
                 <td><select id="edit-user-role">
@@ -1515,6 +1523,12 @@ echo $feed_settings['csvdownloadlimit_mb'];
         $('#group-createuseraddtogroup-password').val(pwd);
         $('#group-createuseraddtogroup-password-confirm').val(pwd);
     })
+    $('#edit-user-modal').on('click', '.generate-password', function () {
+        var pwd = generatePassword();
+        $('#edit-user-modal .edit-user-password').val(pwd);
+        $('#edit-user-modal .edit-user-confirm-password').val(pwd);
+    })
+
 
 // ----------------------------------------------------------------------------------------
 // Other
