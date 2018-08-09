@@ -19,8 +19,16 @@
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
 
-class Group {
+// Make sure we have our capability check function
+if (is_file("Modules/user_capabilities/user_capabilities.php")) {
+    require_once "Modules/user_capabilities/user_capabilities.php";
+} else {
+    function user_has_capability($args) {
+        return true;
+    }
+}
 
+class Group {
     private $mysqli;
     private $user;
     private $feed;
@@ -38,8 +46,22 @@ class Group {
         $this->task = $task;
     }
 
+    private function no_permission() {
+        http_response_code(403);
+
+        return [
+             'success' => false,
+             'message' => _("You don't have permission to do that")
+        ];
+    }
+
     // Create group, add creator user as administrator
     public function create($userid, $name, $description, $organization, $area, $visibility, $access) {
+        // Check capability
+        if (!user_has_capability('groups_can_create')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation
         $userid = (int) $userid;
         $name = preg_replace('/[^\w\s-:]/', '', $name);
@@ -74,6 +96,11 @@ class Group {
 
     // Edit group
     public function editgroup($admin_userid, $groupid, $name, $description, $organization, $area, $visibility, $access) {
+        // Check capability
+        if (!user_has_capability('groups_can_edit')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation        
         $groupid = (int) $groupid;
         $admin_userid = (int) $admin_userid;
@@ -101,6 +128,11 @@ class Group {
     }
 
     public function createuseraddtogroup($admin_userid, $groupid, $email, $username, $password, $role, $name) {
+        // Check capability
+        if (!user_has_capability('groups_can_create_user')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation
         $admin_userid = (int) $admin_userid;
         $groupid = (int) $groupid;
@@ -143,6 +175,11 @@ class Group {
 
     // Add user to a group if admin user knows account username and password
     public function add_user_auth($admin_userid, $groupid, $username, $password, $role) {
+        // Check capability
+        if (!user_has_capability('groups_can_add_member_auth')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation
         $admin_userid = (int) $admin_userid;
         $groupid = (int) $groupid;
@@ -180,12 +217,17 @@ class Group {
 
     // Send email invite to user to join a group
     public function add_user_invite($userid, $groupid, $invite_userid) {
+        // Check capability
+        if (!user_has_capability('groups_can_add_member_invite')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;
     }
 
-    // Return list of groups which $userid belongs and has right to list 
+    // Return list of groups which $userid belongs and has right to list
     public function grouplist($userid) {
         // Input sanitisation
         $userid = (int) $userid;
@@ -402,6 +444,11 @@ class Group {
     }
 
     public function delete($userid, $groupid) {
+        // Check capability
+        if (!user_has_capability('groups_can_delete')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;
@@ -462,6 +509,11 @@ class Group {
 
     // Remove user from database and group
     public function full_remove_user($session_userid, $groupid, $userid_to_remove) {
+        // Check capability
+        if (!user_has_capability('groups_can_delete_user')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation
         $session_userid = (int) $session_userid;
         $groupid = (int) $groupid;
@@ -549,6 +601,11 @@ class Group {
     }
 
     public function setuserinfo($session_userid, $groupid, $to_set_userid, $username, $name, $email, $bio, $timezone, $location, $role, $password, $tags) {
+        // Check capability
+        if (!user_has_capability('groups_can_edit_user')) {
+            return $this->no_permission();
+        }
+
         // Input sanitisation
         $session_userid = (int) $session_userid;
         $groupid = (int) $groupid;
