@@ -18,6 +18,16 @@
 // no direct access
 defined('EMONCMS_EXEC') or die('Restricted access');
 
+
+// Make sure we have our capability check function
+if (is_file("Modules/user_capabilities/user_capabilities.php")) {
+    require_once "Modules/user_capabilities/user_capabilities.php";
+} else {
+    function user_has_capability($args) {
+        return true;
+    }
+}
+
 function group_controller() {
     global $session, $route, $mysqli, $redis, $user, $feed_settings, $log;
 
@@ -150,6 +160,12 @@ function group_controller() {
         // SPECIAL USER SWITCHING FUNCTIONS
         // --------------------------------------------------------------------------
         if ($route->action == 'setuser') {
+            // Check capability
+            if (!user_has_capability('groups_can_impersonate')) {
+                http_response_code(403);
+                return _("You don't have permission to do that.");
+            }
+
             $route->format = "text";
             $groupid = (int) get('groupid');
             $userid = (int) get('userid');

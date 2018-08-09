@@ -468,6 +468,10 @@ JAVASCRIPT
     var summary_for_search = [];
     var task_support = <?php echo $task_support === false ? 0 : 1; ?> === 1 ? true : false;
 
+    var capability = {
+        can_impersonate: <?= json_encode(user_has_capability('groups_can_impersonate')) ?>,
+    }
+
 <?php if (isset($groups_email_subject) && isset($groups_email_body)) { ?>
     var EMAIL_SUBJECT = <?= json_encode($groups_email_subject) ?>;
     var EMAIL_BODY = <?= json_encode($groups_email_body) ?>;
@@ -644,7 +648,7 @@ JAVASCRIPT
                 out += "<div class='user-actions'>";
                 if (userlist[z].userid != my_userid) {
                     if (userlist[z].admin_rights == 'full') {
-                        if (my_role == 1) {
+                        if (my_role == 1 && capability.can_impersonate) {
                             out += "<button title='Log in as user'" +
                                     " class='btn setuser if-admin'" +
                                     " gid=" + selected_groupid +
