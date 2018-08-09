@@ -57,17 +57,41 @@ MAIN
         <h3 style="padding-left:10px">Groups</h3>
         <div id="grouplist"></div>
 
-        <div id="groupcreate"><i class="icon-plus"></i>New Group</div>
+        <?php if (user_has_capability('groups_can_create')) { ?>
+        <div id="groupcreate"><i class="icon-plus"></i> New Group</div>
+        <?php } ?>
     </div>
 
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
             <!--<div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>-->
-            <button id="deletegroup" class="btn if-admin groupselected"><i class="icon-trash"></i> Delete group</button>
-            <button id="editgroup" class="btn if-admin groupselected"><i class="icon-edit"></i> Edit Group</button>
-            <button id="createuseraddtogroup" class="btn if-admin groupselected"><i class="icon-plus"></i> Create User</button>
-            <button id="addmember" class="btn if-admin groupselected"><i class="icon-plus"></i> Add Member</button>
+
+        <?php if (user_has_capability('groups_can_delete')) { ?>
+            <button id="deletegroup" class="btn if-admin groupselected">
+                <i class="icon-trash"></i> Delete group
+            </button>
+        <?php } ?>
+
+        <?php if (user_has_capability('groups_can_edit')) { ?>
+            <button id="editgroup" class="btn if-admin groupselected">
+                <i class="icon-edit"></i> Edit Group
+            </button>
+        <?php } ?>
+
+        <?php if (user_has_capability('groups_can_create_user')) { ?>
+            <button id="createuseraddtogroup" class="btn if-admin groupselected">
+                <i class="icon-plus"></i> Create User
+            </button>
+        <?php } ?>
+
+        <?php if (user_has_capability('groups_can_add_member_invite') ||
+                  user_has_capability('groups_can_add_member_auth')) { ?>
+            <button id="addmember" class="btn if-admin groupselected">
+                <i class="icon-plus"></i> Add Member
+            </button>
+        <?php } ?>
+
             <div class="userstitle"><span id="groupname">Users</span></div>
             <div id="groupdescription"></div>
 
