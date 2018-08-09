@@ -435,6 +435,14 @@ JAVASCRIPT
     var summary_for_search = [];
     var task_support = <?php echo $task_support === false ? 0 : 1; ?> === 1 ? true : false;
 
+<?php if (isset($groups_email_subject) && isset($groups_email_body)) { ?>
+    var EMAIL_SUBJECT = <?= json_encode($groups_email_subject) ?>;
+    var EMAIL_BODY = <?= json_encode($groups_email_body) ?>;
+<?php } else { ?>
+    var EMAIL_SUBJECT = "Your EmonCMS login";
+    var EMAIL_BODY = "Username: {{username}}\nPassword: {{password}}\n\nLogin at {{path}}"
+<?php } ?>
+
     // ----------------------------------------------------------------------------------------
     // Task: ini
     // ---------------------------------------------------------------------e-------------------
@@ -858,7 +866,8 @@ JAVASCRIPT
         $('#group-createuseraddtogroup-modal input').val('');
         $("#group-createuseraddtogroup-role").val(0);
         $('#group-createuseraddtogroup-modal input[type=checkbox]').prop('checked', false);
-        $('#group-createuseraddtogroup-email-body').val('');
+        $('#group-createuseraddtogroup-email-subject').val(EMAIL_SUBJECT);
+        $('#group-createuseraddtogroup-email-body').val(EMAIL_BODY);
         $('#group-createuseraddtogroup-modal').modal('show');
     });
     $("body").on('click', "#group-createuseraddtogroup-action", function () {
@@ -1015,11 +1024,15 @@ JAVASCRIPT
         $('.edit-user-password').val('');
         $('.edit-user-confirm-password').val('');
         $('#edit-user-role option[value="' + userlist[uindex].role + '"]').prop('selected', true);
+        $('#edit-user-email-subject').val(EMAIL_SUBJECT);
+        $('#edit-user-email-body').val(EMAIL_BODY);
+
         var html = '';
         for (var tag in userlist[uindex].tags) {
             var value = userlist[uindex].tags[tag];
             html += '<div name="' + tag + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + tag + ': ' + value + '<span class="remove-tag" name="' + tag + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
         }
+
         $('#edit-user-tagslist').html(html);
         $('#edit-user-modal').modal('show');
     });
