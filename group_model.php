@@ -198,15 +198,20 @@ class Group {
             return array('success' => false, 'message' => _("You haven't got enough permissions to add a member to this group"));
         }
 
-        // 2. Check username and password, return
-        $result = $this->user->get_apikeys_from_login($username, $password);
-        if (!$result["success"]) {
-            $this->log->error("Error adding user to group, username and password don't match - Session userid: " . $admin_userid);
-            return $result;
+        // 2. Check username and password if required
+        // We only allow adding without a password if the capabilities module is loaded
+        if (class_exists('Capabilities') && user_has_capability('groups_can_add_member_no_auth')) {
+            $add_userid = $this->user->get_id($username);
+        } else {
+            $result = $this->user->get_apikeys_from_login($username, $password);
+            if (!$result["success"]) {
+                $this->log->error("Error adding user to group, username and password don't match - Session userid: " . $admin_userid);
+                return $result;
+            }
+            $add_userid = $result["userid"];
         }
-        $add_userid = $result["userid"];
 
-        // 3. Add user to group 
+        // 3. Add user to group
         if (!$this->add_user($groupid, $add_userid, $role)) {
             $this->log->error("Error adding user to group");
             return array('success' => false, 'message' => _("Error adding user to group"));

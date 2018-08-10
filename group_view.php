@@ -86,7 +86,8 @@ MAIN
         <?php } ?>
 
         <?php if (user_has_capability('groups_can_add_member_invite') ||
-                  user_has_capability('groups_can_add_member_auth')) { ?>
+                    user_has_capability('groups_can_add_member_auth') ||
+                    user_has_capability('groups_can_add_member_no_auth')) { ?>
             <button id="addmember" class="btn if-admin groupselected">
                 <i class="icon-plus"></i> Add Member
             </button>
@@ -156,9 +157,14 @@ MODALS
         <p>Username:<br>
             <input id="group-addmember-username" type="text"></p>
 
+        <?php if (user_has_capability('groups_can_add_member_auth') &&
+                !user_has_capability('groups_can_add_member_no_auth')) { ?>
+
         <p>Password:<br>
             <input id="group-addmember-password" type="password">
             <button class="generate-password btn" style="margin-bottom: 10px"><i class="icon-eye-open show-password"></i> Generate pasword</button></p>
+
+        <?php } ?>
 
         <p>Role   <i title="- Administrator: full access (create users, add member, create group feeds, dashboards graphs, etc)&#10;- Sub-administrator: view access to the list of members, write access to group graphs&#10;- Passive member: no access to group. The aim of the user is to be managed by the group administrator" class=" icon-question-sign"></i>:</p>
         <select id="group-addmember-access">
