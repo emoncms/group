@@ -58,7 +58,7 @@ class Group {
     // Create group, add creator user as administrator
     public function create($userid, $name, $description, $organization, $area, $visibility, $access) {
         // Check capability
-        if (!user_has_capability('groups_can_create')) {
+        if (!user_has_capability('group_create')) {
             return $this->no_permission();
         }
 
@@ -96,7 +96,7 @@ class Group {
     // Edit group
     public function editgroup($admin_userid, $groupid, $name, $description, $organization, $area, $visibility, $access) {
         // Check capability
-        if (!user_has_capability('groups_can_edit')) {
+        if (!user_has_capability('group_edit')) {
             return $this->no_permission();
         }
 
@@ -130,7 +130,7 @@ class Group {
 
     public function createuseraddtogroup($admin_userid, $groupid, $email, $username, $password, $role, $name) {
         // Check capability
-        if (!user_has_capability('groups_can_create_user')) {
+        if (!user_has_capability('group_create_user')) {
             return $this->no_permission();
         }
 
@@ -177,7 +177,7 @@ class Group {
     // Add user to a group if admin user knows account username and password
     public function add_user_auth($admin_userid, $groupid, $username, $password, $role) {
         // Check capability
-        if (!user_has_capability('groups_can_add_member_auth')) {
+        if (!user_has_capability('group_add_member_auth')) {
             return $this->no_permission();
         }
 
@@ -200,7 +200,7 @@ class Group {
 
         // 2. Check username and password if required
         // We only allow adding without a password if the capabilities module is loaded
-        if (class_exists('Capabilities') && user_has_capability('groups_can_add_member_no_auth')) {
+        if (class_exists('Capabilities') && user_has_capability('group_add_member_no_auth')) {
             $add_userid = $this->user->get_id($username);
         } else {
             $result = $this->user->get_apikeys_from_login($username, $password);
@@ -224,7 +224,7 @@ class Group {
     // Send email invite to user to join a group
     public function add_user_invite($userid, $groupid, $invite_userid) {
         // Check capability
-        if (!user_has_capability('groups_can_add_member_invite')) {
+        if (!user_has_capability('group_add_member_invite')) {
             return $this->no_permission();
         }
 
@@ -451,7 +451,7 @@ class Group {
 
     public function delete($userid, $groupid) {
         // Check capability
-        if (!user_has_capability('groups_can_delete')) {
+        if (!user_has_capability('group_delete')) {
             return $this->no_permission();
         }
 
@@ -516,7 +516,7 @@ class Group {
     // Remove user from database and group
     public function full_remove_user($session_userid, $groupid, $userid_to_remove) {
         // Check capability
-        if (!user_has_capability('groups_can_delete_user')) {
+        if (!user_has_capability('group_delete_user')) {
             return $this->no_permission();
         }
 
@@ -608,7 +608,7 @@ class Group {
 
     public function setuserinfo($session_userid, $groupid, $to_set_userid, $username, $name, $email, $bio, $timezone, $location, $role, $password, $tags) {
         // Check capability
-        if (!user_has_capability('groups_can_edit_user')) {
+        if (!user_has_capability('group_edit_user')) {
             return $this->no_permission();
         }
 

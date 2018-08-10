@@ -57,7 +57,7 @@ MAIN
         <h3 style="padding-left:10px">Groups</h3>
         <div id="grouplist"></div>
 
-        <?php if (user_has_capability('groups_can_create')) { ?>
+        <?php if (user_has_capability('group_create')) { ?>
         <div id="groupcreate"><i class="icon-plus"></i> New Group</div>
         <?php } ?>
     </div>
@@ -67,27 +67,27 @@ MAIN
             <button class="btn" id="sidebar-open" style="display:none"><i class="icon-list"></i></button>
             <!--<div id="create-inputs-feeds" class="if-admin groupselected"><i class="icon-trash"></i>Update inputs/feeds</div>-->
 
-        <?php if (user_has_capability('groups_can_delete')) { ?>
+        <?php if (user_has_capability('group_delete')) { ?>
             <button id="deletegroup" class="btn if-admin groupselected">
                 <i class="icon-trash"></i> Delete group
             </button>
         <?php } ?>
 
-        <?php if (user_has_capability('groups_can_edit')) { ?>
+        <?php if (user_has_capability('group_edit')) { ?>
             <button id="editgroup" class="btn if-admin groupselected">
                 <i class="icon-edit"></i> Edit Group
             </button>
         <?php } ?>
 
-        <?php if (user_has_capability('groups_can_create_user')) { ?>
+        <?php if (user_has_capability('group_create_user')) { ?>
             <button id="createuseraddtogroup" class="btn if-admin groupselected">
                 <i class="icon-plus"></i> Create User
             </button>
         <?php } ?>
 
-        <?php if (user_has_capability('groups_can_add_member_invite') ||
-                    user_has_capability('groups_can_add_member_auth') ||
-                    user_has_capability('groups_can_add_member_no_auth')) { ?>
+        <?php if (user_has_capability('group_add_member_invite') ||
+                    user_has_capability('group_add_member_auth') ||
+                    user_has_capability('group_add_member_no_auth')) { ?>
             <button id="addmember" class="btn if-admin groupselected">
                 <i class="icon-plus"></i> Add Member
             </button>
@@ -157,8 +157,8 @@ MODALS
         <p>Username:<br>
             <input id="group-addmember-username" type="text"></p>
 
-        <?php if (user_has_capability('groups_can_add_member_auth') &&
-                !user_has_capability('groups_can_add_member_no_auth')) { ?>
+        <?php if (user_has_capability('group_add_member_auth') &&
+                !user_has_capability('group_add_member_no_auth')) { ?>
 
         <p>Password:<br>
             <input id="group-addmember-password" type="password">
@@ -475,7 +475,7 @@ JAVASCRIPT
     var task_support = <?php echo $task_support === false ? 0 : 1; ?> === 1 ? true : false;
 
     var capability = {
-        can_impersonate: <?= json_encode(user_has_capability('groups_can_impersonate')) ?>,
+        can_impersonate: <?= json_encode(user_has_capability('group_impersonate')) ?>,
     }
 
 <?php if (isset($groups_email_subject) && isset($groups_email_body)) { ?>

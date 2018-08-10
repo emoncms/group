@@ -161,7 +161,7 @@ function group_controller() {
         // --------------------------------------------------------------------------
         if ($route->action == 'setuser') {
             // Check capability
-            if (!user_has_capability('groups_can_impersonate')) {
+            if (!user_has_capability('group_impersonate')) {
                 http_response_code(403);
                 return _("You don't have permission to do that.");
             }
