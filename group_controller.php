@@ -164,10 +164,14 @@ function group_controller() {
                 if ($group->is_group_member($groupid, $userid) === true) {
                     // 3. Check that session user has full rights over user requested
                     if ($group->administrator_rights_over_user($groupid, $userid) === true) {
-                        // keep details of current user
-                        $_SESSION['previous_userid'] = $session['userid'];
-                        $_SESSION['previous_username'] = $session['username'];
-                        $_SESSION['previous_admin'] = $session['admin'];
+
+                        // Keep details of current user
+                        if (!$_SESSION['previous_userid']) {
+                            $_SESSION['previous_userid'] = $session['userid'];
+                            $_SESSION['previous_username'] = $session['username'];
+                            $_SESSION['previous_admin'] = $session['admin'];
+                        }
+
                         // Set new user
                         $result = $mysqli->query("SELECT * FROM users WHERE id = '$userid'");
                         if ($result->num_rows < 1) {
@@ -205,12 +209,15 @@ function group_controller() {
         if ($route->action == 'logasprevioususer') {
             $route->format = "text";
 
-            $_SESSION['userid'] = $_SESSION['previous_userid'];
-            $_SESSION['username'] = $_SESSION['previous_username'];
-            $_SESSION['admin'] = $_SESSION['previous_admin'];
-            unset($_SESSION['previous_userid']);
-            unset($_SESSION['previous_username']);
-            unset($_SESSION['previous_admin']);
+            if ($_SESSION['previous_userid']) {
+                $_SESSION['userid'] = $_SESSION['previous_userid'];
+                $_SESSION['username'] = $_SESSION['previous_username'];
+                $_SESSION['admin'] = $_SESSION['previous_admin'];
+                unset($_SESSION['previous_userid']);
+                unset($_SESSION['previous_username']);
+                unset($_SESSION['previous_admin']);
+            }
+
             header("Location: ../group");
         }
 
