@@ -151,59 +151,73 @@ function group_controller() {
         // --------------------------------------------------------------------------
         if ($route->action == 'setuser') {
             $route->format = "text";
-            $groupid = (int) get('groupid');
-            $userid = (int) get('userid');
 
-            $log_str = "user: " . $session['username'] . ", userid " .
-                    $session['userid'] . ' and admin ' . $session['admin'] .
-                    " is loging as userid " . $userid;
+            $groupid = (int) get('groupid');
+            $cur_username = $session['username'];
+            $cur_userid = $session['userid'];
+            $cur_is_admin = $session['admin'] === 1 ? true : false;
+            $new_userid = (int) get('userid');
+
+            $log->info("User $cur_userid:$cur_username " .
+                    ($cur_is_admin ? "(admin)" : "(not admin)") .
+                    " is trying to log in as userid $new_userid");
 
             // 1. Check that session user is an administrator of the group requested
-            if ($group->is_group_admin($groupid, $session["userid"]) === true) {
-                // 2. Check that user requested is a member of group requested
-                if ($group->is_group_member($groupid, $userid) === true) {
-                    // 3. Check that session user has full rights over user requested
-                    if ($group->administrator_rights_over_user($groupid, $userid) === true) {
+            if ($group->is_group_admin($groupid, $cur_userid) !== true) {
+                $result = "ERROR: You are not an administrator of this group";
+                $log->error($result);
+                return [ 'content' => $result ];
+            }
 
-                        // Keep details of current user
-                        if (!$_SESSION['previous_userid']) {
-                            $_SESSION['previous_userid'] = $session['userid'];
-                            $_SESSION['previous_username'] = $session['username'];
-                            $_SESSION['previous_admin'] = $session['admin'];
-                        }
+            // 2. Check that user requested is a member of group requested
+            if ($group->is_group_member($groupid, $new_userid) !== true) {
+                $result = "ERROR: User is not a member of group";
+                $log->error($result);
+                return [ 'content' => $result ];
+            }
 
-                        // Set new user
-                        $result = $mysqli->query("SELECT * FROM users WHERE id = '$userid'");
-                        if ($result->num_rows < 1) {
-                            $this->logout(); // user id does not exist
-                        }
-                        else {
-                            $new_user = $result->fetch_object();
-                            $_SESSION['userid'] = $userid;
-                            $_SESSION['username'] = $new_user->username;
-                            $_SESSION['admin'] = $new_user->admin;
-                            $log_str .= ", username " . $new_user->username . ' and admin ' . $new_user->admin;
-                            $log->warn($log_str);
-                        }
-                        if (is_null(get('view')))
-                            header("Location: ../user/view");
-                        else if (get('view') == 'tasks')
-                            header("Location: ../task/list#" . get('tag'));
-                    }
-                    else {
-                        $result = "ERROR: You haven't got rights to access this user";
-                        $log->error($result . ' - ' . $log_str);
-                    }
+            // 3. Check that session user has full rights over user requested
+            if ($group->administrator_rights_over_user($groupid, $cur_userid) !== true) {
+                $result = "ERROR: You haven't got rights to access this user";
+                $log->error($result);
+                return [ 'content' => $result ];
+            }
+
+            // 4. Check that we don't escalate from a non-admin user to an admin-user
+            if ($cur_is_admin === false) {
+                $result = $mysqli->query("SELECT admin FROM users WHERE id = $new_userid");
+                $row = $result->fetch_array();
+                if ((int) $row['admin'] !== 0) {
+                    $result = "ERROR: Can't impersonate an admin user as a non-admin user";
+                    $log->error($result);
+                    return [ 'content' => $result ];
                 }
-                else {
-                    $result = "ERROR: User is not a member of group";
-                    $log->error($result . ' - ' . $log_str);
-                }
+            }
+
+            // Keep details of current user
+            if (!$_SESSION['previous_userid']) {
+                $_SESSION['previous_userid'] = $cur_userid;
+                $_SESSION['previous_username'] = $cur_username;
+                $_SESSION['previous_admin'] = $session['admin'];
+            }
+
+            // Set new user
+            $result = $mysqli->query("SELECT * FROM users WHERE id = '$new_userid'");
+            if ($result->num_rows < 1) {
+                $this->logout(); // user id does not exist
             }
             else {
-                $result = "ERROR: You are not an administrator of this group";
-                $log->error($result . ' - ' . $log_str);
+                $new_user = $result->fetch_object();
+                $_SESSION['userid'] = $new_userid;
+                $_SESSION['username'] = $new_user->username;
+                $_SESSION['admin'] = $new_user->admin;
+                $log->warn("Login successful - $cur_username changed to " . $new_user->username);
             }
+
+            if (is_null(get('view')))
+                header("Location: ../user/view");
+            else if (get('view') == 'tasks')
+                header("Location: ../task/list#" . get('tag'));
         }
 
         if ($route->action == 'logasprevioususer') {
