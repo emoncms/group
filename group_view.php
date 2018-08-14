@@ -530,8 +530,18 @@ JAVASCRIPT
             $('#userlist-alert').show();
         }
         else {
+            roleorder = [ 1, 2, 3, 0 ];
+
             // Sort userlist
             userlist.sort(function (a, b) {
+                // Sort by admin role
+                var role_a_index = roleorder.findIndex(function(e) { return e === a.role });
+                var role_b_index = roleorder.findIndex(function(e) { return e === b.role });
+                if (role_a_index < role_b_index)
+                    return -1;
+                if (role_a_index > role_b_index)
+                    return 1;
+
                 var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
                 if (nameA < nameB) //sort string ascending
                     return -1;
