@@ -177,7 +177,8 @@ class Group {
     // Add user to a group if admin user knows account username and password
     public function add_user_auth($admin_userid, $groupid, $username, $password, $role) {
         // Check capability
-        if (!user_has_capability('group_add_member_auth')) {
+        if (!user_has_capability('group_add_member_auth') &&
+                !user_has_capability('group_add_member_no_auth')) {
             return $this->no_permission();
         }
 
