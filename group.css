@@ -34,7 +34,7 @@
 
 /*------------*/
 #grouplist {
-    background-color: #f3f3f3;
+    background-color: #eee;
 }
 
 .group {
@@ -43,11 +43,12 @@
 }
 
 .group:hover {
-    background-color: #f8f8f8;
+    background-color: #fff;
 }
 
-.group:active, .activated {
-    background-color: #fcfcfc;
+.group--active, .group--active:hover {
+    background-color: #0088cc;
+    color: white;
 }
 
 .userstitle {

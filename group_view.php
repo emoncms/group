@@ -480,7 +480,7 @@ JAVASCRIPT
         setTimeout(function () { // We need some extra time to let processlist_ui.init(1) to finish
             for (var gindex in grouplist) {
                 if (grouplist[gindex].name == selected_group) {
-                    $(".group[gindex=" + gindex + "]").addClass('activated');
+                    $(".group[gindex=" + gindex + "]").addClass('group--active');
                     draw_group(gindex);
                 }
             }
@@ -810,8 +810,8 @@ JAVASCRIPT
 // ----------------------------------------------------------------------------------------
     $("body").on("click", "#grouplist .group", function () {
         // Group selection CSS
-        $(".group").removeClass('activated');
-        $(this).addClass('activated');
+        $(".group").removeClass('group--active');
+        $(this).addClass('group--active');
         // Get selected group from attributes
         var gindex = $(this).attr("gindex");
         document.location.hash = grouplist[gindex].name
