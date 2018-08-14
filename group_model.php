@@ -203,6 +203,10 @@ class Group {
         // We only allow adding without a password if the capabilities module is loaded
         if (class_exists('Capabilities') && user_has_capability('group_add_member_no_auth')) {
             $add_userid = $this->user->get_id($username);
+            if (!$add_userid) {
+                $this->log->error("Error adding user to group: user $username doesn't exist");
+                return [ 'success' => false, 'message' => _("User doesn't exist") ];
+            }
         } else {
             $result = $this->user->get_apikeys_from_login($username, $password);
             if (!$result["success"]) {
