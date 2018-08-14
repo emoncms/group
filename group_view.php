@@ -878,7 +878,15 @@ JAVASCRIPT
         $('#group-addmember-modal input').val('');
         $("#group-addmember-access").val(0);
         $('#group-addmember-modal').modal('show');
+        $('#group-addmember-username').focus();
     });
+
+    $("body").on('keydown', '#group-addmember-username', function(evt) {
+        if (evt.which === 13) {
+            $("#group-addmember-action").click();
+        }
+    });
+
     $("body").on('click', "#group-addmember-action", function () {
         var username = $("#group-addmember-username").val();
         var password = $("#group-addmember-password").val();
