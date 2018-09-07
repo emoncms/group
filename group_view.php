@@ -1194,7 +1194,7 @@ JAVASCRIPT
             $("#groupdescription").html("");
             $('.groupselected').hide();
             $("#nogroupselected").show();
-            $('#userlist-div').hide();
+            $('#userlist-div').html('');
         }
     });
 // ----------------------------------------------------------------------------------------
