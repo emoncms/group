@@ -11,6 +11,7 @@
  * **********************************************/
 
 let login_details = require('../login_details');
+let helper = require('./group_tests_helper.js');
 
 describe('A Group user', function () {
 
@@ -20,98 +21,72 @@ describe('A Group user', function () {
     let user_to_add_password = Math.random().toString(36).substring(2, 8) + Math.random().toString(36).substring(2, 8);
 
     beforeAll(function () {
-        // Login
-        browser.url(login_details.login_url)
-                .setValue('[name=username]', login_details.username)
-                .setValue('[name=password]', login_details.password)
-                .click('#login');
-        // Go to groups
-        browser.click('a=Setup')
-                .click('a=Groups');
-        //Create a group
-        browser.click('#groupcreate')
-                .setValue('#group-create-name', group_name)
-                .setValue('#group-create-description', group_description)
-                .click('#group-create-action')
-                .click('.group=' + group_name);
+        helper.logIfDebug('\nBefore all\n------------------');
+        helper.loginDefaultUser();
+        helper.goToGroupsPage();
+        helper.createGroup(group_name);
+        helper.goToGroup(group_name);
     });
 
     afterAll(function () {
-        // Delte the group
-        browser.click('#deletegroup')
-                .click('#delete-group-action');
-        // Logout
-        browser.click('a*=Logout');
+        helper.logIfDebug('\nAfter all\n------------------');
+        helper.goToGroupsPage();
+        helper.goToGroup(group_name);
+        helper.deleteGroup(group_name);
+        helper.logout();
     });
 
     it('can create a user and add it to the group', function () {
-        browser.click('#createuseraddtogroup')
-                .setValue('#group-createuseraddtogroup-name', user_to_add)
-                .setValue('#group-createuseraddtogroup-email', 'an_email_address@tururu.com')
-                .setValue('#group-createuseraddtogroup-username', user_to_add)
-                .setValue('#group-createuseraddtogroup-password', user_to_add_password)
-                .setValue('#group-createuseraddtogroup-password-confirm', user_to_add_password)
-                .selectByVisibleText('#group-createuseraddtogroup-role', 'Passive member');
-        browser.click('#group-createuseraddtogroup-action');
+        helper.logIfDebug('\nSpecification: A Group user can create a user and add it to the group\n---------------------');
+        helper.createUserAddToGroup(user_to_add, user_to_add_password, 'Passive member');
         let created_user_name = $$('.user-info .user-name')[1];
         expect(created_user_name.getText()).toBe(user_to_add);
         let created_user_role = $$('.user-info .user-role')[1];
         expect(created_user_role.getText()).toBe('Passive member');
     });
 
-    it('can impersonate another user because is an Admnistrator', function () {
-        browser.click('[title="Log in as user"]'); // There is onlyone user so we don't need to be more specific with the selector
+    it('can impersonate the new user because is an Admnistrator', function () {
+        helper.logIfDebug('\nSpecification: A Group user can impersonate another user because is an Admnistrator\n---------------------');
+        helper.impersonateUser(user_to_add);
         expect(browser.alertText()).toBe('You are now logged as ' + user_to_add);
         browser.alertAccept();
         expect(browser.isExisting('span*=' + login_details.username + ' => ' + user_to_add)).toBe(true);
     });
 
-    it('can go to the Groups page to ensure the new user cannot see any group', function () {
-        browser.click('a=Setup')
-                .click('a=Groups');
+    it('can go to the Groups page to ensure the new user cannot see any group because is a Passive member', function () {
+        helper.logIfDebug('\nSpecification: A Group user can go to the Groups page to ensure the new user cannot see any group because is a Passive member\n---------------------');
+        helper.goToGroupsPage()
         expect(browser.isExisting('.group')).toBe(false);
     });
 
     it('can log back', function () {
-        browser.click('[href*=logasprevioususer]');
+        helper.logIfDebug('\nSpecification: A Group user can log back\n---------------------');
+        helper.logAsPreviousUser();
         expect(browser.isExisting('a*=logasprevioususer')).toBe(false);
         expect(browser.isExisting('.group*=' + group_name)).toBe(true);
     });
 
     it('can remove a user from the group but keep it in the system', function () {
-        browser.click('.group=' + group_name)
-                .click('[title="Remove user"]') // There is onlyone user so we don't need to be more specific with the selector
-                .click('[for="removeuser-from-group"')
-                .click('#remove-user-action')
-                .click('#remove-user-action');
+        helper.logIfDebug('\nSpecification: A Group user can remove a user from the group but keep it in the system\n---------------------');
+        helper.removeUserFromGroup(user_to_add, group_name);
         expect(browser.isExisting('.user-name=' + user_to_add)).toBe(false);
     });
 
     it('can add a member with password', function () {
-        browser.click('#addmember')
-                .setValue('#group-addmember-username', user_to_add)
-                .setValue('#group-addmember-password',user_to_add_password)                
-                .selectByVisibleText('#group-addmember-access', 'Sub-administrator')
-                .click('#group-addmember-action');
+        helper.logIfDebug('\nSpecification: A Group user can add a member with password\n---------------------');
+        helper.goToGroup(group_name);
+        helper.addExistingUserToGroup(user_to_add, user_to_add_password, 'Sub-administrator');
         let created_user_name = $$('.user-info .user-name')[1];
         expect(created_user_name.getText()).toBe(user_to_add);
         let created_user_role = $$('.user-info .user-role')[1];
-        expect(created_user_role.getText()).toBe('Sub-administrator');        
+        expect(created_user_role.getText()).toBe('Sub-administrator');
     });
-    
-    it('can completely remove a user from the system', function(){
-         browser.click('.group=' + group_name)
-                .click('[title="Remove user"]') // There is onlyone user so we don't need to be more specific with the selector
-                .click('[for="removeuser-delete"')
-                .click('#remove-user-action')
-                .click('#remove-user-action');
+
+    it('can completely remove a user from the system', function () {
+        helper.logIfDebug('\nSpecification: A Group user can completely remove a user from the system\n---------------------');
+        helper.removeUserFromGroupAndSystem(user_to_add, group_name);
         expect(browser.isExisting('.user-name=' + user_to_add)).toBe(false);
-        
-        browser.click('#addmember')
-                .setValue('#group-addmember-username', user_to_add)
-                .setValue('#group-addmember-password',user_to_add_password)                
-                .selectByVisibleText('#group-addmember-access', 'Sub-administrator')
-                .click('#group-addmember-action');
+        helper.addExistingUserToGroup(user_to_add, user_to_add_password, 'Sub-administrator')
         expect(browser.alertText()).toBe('Incorrect authentication');
         browser.alertAccept();
     });
