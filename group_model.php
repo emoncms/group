@@ -125,7 +125,7 @@ class Group {
             return $result;
         }
         $add_userid = $result["userid"];
-        
+
         // 2.1 Add name
         $user_data = $this->user->get($add_userid);
         $user_data->name = $name;
@@ -1005,6 +1005,30 @@ class Group {
         }
 
         return array('success' => true);
+    }
+
+    public function delete_all_groups_from_user($userid, $remove_users_from_system = false) {
+        $userid = (int) $userid;
+        $groups = $this->grouplist($userid);
+
+        foreach ($groups as $group) {
+            if ($this->is_group_admin($group['groupid'], $userid)) {
+                if ($remove_users_from_system) {
+                    $users = $this->userlist($session_userid, $group['groupid']);
+                    foreach ($users as $user_to_remove) {
+                        if ($user_to_remove['userid'] != $userid) {
+                            $result = $this->full_remove_user($userid, $group['groupid'], $user_to_remove['userid']);
+                            if ($result['success'] == false)
+                                return $result;
+                        }
+                    }
+                }
+                $result = $this->delete($userid, $group['groupid']);
+                if ($result['success'] == false)
+                    return $result;
+            }
+        }
+        return array('success' => true, 'message' => '');
     }
 
 // --------------------------------------------------------------------

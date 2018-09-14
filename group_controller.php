@@ -137,6 +137,14 @@ function group_controller() {
             $route->format = "json";
             $result = $group->send_login_details($session["userid"], prop("groupid"), prop("userid"), prop("password"), prop("emailsubject"), prop("template"), prop('sendcopy'));
         }
+                
+        // group/deleteallsgroupsfromuser
+        if ($route->action == "deleteallgroupsfromuser") {
+            $route->format = "json";
+            $result = $group->delete_all_groups_from_user($session["userid"]);
+        }
+        
+        
         /* if ($route->action == 'updatetheme') {
           if ($session['admin'] == 1) {
           $route->format = "json";
