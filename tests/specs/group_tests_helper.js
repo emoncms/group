@@ -78,7 +78,7 @@ module.exports = {
     },
     removeUserFromGroupAndSystem: function (username, group_name) {
         this.goToGroup(group_name);
-        this.logIfDebug('Removing a user from group and system' + group_name);
+        this.logIfDebug('Removing a user from group and system, group:' + group_name + ' user: ' + username);
         let users_divs = $$('.user');
         for (let i in users_divs) {
             if (users_divs[i].$('.user-name').getText() == username) {

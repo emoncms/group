@@ -33,6 +33,7 @@ describe('A Group user', function () {
         helper.logout();
         helper.loginDefaultUser();
         helper.goToGroupsPage();
+        helper.goToGroup(group_name);
         helper.fullyRemoveAllUsersFromGroup(group_name);
         helper.deleteGroup(group_name);
         helper.logout();
@@ -66,7 +67,7 @@ describe('A Group user', function () {
         browser.alertAccept();
         expect(browser.isExisting('span*=' + login_details.username + ' => ' + user_to_add_2)).toBe(true);
         helper.logAsPreviousUser();
-        helper.goToMyAccountpage();
+        helper.goToMyAccountPage();
         expect(browser.getText('.username')).toBe(login_details.username);
     });
 })

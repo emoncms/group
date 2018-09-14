@@ -89,6 +89,7 @@ describe('A Group user', function () {
         helper.addExistingUserToGroup(user_to_add, user_to_add_password, 'Sub-administrator')
         expect(browser.alertText()).toBe('Incorrect authentication');
         browser.alertAccept();
+        browser.click('#group-addmember-modal .btn[data-dismiss="modal"]');
     });
 
 });
