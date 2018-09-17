@@ -42,7 +42,7 @@ var group = {
         group.apiCall('group/removeuser', 'GET', data, succeed, fail)
     },
     fullremoveuser: function (data, succeed, fail) {
-        group.apiCall('group/removeuser', 'GET', data, succeed, fail)
+        group.apiCall('group/fullremoveuser', 'GET', data, succeed, fail)
     },
     setuserinfo: function (data, succeed, fail) {
         group.apiCall('group/setuserinfo', 'POST', data, succeed, fail)
