@@ -39,10 +39,7 @@ describe('A Group user', function () {
     it('can create a user and add it to the group', function () {
         helper.logIfDebug('\nSpecification: A Group user can create a user and add it to the group\n---------------------');
         helper.createUserAddToGroup(user_to_add, user_to_add_password, 'Passive member');
-        let created_user_name = $$('.user-info .user-name')[1];
-        expect(created_user_name.getText()).toBe(user_to_add);
-        let created_user_role = $$('.user-info .user-role')[1];
-        expect(created_user_role.getText()).toBe('Passive member');
+        $('.user-name=' + user_to_add).waitForExist(1000);
     });
 
     it('can impersonate the new user because is an Admnistrator', function () {
@@ -69,25 +66,22 @@ describe('A Group user', function () {
     it('can remove a user from the group but keep it in the system', function () {
         helper.logIfDebug('\nSpecification: A Group user can remove a user from the group but keep it in the system\n---------------------');
         helper.removeUserFromGroup(user_to_add, group_name);
-        expect(browser.isExisting('.user-name=' + user_to_add)).toBe(false);
+        $('.user-name=' + user_to_add).waitForExist(1000, true);
     });
 
     it('can add a member with password', function () {
         helper.logIfDebug('\nSpecification: A Group user can add a member with password\n---------------------');
         helper.goToGroup(group_name);
         helper.addExistingUserToGroup(user_to_add, user_to_add_password, 'Sub-administrator');
-        let created_user_name = $$('.user-info .user-name')[1];
-        expect(created_user_name.getText()).toBe(user_to_add);
-        let created_user_role = $$('.user-info .user-role')[1];
-        expect(created_user_role.getText()).toBe('Sub-administrator');
+        $('.user-name=' + user_to_add).waitForExist(1000);
     });
 
     it('can completely remove a user from the system', function () {
         helper.logIfDebug('\nSpecification: A Group user can completely remove a user from the system\n---------------------');
         helper.removeUserFromGroupAndSystem(user_to_add, group_name);
-        expect(browser.isExisting('.user-name=' + user_to_add)).toBe(false);
-        helper.addExistingUserToGroup(user_to_add, user_to_add_password, 'Sub-administrator')
-        expect(browser.alertText()).toBe('Incorrect authentication');
+        $('.user-name=' + user_to_add).waitForExist(1000, true);
+        helper.addExistingUserToGroup(user_to_add, user_to_add_password, 'Sub-administrator');
+        expect(browser.alertText()).toBe('Error: Incorrect authentication');
         browser.alertAccept();
         browser.click('#group-addmember-modal .btn[data-dismiss="modal"]');
     });
