@@ -1,26 +1,28 @@
 <?php
+// setup menu item
+$menu['sidebar']['emoncms'][] = array(
+    'text' => _("Groups"),
+    'path' => 'group',
+    'icon' => 'users',
+    'data'=> array('sidebar' => '#sidebar_group')
+);
 
-/*
-  All Emoncms code is released under the GNU Affero General Public License.
-  See COPYRIGHT.txt and LICENSE.txt.
-
-  ---------------------------------------------------------------------
-  Emoncms - open source energy visualisation
-  Part of the OpenEnergyMonitor project:
-  http://openenergymonitor.org
-
-  Group module has been developed by Carbon Co-op
-  https://carbon.coop/
-
- */
-global $session;
-
-$menu_dropdown_config[] = array('name' => "Groups", 'icon' => 'icon-globe', 'path' => "group", 'session' => "write", 'order' => 50);
-// ----------------------------------------------------------------------------------------
 // Display info about previous user logged in
 // ----------------------------------------------------------------------------------------
 if (isset($_SESSION) != false && key_exists('previous_userid', $_SESSION) == true) {
-    $menu_left[] = array('name' => $_SESSION['previous_username'] . " => " . $_SESSION['username'], 'icon' => 'icon-user icon-white', 'path' => "group/logasprevioususer", 'session' => "write", 'order' => 1000);
+    $menu['sidebar']['includes']['setup']['group'][] = array(
+        'text' => $_SESSION['previous_username'] . " => " . $_SESSION['username'],
+        'path' => 'group/logasprevioususer',
+    );
 }
 
-    
+// sub menu
+$menu['sidebar']['includes']['emoncms']['group'][] = array(
+    'text' => _('New Group'),
+    'id' => 'groupcreate',
+    'icon' => 'plus',
+    'href' => '#new',
+    'order'=> 99
+);
+$menu['sidebar']['includes']['emoncms']['group'][] = view('Modules/group/Views/search.php',array());
+$menu['sidebar']['includes']['emoncms']['group'][] = view('Modules/group/Views/grouplist.php',array());
