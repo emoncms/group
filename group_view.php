@@ -1413,45 +1413,14 @@ $("body").on('focus', '#search-box', function (e) {
         summary_for_search = data;
     });
 });
-$("body").on('keyup', '#search-box', function (e) {
-    $('.search-list-groups-show').hide();
-    $('.search-list-users-show').hide();
-    $('.search-list-tags-show').hide();
-    $('#search-list-groups').html('');
-    $('#search-list-users').html('');
-    $('#search-list-tags').html('');
-    var typed = $('#search-box').val();
-    if (typed.length > 2) {
-        summary_for_search.forEach(function (group) {
-            if (group.name.indexOf(typed) != -1) {
-                $('#search-list-groups').append('<p class="search-match" data-groupid="' + group.groupid + '">' + group.name + '</p>');
-                $('.search-list-groups-show').show();
-            }
-            group.users.forEach(function (user) {
-                if (user.username.indexOf(typed) != -1) {
-                    $('#search-list-users').append('<p class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '">' + group.name + ': ' + user.username + '</p>');
-                    $('.search-list-users-show').show();
-                }
-                for (var tag in user.tags) {
-                    if (user.tags[tag].indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
-                        $('.search-list-tags-show').show();
-                    }
-                    else if (tag.indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
-                        $('.search-list-tags-show').show();
-                    }
-                }
-            });
-        });
-    }
-});
+
 $("body").on('click', '.search-match', function (e) {
     var groupid = $(this).data('groupid');
     var userid = $(this).data('userid');
     var tag = $(this).data('tag');
     $('.group[data-gid=' + groupid + ']').click();
     $('.user[data-uid=' + userid + ']').click();
+    e.preventDefault();
 });
 $("body").on('focusout', '#search-box', function (e) {
     setTimeout(function () { // we delay the execution to allow the click on .search-match to happen
@@ -1478,25 +1447,25 @@ $("body").on('keyup', '#search-box', function (e) {
     $('#search-list-groups').html('');
     $('#search-list-users').html('');
     $('#search-list-tags').html('');
-    var typed = $('#search-box').val();
+    var typed = $('#search-box').val().toLowerCase();
     if (typed.length > 2) {
         summary_for_search.forEach(function (group) {
-            if (group.name.indexOf(typed) != -1) {
-                $('#search-list-groups').append('<p class="search-match" data-groupid="' + group.groupid + '">' + group.name + '</p>');
+            if (group.name.toLowerCase().indexOf(typed) != -1) {
+                $('#search-list-groups').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '">' + group.name + '</a></li>');
                 $('.search-list-groups-show').show();
             }
             group.users.forEach(function (user) {
-                if (user.username.indexOf(typed) != -1) {
-                    $('#search-list-users').append('<p class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '">' + group.name + ': ' + user.username + '</p>');
+                if (user.username.toLowerCase().indexOf(typed) != -1) {
+                    $('#search-list-users').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '">' + group.name + ': ' + user.username + '</a></li>');
                     $('.search-list-users-show').show();
                 }
                 for (var tag in user.tags) {
-                    if (user.tags[tag].indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                    if (user.tags[tag].toLowerCase().indexOf(typed) != -1) {
+                        $('#search-list-tags').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</a></li>');
                         $('.search-list-tags-show').show();
                     }
-                    else if (tag.indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                    else if (tag.toLowerCase().indexOf(typed) != -1) {
+                        $('#search-list-tags').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</a></li>');
                         $('.search-list-tags-show').show();
                     }
                 }
@@ -1504,23 +1473,7 @@ $("body").on('keyup', '#search-box', function (e) {
         });
     }
 });
-$("body").on('click', '.search-match', function (e) {
-    var groupid = $(this).data('groupid');
-    var userid = $(this).data('userid');
-    var tag = $(this).data('tag');
-    $('.group[data-gid=' + groupid + ']').click();
-    $('.user[data-uid=' + userid + ']').click();
-});
-$("body").on('focusout', '#search-box', function (e) {
-    setTimeout(function () { // we delay the execution to allow the click on .search-match to happen
-        $('.search-list-groups-show').hide();
-        $('.search-list-users-show').hide();
-        $('.search-list-tags-show').hide();
-        $('#search-list-groups').html('');
-        $('#search-list-users').html('');
-        $('#search-list-tags').html('');
-    }, 100);
-});
+
 // ----------------------------------------------------------------------------------------
 // Passwords
 // ----------------------------------------------------------------------------------------
