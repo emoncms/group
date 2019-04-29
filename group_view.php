@@ -535,6 +535,8 @@ function refresh_userlist(groupid) {
 }
 
 function draw_userlist(userlist) {
+    // pass new data to global variable
+    window.userlist=userlist
     // Sort userlist
     userlist.sort(function (a, b) {
         var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
@@ -668,7 +670,7 @@ function draw_userlist(userlist) {
                             out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
                             out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
                             out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
-                            out += "<div class='task-enabled' style='cursor:pointer' title='Enabled' uindex=" + z + " data-taskid=" + task_again.id + ">" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
+                            out += "<div class='task-enabled' style='cursor:pointer' title='Enabled' data-uindex=" + z + " data-taskid=" + task_again.id + ">" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
                             if (userlist[z].admin_rights == 'full') {
                                 out += '<div id="task-actions">';
                                 out += "<div class='task-delete' title='Delete task' data-uid=" + userlist[z].userid + " data-taskid=" + task_again.id + "><i class='icon-trash if-admin' style='cursor:pointer'> </i></div> ";
@@ -680,7 +682,7 @@ function draw_userlist(userlist) {
                                         " data-extra='&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "'>" +
                                         "    <i class='icon-eye-open' style='cursor:pointer'></i>" +
                                         "</div>";
-                                out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
+                                out += "<div class='task-edit-processlist' title='Edit process list' data-uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
                                 out += "</div>"; // task-actions
                             }
                             out += "</div>"; // task
