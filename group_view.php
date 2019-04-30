@@ -17,9 +17,10 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $fullwidth, $session, $appname;
 global $groups_email_subject, $groups_email_body;
 $fullwidth = true;
+$v = 1;
 ?>
-<link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
-<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
+<link href="<?php echo $path; ?>Modules/group/group.css?v=<?php echo $v ?>" rel="stylesheet">
+<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js?v=<?php echo $v ?>"></script>
 <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
