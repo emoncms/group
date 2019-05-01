@@ -7,6 +7,7 @@ var group = {
         return $.ajax({
             url: path + endpoint,
             data: data,
+            method: method || 'GET',
             dataType: 'json',
             success: function (data) {
                 if (typeof(data) == 'object' && 'success' in data && !data.success) {
