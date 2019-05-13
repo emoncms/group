@@ -1,5 +1,5 @@
 <h4 class="pl-3 mb-0">Search</h4>
-<input class="form-control ml-3" id="search-box" type="search">
+<input class="form-control ml-3" id="group-search-box" type="search">
 
 <div id="search-list" class="mb-4 pb-3">
     <h5 class="hide search-list-groups-show mb-0 pl-3">Found: Groups</h5>

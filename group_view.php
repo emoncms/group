@@ -1411,7 +1411,7 @@ $("body").on('click', '.feed-graph', function (e) {
 // ----------------------------------------------------------------------------------------
 // Action: search
 // ----------------------------------------------------------------------------------------
-$("body").on('focus', '#search-box', function (e) {
+$("body").on('focus', '#group-search-box', function (e) {
     group.extendedgrouplist(function (data) {
         summary_for_search = data;
     });
@@ -1425,7 +1425,7 @@ $("body").on('click', '.search-match', function (e) {
     $('.user[data-uid=' + userid + ']').click();
     e.preventDefault();
 });
-$("body").on('focusout', '#search-box', function (e) {
+$("body").on('focusout', '#group-search-box', function (e) {
     setTimeout(function () { // we delay the execution to allow the click on .search-match to happen
         $('.search-list-groups-show').hide();
         $('.search-list-users-show').hide();
@@ -1438,19 +1438,19 @@ $("body").on('focusout', '#search-box', function (e) {
 // ----------------------------------------------------------------------------------------
 // Action: search
 // ----------------------------------------------------------------------------------------
-$("body").on('focus', '#search-box', function (e) {
+$("body").on('focus', '#group-search-box', function (e) {
     group.extendedgrouplist(function (data) {
         summary_for_search = data;
     });
 });
-$("body").on('keyup', '#search-box', function (e) {
+$("body").on('keyup', '#group-search-box', function (e) {
     $('.search-list-groups-show').hide();
     $('.search-list-users-show').hide();
     $('.search-list-tags-show').hide();
     $('#search-list-groups').html('');
     $('#search-list-users').html('');
     $('#search-list-tags').html('');
-    var typed = $('#search-box').val().toLowerCase();
+    var typed = $('#group-search-box').val().toLowerCase();
     if (typed.length > 2) {
         summary_for_search.forEach(function (group) {
             if (group.name.toLowerCase().indexOf(typed) != -1) {
