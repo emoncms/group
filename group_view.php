@@ -17,9 +17,10 @@ defined('EMONCMS_EXEC') or die('Restricted access');
 global $path, $fullwidth, $session, $appname;
 global $groups_email_subject, $groups_email_body;
 $fullwidth = true;
+$v = 1;
 ?>
-<link href="<?php echo $path; ?>Modules/group/group.css" rel="stylesheet">
-<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js"></script>
+<link href="<?php echo $path; ?>Modules/group/group.css?v=<?php echo $v ?>" rel="stylesheet">
+<script language="javascript" type="text/javascript" src="<?php echo $path; ?>Modules/group/group.js?v=<?php echo $v ?>"></script>
 <link href="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
 <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap-datetimepicker-0.0.11/js/bootstrap-datetimepicker.min.js"></script>
 <script type="text/javascript" src="<?php echo $path; ?>Modules/user/user.js"></script>
@@ -33,33 +34,7 @@ $fullwidth = true;
 <!-------------------------------------------------------------------------------------------
 MAIN
 -------------------------------------------------------------------------------------------->
-<div id="wrapper">
-    <div class="sidebar">
-        <div style="padding-left:10px">
-            <div id="sidebar-close"><i class="icon-remove"></i></div>
-        </div>
-        <div id="previous_user" style="padding: 0 0 10px 10px">
-            <h3>Admin user</h3>'
-        </div>
 
-        <h3 style="padding-left:10px">Search</h3>
-        <div id="search-wrapper">
-            <input id="search-box"></input>
-            <div id="search-list">
-                <h4 class="hide search-list-groups-show">Groups</h4>
-                <div id="search-list-groups" class="hide search-list-groups-show"></div>
-                <h4 class="hide search-list-users-show">Users</h4>
-                <div id="search-list-users" class="hide search-list-users-show"></div>
-                <h4 class="hide search-list-tags-show">Tags</h4>
-                <div id="search-list-tags" class="hide search-list-tags-show"></div>
-            </div>
-        </div>
-
-        <h3 style="padding-left:10px">Groups</h3>
-        <div id="grouplist"></div>
-
-        <div id="groupcreate"><i class="icon-plus"></i>New Group</div>
-    </div>
 
     <div class="page-content" style="padding-top:15px">
         <div style="padding-bottom:15px">
@@ -96,7 +71,6 @@ MAIN
             <p>Select or create group from sidebar</p>
         </div>
     </div>
-</div>
 
 <!-------------------------------------------------------------------------------------------
 MODALS
@@ -438,7 +412,6 @@ JAVASCRIPT
 <script>
 var path = "<?php echo $path; ?>";
 var my_userid = <?php echo $session["userid"]; ?>;
-sidebar_resize();
 var selected_groupid = 0;
 var selected_groupindex = 0;
 var grouplist = [];
@@ -482,12 +455,12 @@ refresh_grouplist();
 // Startup group
 // ----------------------------------------------------------------------------------------
 var selected_group = decodeURIComponent(window.location.hash).substring(1);
-console.log("Selectedgroup:" + selected_group)
+// console.log("Selectedgroup:" + selected_group)
 if (selected_group != "") {
     setTimeout(function () { // We need some extra time to let processlist_ui.init(1) to finish
         for (var gindex in grouplist) {
             if (grouplist[gindex].name == selected_group) {
-                $(".group[gindex=" + gindex + "]").addClass('activated');
+                $(".group[data-gindex=" + gindex + "]").parent().addClass('active');
                 select_group(gindex);
             }
         }
@@ -526,11 +499,13 @@ function select_group(index) {
     refresh_userlist(selected_groupid);
 }
 
+
 function draw_grouplist() {
-    var out = "";
+    var out = '<ul class="nav sidebar-menu sub-nav">';
     for (var z in grouplist) {
-        out += "<div class='group' gindex=" + z + " gid=" + grouplist[z].groupid + ">" + grouplist[z].name + "</div>";
+        out += "<li><a href='#"+ grouplist[z].name + "' class='group' data-gindex=" + z + " data-gid=" + grouplist[z].groupid + ">" + grouplist[z].name + "</a></li>";
     }
+    out += "</ul>";
     $("#grouplist").html(out);
 }
 
@@ -561,6 +536,8 @@ function refresh_userlist(groupid) {
 }
 
 function draw_userlist(userlist) {
+    // pass new data to global variable
+    window.userlist=userlist
     // Sort userlist
     userlist.sort(function (a, b) {
         var nameA = a.username.toLowerCase(), nameB = b.username.toLowerCase();
@@ -623,7 +600,7 @@ function draw_userlist(userlist) {
         orange = orange > 0 ? orange : '';
         red = red > 0 ? red : '';
         // html user
-        out += "<div class='user' uid='" + userlist[z].userid + "'>";
+        out += "<div class='user' data-uid='" + userlist[z].userid + "'>";
         out += "<div class='user-info'>";
         out += "<div class='user-name'>" + userlist[z].username + "</div>";
         out += "<div class='user-active-feeds'><b> <span style='color:" + color_green + "'>" + green + "</span>" + " <span style='color:" + color_amber + "'>" + amber + "</span>" + " <span style='color:" + color_orange + "'>" + orange + "</span>" + " <span style='color:" + color_red + "'>" + red + "</span>" + "</b></div>";
@@ -634,20 +611,20 @@ function draw_userlist(userlist) {
                 if (my_role == 1) {
                     out += "<button title='Log in as user'" +
                             " class='btn setuser if-admin'" +
-                            " gid=" + selected_groupid +
-                            " uid=" + userlist[z].userid +
-                            " username='" + userlist[z].username + "'>" +
+                            " data-gid=" + selected_groupid +
+                            " data-uid=" + userlist[z].userid +
+                            " data-username='" + userlist[z].username + "'>" +
                             "    <i class='icon-user'></i>" +
                             "</button>";
                 }
-                out += "<button title='Edit user' class='btn edit-user if-admin' uid=" + userlist[z].userid + " uindex=" + z + "><i class='icon-edit'></i></button>";
+                out += "<button title='Edit user' class='btn edit-user if-admin' data-uid=" + userlist[z].userid + " data-uindex=" + z + "><i class='icon-edit'></i></button>";
             }
-            out += "<button title='Remove user' class='btn removeuser if-admin' uid=" + userlist[z].userid + " admin-rights=" + userlist[z].admin_rights + "><i class='icon-trash'></i></button>";
+            out += "<button title='Remove user' class='btn removeuser if-admin' data-uid=" + userlist[z].userid + " data-admin-rights=" + userlist[z].admin_rights + "><i class='icon-trash'></i></button>";
         }
         out += "</div>"; // user-actions
         out += "</div>"; // user-info
         // html feeds and tasks
-        out += "<div class='user-feeds-inputs hide' uid='" + userlist[z].userid + "'>";
+        out += "<div class='user-feeds-inputs hide' data-uid='" + userlist[z].userid + "'>";
         // Feeds
         out += "<div class='user-feedslist'>";
         out += "<div class='user-feedslist-inner'>";
@@ -657,14 +634,14 @@ function draw_userlist(userlist) {
             if (tags_list.indexOf(feed.tag) == -1) {
                 tags_list.push(feed.tag);
                 out += "<div class='feed-tag' tag='" + feed.tag + "'>";
-                out += "<input class='feed-tag-checkbox' type='checkbox' tag='" + feed.tag + "' uid='" + userlist[z].userid + "' />" + feed.tag;
+                out += "<input class='feed-tag-checkbox' type='checkbox' data-tag='" + feed.tag + "' data-uid='" + userlist[z].userid + "' />" + feed.tag;
                 // Add feed tah have the current tag
                 userlist[z].feedslist.forEach(function (feed_again) {
                     if (feed_again.tag == feed.tag) {
-                        out += "<div class='feed hide' tag='" + feed_again.tag + "' uid='" + userlist[z].userid + "'>";
-                        out += "<input type='checkbox' fid='" + feed_again.id + "' tag='" + feed_again.tag + "' uid='" + userlist[z].userid + "' />";
+                        out += "<div class='feed hide' data-tag='" + feed_again.tag + "' data-uid='" + userlist[z].userid + "'>";
+                        out += "<input type='checkbox' data-fid='" + feed_again.id + "' data-tag='" + feed_again.tag + "' data-uid='" + userlist[z].userid + "' />";
                         out += "<div class='feed-name'>" + feed_again.name + "</div>";
-                        out += "<div class='feed-download' fid='" + feed_again.id + "' tag='" + feed_again.tag + "' name='" + feed_again.name + "'><i class='icon-download'style='cursor:pointer' title='Download csv'> </i></div>";
+                        out += "<div class='feed-download' data-fid='" + feed_again.id + "' data-tag='" + feed_again.tag + "' data-name='" + feed_again.name + "'><i class='icon-download'style='cursor:pointer' title='Download csv'> </i></div>";
                         out += "<div class='feed-value'>" + list_format_value(feed_again.value) + "</div>";
                         out += "<div class='feed-time'>" + list_format_updated(feed_again.time) + "</div>";
                         out += "</div>"; // feed
@@ -677,7 +654,7 @@ function draw_userlist(userlist) {
         out += "</div>"; // user-feedslist
         // Tasks div
         if (task_support === true && userlist[z].taskslist.length > 0) {
-            out += "<div class='user-tasks' groupid='" + groupid + "' userid='" + userlist[z].userid + "'>";
+            out += "<div class='user-tasks' groupid='" + groupid + "' data-userid='" + userlist[z].userid + "'>";
             out += "<div class='user-taskslist-inner'>";
             // Add tags
             var tags_list = [];
@@ -690,23 +667,23 @@ function draw_userlist(userlist) {
                     // Add tasks tah have the current tag
                     userlist[z].taskslist.forEach(function (task_again, row) {
                         if (task_again.tag == task.tag) {
-                            out += "<div class='task hide' tag='" + task.tag + "' uid='" + userlist[z].userid + "' taskid='" + task_again.id + "'>";
+                            out += "<div class='task hide' data-tag='" + task.tag + "' data-uid='" + userlist[z].userid + "' data-taskid='" + task_again.id + "'>";
                             out += "<div class='task-name' title='Name'>" + task_again.name + "</div>";
                             out += "<div class='task-processlist' title='Process list'>" + table.fieldtypes.processlist.draw(table, row, '', 'processList') + "</div>";
                             out += "<div class='task-frequency' title='Frequency'>" + table.fieldtypes.frequency.draw(table, row, '', 'frequency') + "</div>";
-                            out += "<div class='task-enabled' style='cursor:pointer' title='Enabled' uindex=" + z + " taskid=" + task_again.id + ">" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
+                            out += "<div class='task-enabled' style='cursor:pointer' title='Enabled' data-uindex=" + z + " data-taskid=" + task_again.id + ">" + (task_again.enabled == 1 ? 'On' : 'Off') + "</div>";
                             if (userlist[z].admin_rights == 'full') {
                                 out += '<div id="task-actions">';
-                                out += "<div class='task-delete' title='Delete task' uid=" + userlist[z].userid + " taskid=" + task_again.id + "><i class='icon-trash if-admin' style='cursor:pointer'> </i></div> ";
+                                out += "<div class='task-delete' title='Delete task' data-uid=" + userlist[z].userid + " data-taskid=" + task_again.id + "><i class='icon-trash if-admin' style='cursor:pointer'> </i></div> ";
                                 out += "<div class='task-view setuser'"
                                 ' title="Edit task in user\'s account"' +
-                                        " gid=" + selected_groupid +
-                                        " uid=" + userlist[z].userid +
-                                        " username='" + userlist[z].username + "'" +
-                                        " extra='&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "'>" +
+                                        " data-gid=" + selected_groupid +
+                                        " data-uid=" + userlist[z].userid +
+                                        " data-username='" + userlist[z].username + "'" +
+                                        " data-extra='&view=tasks&tag=" + (task.tag === '' ? 'NoGroup' : task.tag) + "'>" +
                                         "    <i class='icon-eye-open' style='cursor:pointer'></i>" +
                                         "</div>";
-                                out += "<div class='task-edit-processlist' title='Edit process list' uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
+                                out += "<div class='task-edit-processlist' title='Edit process list' data-uindex=" + z + " taskid=" + task_again.id + " ><i style='cursor:pointer' class='icon-wrench' /></div>";
                                 out += "</div>"; // task-actions
                             }
                             out += "</div>"; // task
@@ -812,14 +789,15 @@ function generatePassword() {
 // ----------------------------------------------------------------------------------------
 // Action: click on group
 // ----------------------------------------------------------------------------------------
-$("body").on("click", "#grouplist .group", function () {
+$("body").on("click", "#grouplist .group", function (event) {
+    // event.preventDefault();
     // Group selection CSS
-    $(".group").removeClass('group--active');
-    $(this).addClass('group--active');
+    $('#grouplist li.active').removeClass('active');
+    $(this).parent().addClass('active');
     // Get selected group from attributes
-    var gindex = $(this).attr("gindex");
-    document.location.hash = grouplist[gindex].name
+    var gindex = $(this).data("gindex");
     select_group(gindex);
+    // document.location.hash = grouplist[gindex].name
 });
 
 // ----------------------------------------------------------------------------------------
@@ -963,23 +941,23 @@ $("body").on('click', "#group-createuseraddtogroup-action", function () {
 // Action: Show feeds of a user
 // ----------------------------------------------------------------------------------------
 $('body').on('click', '.user', function () {
-    var userid = $(this).attr('uid');
-    $('.user-feeds-inputs[uid="' + userid + '"]').toggle();
+    var userid = $(this).data('uid');
+    $('.user-feeds-inputs[data-uid="' + userid + '"]').toggle();
 });
 $('body').on('click', '.feed-tag', function (e) {
     e.stopPropagation();
-    var tag = $(this).attr('tag');
+    var tag = $(this).data('tag');
     $(this).find('.feed[tag="' + tag + '"]').toggle();
 });
 $('body').on('click', '.feed-tag-checkbox', function (e) {
     e.stopPropagation();
-    var tag = $(this).attr('tag');
-    var uid = $(this).attr('uid');
+    var tag = $(this).data('tag');
+    var uid = $(this).data('uid');
     if ($(this).is(':checked')) {
-        $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', 'checked');
+        $('.feed[data-tag="' + tag + '"][data-uid="' + uid + '"] input').prop('checked', 'checked');
     }
     else
-        $('.feed[tag="' + tag + '"][uid="' + uid + '"] input').prop('checked', '');
+        $('.feed[data-tag="' + tag + '"][data-uid="' + uid + '"] input').prop('checked', '');
 });
 $('body').on('click', '.feed', function (e) {
     e.stopPropagation();
@@ -989,7 +967,7 @@ $('body').on('click', '.feed', function (e) {
 // ----------------------------------------------------------------------------------------
 $('body').on('click', '.task-tag', function (e) {
     e.stopPropagation();
-    var tag = $(this).attr('tag');
+    var tag = $(this).data('tag');
     $(this).find('.feed[tag="' + tag + '"]').toggle();
 });
 $('body').on('click', '.task', function (e) {
@@ -1003,31 +981,25 @@ $("body").on('click', ".removeuser", function (e) {
     $('#remove-user-modal-step-1').show();
     $('#remove-user-modal-step-2').hide();
     $('#remove-user-action').html('Next');
-    $('#remove-user-action').attr('action', 'next');
-    var userid = $(this).attr("uid");
-    $('#remove-user-modal').attr("uid", userid);
-    var admin_rights = $(this).attr("admin-rights");
-    if (admin_rights != "full") {
-        $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', true);
-    }
-    else {
-        $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', false);
-    }
-
+    $('#remove-user-action').data('action', 'next');
+    var userid = $(this).data("uid");
+    $('#remove-user-modal').data("uid", userid);
+    var admin_rights = $(this).data("admin-rights");
+    $('[name="removeuser-whattodo"][value="delete"]').attr('disabled', admin_rights !== "full");
     $('#remove-user-modal').modal('show');
 });
 $("body").on('click', "#remove-user-action", function () {
-    var action = $(this).attr('action');
+    var action = $(this).data('action');
     if (action == 'next') {
         $('#remove-user-modal-step-1').hide();
         var what_to_do = $('input[name="removeuser-whattodo"]:checked').val();
         if (what_to_do == 'remove-from-group') {
             $('#remove-user-modal-step-2').html('<p>Are you sure you want to remove this user from group?</p>');
-            $(this).attr('action', 'remove-from-group');
+            $(this).data('action', 'remove-from-group');
         }
         else {
             $('#remove-user-modal-step-2').html('<p>Are you sure you wish to completely delete this user from the database?</p><p>All the data will be lost</p>');
-            $(this).attr('action', 'delete-from-database');
+            $(this).data('action', 'delete-from-database');
         }
         $('#remove-user-modal-step-2').show();
         $('#remove-user-action').html('Done')
@@ -1037,7 +1009,7 @@ $("body").on('click', "#remove-user-action", function () {
 
         var data = {
             groupid: selected_groupid,
-            userid: $('#remove-user-modal').attr("uid")
+            userid: $('#remove-user-modal').data("uid")
         }
 
         group.removeuser(data, function () {
@@ -1049,7 +1021,7 @@ $("body").on('click', "#remove-user-action", function () {
 
         var data = {
             groupid: selected_groupid,
-            userid: $('#remove-user-modal').attr("uid")
+            userid: $('#remove-user-modal').data("uid")
         }
 
         group.fullremoveuser(data, function () {
@@ -1067,9 +1039,9 @@ $("body").on('click', ".edit-user", function (e) {
     $('#edit-user-matching-tags').hide();
     $('.edit-user-tag-name').val('');
     $('.edit-user-tag-value').val('');
-    var userid = $(this).attr("uid");
-    $('#edit-user-action').attr("uid", userid);
-    var uindex = $(this).attr("uindex");
+    var userid = $(this).data("uid");
+    $('#edit-user-action').data("uid", userid);
+    var uindex = $(this).data("uindex");
     $('.edit-user-username').val(userlist[uindex].username);
     $('.edit-user-name').val(userlist[uindex].name);
     $('.edit-user-email').val(userlist[uindex].email);
@@ -1085,7 +1057,7 @@ $("body").on('click', ".edit-user", function (e) {
     var html = '';
     for (var tag in userlist[uindex].tags) {
         var value = userlist[uindex].tags[tag];
-        html += '<div name="' + tag + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + tag + ': ' + value + '<span class="remove-tag" name="' + tag + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
+        html += '<div data-name="' + tag + '" data-value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + tag + ': ' + value + '<span class="remove-tag" data-name="' + tag + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
     }
 
     $('#edit-user-tagslist').html(html);
@@ -1094,12 +1066,12 @@ $("body").on('click', ".edit-user", function (e) {
 $("body").on('click', "#edit-user-action", function () {
     var tags = {};
     $('#edit-user-tagslist div').each(function () {
-        tags[$(this).attr('name')] = $(this).attr('value');
+        tags[$(this).data('name')] = $(this).data('value');
     });
 
     var data = {
         groupid: selected_groupid,
-        userid: $('#edit-user-action').attr("uid"),
+        userid: $('#edit-user-action').data("uid"),
         username: $('.edit-user-username').val(),
         name: $('.edit-user-name').val(),
         email: $('.edit-user-email').val(),
@@ -1144,11 +1116,11 @@ $("body").on('click', ".edit-user-tag-add", function () {
     $('#edit-user-modal-message-tag').hide();
     var name = $('.edit-user-tag-name').val();
     var value = $('.edit-user-tag-value').val();
-    var html = '<div name="' + name + '" value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + name + ': ' + value + '<span class="remove-tag" name="' + name + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
+    var html = '<div data-name="' + name + '" data-value="' + value + '" class="btn" style="cursor:default;margin-right:5px">' + name + ': ' + value + '<span class="remove-tag" data-name="' + name + '" style="margin-left:5px; cursor:pointer"><sup><b>X</b></sup></span></div>';
     var name_found = false;
     // Find out if tag is already used
     $('#edit-user-tagslist div').each(function () {
-        if ($(this).attr('name') == name)
+        if ($(this).data('name') == name)
             name_found = true;
     });
     // Add tag
@@ -1163,7 +1135,7 @@ $("body").on('click', ".edit-user-tag-add", function () {
     }
 });
 $("body").on('click', ".remove-tag", function () {
-    var name = $(this).attr('name');
+    var name = $(this).data('name');
     $('#edit-user-tagslist div[name="' + name + '"]').remove();
 });
 $("body").on('keyup', ".edit-user-tag-name", function () {
@@ -1185,7 +1157,7 @@ $("body").on('keyup', ".edit-user-tag-name", function () {
     }
 });
 $("body").on('click', ".matched-tag", function () {
-    $('.edit-user-tag-name').val($(this).attr('tag'));
+    $('.edit-user-tag-name').val($(this).data('tag'));
     $('#edit-user-matching-tags').hide();
 });
 // ----------------------------------------------------------------------------------------
@@ -1212,7 +1184,7 @@ $("body").on('click', "#delete-group-action", function () {
 // ----------------------------------------------------------------------------------------
 $('body').on('click', '.feed-download, .multiple-feed-download', function (e) {
     e.stopPropagation();
-    if ($(this).attr('type') == 'multiple') {
+    if ($(this).data('type') == 'multiple') {
         /*$("#export").attr('export-type', "group");
          var group = $(this).attr('group');
          $("#export").attr('group', group);
@@ -1226,24 +1198,24 @@ $('body').on('click', '.feed-download, .multiple-feed-download', function (e) {
          $("#SelectedExport").html(group + " tag (" + rows.length + " feeds)");
          calculate_download_size(rows.length);*/
 
-        $("#export").attr('export-type', "group");
+        $("#export").data('export-type', "group");
         // var group = $(this).attr('group');
         //$("#export").attr('group', group);
         var feedids = [];
         $('.feed input:checked').each(function () {
-            feedids.push($(this).attr('fid'));
+            feedids.push($(this).data('fid'));
         });
-        $("#export").attr('feedids', feedids);
-        $("#export").attr('feedcount', feedids.length);
+        $("#export").data('feedids', feedids);
+        $("#export").data('feedcount', feedids.length);
         $("#SelectedExport").html("Download " + feedids.length + " feeds");
-        $("#export").attr('name', selected_group);
+        $("#export").data('name', selected_group);
         calculate_download_size(feedids.length);
     }
     else {
-        $("#export").attr('export-type', "feed");
-        $("#export").attr('feedid', $(this).attr('fid'));
-        var name = $(this).attr('tag') + ":" + $(this).attr('name');
-        $("#export").attr('name', name);
+        $("#export").data('export-type', "feed");
+        $("#export").data('feedid', $(this).data('fid'));
+        var name = $(this).data('tag') + ":" + $(this).data('name');
+        $("#export").data('name', name);
         $("#SelectedExport").html(name);
         calculate_download_size(1);
     }
@@ -1279,8 +1251,8 @@ picker2.setStartDate(today);
 $("body").on('change', '#export-interval, #export-timeformat', function (e)
 {
     $("#export-timezone-offset").prop("disabled", $("#export-timeformat").prop('checked'));
-    if ($("#export").attr('export-type') == 'group') {
-        var downloadsize = calculate_download_size($("#export").attr('feedcount'));
+    if ($("#export").data('export-type') == 'group') {
+        var downloadsize = calculate_download_size($("#export").data('feedcount'));
     }
     else {
         calculate_download_size(1);
@@ -1288,8 +1260,8 @@ $("body").on('change', '#export-interval, #export-timeformat', function (e)
 });
 $("body").on('changeDate', '#datetimepicker1, #datetimepicker2', function (e)
 {
-    if ($("#export").attr('export-type') == 'group') {
-        var downloadsize = calculate_download_size($("#export").attr('feedcount'));
+    if ($("#export").data('export-type') == 'group') {
+        var downloadsize = calculate_download_size($("#export").data('feedcount'));
     }
     else {
         calculate_download_size(1);
@@ -1325,8 +1297,8 @@ $("body").on('click', "#export", function ()
 global $feed_settings;
 echo $feed_settings['csvdownloadlimit_mb'];
 ?>;
-    if ($(this).attr('export-type') == 'group')
-        var downloadsize = calculate_download_size($(this).attr('feedcount'));
+    if ($(this).data('export-type') == 'group')
+        var downloadsize = calculate_download_size($(this).data('feedcount'));
     else
         var downloadsize = calculate_download_size(1);
 
@@ -1338,9 +1310,9 @@ echo $feed_settings['csvdownloadlimit_mb'];
 
     $('#feedExportModal').modal('hide');
 
-    var feedids = $(this).attr('export-type') == 'group' ?
-            $(this).attr('feedids') :
-            $(this).attr('feedid');
+    var feedids = $(this).data('export-type') == 'group' ?
+            $(this).data('feedids') :
+            $(this).data('feedid');
 
     window.open(path + "group/csvexport" +
             "?groupid=" + selected_groupid +
@@ -1349,7 +1321,7 @@ echo $feed_settings['csvdownloadlimit_mb'];
             "&end=" + (export_end + export_timezone_offset) +
             "&interval=" + export_interval +
             "&timeformat=" + export_timeformat +
-            "&name=" + $(this).attr('name'));
+            "&name=" + $(this).data('name'));
 });
 function calculate_download_size(feedcount) {
     var export_start = parse_timepicker_time($("#export-start").val());
@@ -1407,8 +1379,8 @@ $('body').on('click', '.feed-tag-checkbox, .feed input', function (e) {
 // ----------------------------------------------------------------------------------------
 $('body').on('click', '.feed input', function (e) {
     e.stopPropagation();
-    var tag = $(this).attr('tag');
-    var uid = $(this).attr('uid');
+    var tag = $(this).data('tag');
+    var uid = $(this).data('uid');
     var any_checked = false;
     var any_unchecked = false;
     $('.feed input[tag="' + tag + '"][uid="' + uid + '"]').each(function () {
@@ -1432,59 +1404,28 @@ $("body").on('click', '.feed-graph', function (e) {
     var feeds = [];
     $('.feed input').each(function () {
         if ($(this).is(':checked'))
-            feeds.push($(this).attr('fid'))
+            feeds.push($(this).data('fid'))
     });
     window.location = path + "graph/groupgraph/" + selected_groupid + ',' + feeds.join(",");
 });
 // ----------------------------------------------------------------------------------------
 // Action: search
 // ----------------------------------------------------------------------------------------
-$("body").on('focus', '#search-box', function (e) {
+$("body").on('focus', '#group-search-box', function (e) {
     group.extendedgrouplist(function (data) {
         summary_for_search = data;
     });
 });
-$("body").on('keyup', '#search-box', function (e) {
-    $('.search-list-groups-show').hide();
-    $('.search-list-users-show').hide();
-    $('.search-list-tags-show').hide();
-    $('#search-list-groups').html('');
-    $('#search-list-users').html('');
-    $('#search-list-tags').html('');
-    var typed = $('#search-box').val();
-    if (typed.length > 2) {
-        summary_for_search.forEach(function (group) {
-            if (group.name.indexOf(typed) != -1) {
-                $('#search-list-groups').append('<p class="search-match" groupid="' + group.groupid + '">' + group.name + '</p>');
-                $('.search-list-groups-show').show();
-            }
-            group.users.forEach(function (user) {
-                if (user.username.indexOf(typed) != -1) {
-                    $('#search-list-users').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '">' + group.name + ': ' + user.username + '</p>');
-                    $('.search-list-users-show').show();
-                }
-                for (var tag in user.tags) {
-                    if (user.tags[tag].indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
-                        $('.search-list-tags-show').show();
-                    }
-                    else if (tag.indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
-                        $('.search-list-tags-show').show();
-                    }
-                }
-            });
-        });
-    }
-});
+
 $("body").on('click', '.search-match', function (e) {
-    var groupid = $(this).attr('groupid');
-    var userid = $(this).attr('userid');
-    var tag = $(this).attr('tag');
-    $('.group[gid=' + groupid + ']').click();
-    $('.user[uid=' + userid + ']').click();
+    var groupid = $(this).data('groupid');
+    var userid = $(this).data('userid');
+    var tag = $(this).data('tag');
+    $('.group[data-gid=' + groupid + ']').click();
+    $('.user[data-uid=' + userid + ']').click();
+    e.preventDefault();
 });
-$("body").on('focusout', '#search-box', function (e) {
+$("body").on('focusout', '#group-search-box', function (e) {
     setTimeout(function () { // we delay the execution to allow the click on .search-match to happen
         $('.search-list-groups-show').hide();
         $('.search-list-users-show').hide();
@@ -1497,37 +1438,37 @@ $("body").on('focusout', '#search-box', function (e) {
 // ----------------------------------------------------------------------------------------
 // Action: search
 // ----------------------------------------------------------------------------------------
-$("body").on('focus', '#search-box', function (e) {
+$("body").on('focus', '#group-search-box', function (e) {
     group.extendedgrouplist(function (data) {
         summary_for_search = data;
     });
 });
-$("body").on('keyup', '#search-box', function (e) {
+$("body").on('keyup', '#group-search-box', function (e) {
     $('.search-list-groups-show').hide();
     $('.search-list-users-show').hide();
     $('.search-list-tags-show').hide();
     $('#search-list-groups').html('');
     $('#search-list-users').html('');
     $('#search-list-tags').html('');
-    var typed = $('#search-box').val();
+    var typed = $('#group-search-box').val().toLowerCase();
     if (typed.length > 2) {
         summary_for_search.forEach(function (group) {
-            if (group.name.indexOf(typed) != -1) {
-                $('#search-list-groups').append('<p class="search-match" groupid="' + group.groupid + '">' + group.name + '</p>');
+            if (group.name.toLowerCase().indexOf(typed) != -1) {
+                $('#search-list-groups').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '">' + group.name + '</a></li>');
                 $('.search-list-groups-show').show();
             }
             group.users.forEach(function (user) {
-                if (user.username.indexOf(typed) != -1) {
-                    $('#search-list-users').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '">' + group.name + ': ' + user.username + '</p>');
+                if (user.username.toLowerCase().indexOf(typed) != -1) {
+                    $('#search-list-users').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '">' + group.name + ': ' + user.username + '</a></li>');
                     $('.search-list-users-show').show();
                 }
                 for (var tag in user.tags) {
-                    if (user.tags[tag].indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                    if (user.tags[tag].toLowerCase().indexOf(typed) != -1) {
+                        $('#search-list-tags').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</a></li>');
                         $('.search-list-tags-show').show();
                     }
-                    else if (tag.indexOf(typed) != -1) {
-                        $('#search-list-tags').append('<p class="search-match" groupid="' + group.groupid + '" userid="' + user.userid + '" tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</p>');
+                    else if (tag.toLowerCase().indexOf(typed) != -1) {
+                        $('#search-list-tags').append('<li><a href="#" class="search-match" data-groupid="' + group.groupid + '" data-userid="' + user.userid + '" data-tag="' + tag + '">' + group.name + ': ' + user.username + ': ' + tag + ': ' + user.tags[tag] + '</a></li>');
                         $('.search-list-tags-show').show();
                     }
                 }
@@ -1535,23 +1476,7 @@ $("body").on('keyup', '#search-box', function (e) {
         });
     }
 });
-$("body").on('click', '.search-match', function (e) {
-    var groupid = $(this).attr('groupid');
-    var userid = $(this).attr('userid');
-    var tag = $(this).attr('tag');
-    $('.group[gid=' + groupid + ']').click();
-    $('.user[uid=' + userid + ']').click();
-});
-$("body").on('focusout', '#search-box', function (e) {
-    setTimeout(function () { // we delay the execution to allow the click on .search-match to happen
-        $('.search-list-groups-show').hide();
-        $('.search-list-users-show').hide();
-        $('.search-list-tags-show').hide();
-        $('#search-list-groups').html('');
-        $('#search-list-users').html('');
-        $('#search-list-tags').html('');
-    }, 100);
-});
+
 // ----------------------------------------------------------------------------------------
 // Passwords
 // ----------------------------------------------------------------------------------------
@@ -1589,52 +1514,20 @@ $('#edit-user-modal').on('click', '.generate-password', function () {
 $("body").on('click', ".setuser", function (e) {
     e.stopPropagation();
 
-    var extra = $(this).attr('extra');
+    var extra = $(this).data('extra');
     extra = extra ? extra : "";
 
-    alert('You are now logged as ' + $(this).attr('username'));
-    window.location = path + "group/setuser?groupid=" + $(this).attr('gid') +
-            "&userid=" + $(this).attr('uid') +
+    alert('You are now logged as ' + $(this).data('username'));
+    window.location = path + "group/setuser?groupid=" + $(this).data('gid') +
+            "&userid=" + $(this).data('uid') +
             extra;
 });
 $("body").on('click', '.toogle-email-div', function () {
-    if ($(this).is(':checked'))
+    if ($(this).is(':checked')) {
         $(this).parents('.modal').find('.email-div').show();
-    else
+    } else {
         $(this).parents('.modal').find('.email-div').hide();
-
-});
-// ----------------------------------------------------------------------------------------
-// Sidebar
-// ----------------------------------------------------------------------------------------
-$("body").on('click', "#sidebar-open", function () {
-    $(".sidebar").css("left", "250px");
-    $("#sidebar-close").show();
-});
-$("body").on('click', "#sidebar-close", function () {
-    $(".sidebar").css("left", "0");
-    $("#sidebar-close").hide();
-});
-function sidebar_resize() {
-    var width = $(window).width();
-    var height = $(window).height();
-    var nav = $(".navbar").height();
-    $(".sidebar").height(height - nav - 40);
-    if (width < 1024) {
-        $(".sidebar").css("left", "0");
-        $("#wrapper").css("padding-left", "0");
-        $("#sidebar-open").show();
     }
-    else {
-        $(".sidebar").css("left", "250px");
-        $("#wrapper").css("padding-left", "250px");
-        $("#sidebar-open").hide();
-        $("#sidebar-close").hide();
-    }
-}
-
-$(window).resize(function () {
-    sidebar_resize();
 });
 
 // ----------------------------------------------------------------------------------------
@@ -1642,7 +1535,7 @@ $(window).resize(function () {
 // ----------------------------------------------------------------------------------------
 $("body").on('click', ".task-tag", function (e) {
     e.stopPropagation();
-    var tag = $(this).attr('tag');
+    var tag = $(this).data('tag');
     $(this).find('.task[tag="' + tag + '"]').toggle();
 });
 $("body").on('click', ".create-task", function (e) {
@@ -1666,19 +1559,19 @@ $("body").on('click', ".create-task", function (e) {
     // Get all the checked feeds and store them into the ProcessList modal
     var feedids = [];
     $('.feed input[type=checkbox]:checked').each(function () {
-        feedids.push($(this).attr('fid'));
+        feedids.push($(this).data('fid'));
     });
-    $('#processlistModal').attr('feedids', JSON.stringify(feedids));
+    $('#processlistModal').data('feedids', JSON.stringify(feedids));
 });
 $("body").on('click', ".task-delete", function (e) {
-    $('#delete-task-modal').attr('uid', $(this).attr('uid'));
-    $('#delete-task-modal').attr('taskid', $(this).attr('taskid'));
+    $('#delete-task-modal').data('uid', $(this).data('uid'));
+    $('#delete-task-modal').data('taskid', $(this).data('taskid'));
     $('#delete-task-modal').modal('show');
 });
 $("body").on('click', "#delete-task-action", function (e) {
     var data = {
-        taskid: $('#delete-task-modal').attr('taskid'),
-        userid: $('#delete-task-modal').attr('uid'),
+        taskid: $('#delete-task-modal').data('taskid'),
+        userid: $('#delete-task-modal').data('uid'),
         groupid: selected_groupid,
     }
 
@@ -1693,15 +1586,15 @@ $("body").on('click', "#delete-task-action", function (e) {
 });
 $("body").on('click', ".task-edit-processlist", function (e) {
     e.stopPropagation();
-    var taskid = $(this).attr('taskid');
-    var user = userlist[$(this).attr('uindex')];
+    var taskid = $(this).data('taskid');
+    var user = userlist[$(this).data('uindex')];
     var task = user.taskslist.find(function (task_obj) {
         return task_obj.id === taskid;
     });
     processlist_ui.load(taskid, processlist_ui.decode(task.processList), '', null, null); // show processlist modal
-    $("#processlistModal #save-processlist").attr('action', 'edit');
-    $("#processlistModal #save-processlist").attr('taskid', taskid);
-    $("#processlistModal #save-processlist").attr('uid', user.userid);
+    $("#processlistModal #save-processlist").data('action', 'edit');
+    $("#processlistModal #save-processlist").data('taskid', taskid);
+    $("#processlistModal #save-processlist").data('uid', user.userid);
     $("#processlistModal #save-processlist").html('Ok');
     $("#process-select").val('task__feed_last_update_greater'); //Set default process to add
     $("#process-select").change();
@@ -1709,11 +1602,11 @@ $("body").on('click', ".task-edit-processlist", function (e) {
 $("body").on('click', ".task-enabled", function (e) {
     e.stopPropagation();
 
-    var userindex = $(this).attr('uindex');
+    var userindex = $(this).data('uindex');
     var user = userlist[userindex];
 
     var data = {
-        taskid: $(this).attr('taskid'),
+        taskid: $(this).data('taskid'),
         userid: user.userid,
         groupid: selected_groupid,
         enabled: task.enabled == '1' ? 0 : 1,
@@ -1735,19 +1628,19 @@ $('#taskCreate-confirm').on('click', function () {
     else {
         // Prepare process list
         var processlist = new Array();
-        processlist[0] = new Array('group__source_multifeed', $('#processlistModal').attr('feedids').replace(/["\[\]]/gi, '').replace(/,/gi, '-'));
+        processlist[0] = new Array('group__source_multifeed', $('#processlistModal').data('feedids').replace(/["\[\]]/gi, '').replace(/,/gi, '-'));
         // Get other task fields    
         var belongs_to = $('#task-create-belongs-to input[name=belongs-to]:checked').val();
         var description = $('#task-create-description').val();
         var tag = $('#task-create-tag').val();
         var frequency = get_frequency_field('#task-create-frequency');
         var run_on = parse_timepicker_time($('#task-create-run-on input').val());
-        $('#processlistModal').attr('belongs-to', belongs_to);
-        $('#processlistModal').attr('name', name);
-        $('#processlistModal').attr('description', description);
-        $('#processlistModal').attr('tag', tag);
-        $('#processlistModal').attr('frequency', frequency);
-        $('#processlistModal').attr('run_on', run_on);
+        $('#processlistModal').data('belongs-to', belongs_to);
+        $('#processlistModal').data('name', name);
+        $('#processlistModal').data('description', description);
+        $('#processlistModal').data('tag', tag);
+        $('#processlistModal').data('frequency', frequency);
+        $('#processlistModal').data('run_on', run_on);
         // Show hide modals
         $('#taskCreateModal').modal('hide');
         $('#processlistModal').hide();
@@ -1755,10 +1648,10 @@ $('#taskCreate-confirm').on('click', function () {
         //Set default process to addtask__feed_last_update_higher
         $("#process-select").val('task__feed_last_update_greater');
         $("#process-select").change();
-        $("#processlistModal #save-processlist").attr('action', 'create');
+        $("#processlistModal #save-processlist").data('action', 'create');
         // Remove actions from the first proccess in the processlist (Source multifeed) as we dont' want the user to be able toedit/remove it
-        $('.edit-process[processid=0]').hide();
-        $('.delete-process[processid=0]').hide();
+        $('.edit-process[data-processid=0]').hide();
+        $('.delete-process[data-processid=0]').hide();
         // Change the html of the buttons
         $('#processlistModal #close').html('Cancel');
         $('#processlistModal #save-processlist').html('Ok');
@@ -1766,7 +1659,7 @@ $('#taskCreate-confirm').on('click', function () {
 });
 $("#processlistModal").on('click', '#save-processlist', function () {
     // We are creating task from the feeds ticked
-    if ($(this).attr('action') == 'create') {
+    if ($(this).data('action') == 'create') {
         // We remove the first process (source multi-feed) as we are already
         // sending the list of feedids in another variable, more convenient this way
         var processlist = processlist_ui.encode(processlist_ui.contextprocesslist);
@@ -1774,14 +1667,14 @@ $("#processlistModal").on('click', '#save-processlist', function () {
 
         var data = {
             groupid: selected_groupid,
-            feedids: $('#processlistModal').attr('feedids'),
+            feedids: $('#processlistModal').data('feedids'),
             processlist: processlist,
-            name: $('#processlistModal').attr('name'),
-            description: $('#processlistModal').attr('description'),
-            tag: $('#processlistModal').attr('tag'),
-            frequency: $('#processlistModal').attr('frequency'),
-            run_on: $('#processlistModal').attr('run_on'),
-            belongs_to: $('#processlistModal').attr('belongs-to'),
+            name: $('#processlistModal').data('name'),
+            description: $('#processlistModal').data('description'),
+            tag: $('#processlistModal').data('tag'),
+            frequency: $('#processlistModal').data('frequency'),
+            run_on: $('#processlistModal').data('run_on'),
+            belongs_to: $('#processlistModal').data('belongs-to'),
         };
 
         var result = group.setMultiFeedProcessList(data, function win() {
@@ -1793,8 +1686,8 @@ $("#processlistModal").on('click', '#save-processlist', function () {
     }
     else { // we are editing the processlist of an existing task
         var data = {
-            id: $(this).attr('taskid'),
-            userid: $(this).attr('uid'),
+            id: $(this).data('taskid'),
+            userid: $(this).data('uid'),
             groupid: selected_groupid,
             processlist: processlist_ui.encode(processlist_ui.contextprocesslist),
         }
@@ -1822,15 +1715,15 @@ $("#processlistModal").on('click', '#save-processlist', function () {
 });
 $("#processlistModal").on('click', '#process-add', function () {
     // The addintion of a new process to the list redraws the table adding the edit and remove buttons to the "source multifeed" process> we removed them as we don't want the user to edit/remove that process
-    $('.edit-process[processid=0]').hide();
-    $('.delete-process[processid=0]').hide();
+    $('.edit-process[data-processid=0]').hide();
+    $('.delete-process[data-processid=0]').hide();
     // And also qwe make the "Changed press to save" button look like OK
     $('#processlistModal #save-processlist').html('Ok').removeClass('btn-warning').addClass('btn-success');
 });
 
 // development
 /* $(document).ready(function () {
- $('[gindex="1"]').click();
+ $('[data-gindex="1"]').click();
  $('#createuseraddtogroup').click();
  $('#group-createuseraddtogroup-email').val('cagabi@lapiluka.org');
  $('#group-createuseraddtogroup-username').val(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));

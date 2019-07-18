@@ -1,19 +1,7 @@
-#wrapper {
-    padding:0px;
-    margin:0px;
-    padding-left: 250px;
-}
-
-.sidebar {
-    margin-top:0px;
-    margin-left: -250px;
-    left: 250px;
-    width: 250px;
-    background: #eee;
-    position: fixed;
-    overflow-y: auto;
-    z-index: 1000;
-}
+/* 
+#sidebar .include-container {
+    padding: .5rem .95rem .5rem .95rem;
+} */
 
 .page-content {
     width: 100%;
@@ -30,25 +18,6 @@
     float:right; 
     cursor:pointer; 
     padding:10px;
-}
-
-/*------------*/
-#grouplist {
-    background-color: #eee;
-}
-
-.group {
-    padding:15px;
-    cursor:pointer;
-}
-
-.group:hover {
-    background-color: #fff;
-}
-
-.group--active, .group--active:hover {
-    background-color: #0088cc;
-    color: white;
 }
 
 .userstitle {
@@ -111,12 +80,11 @@ input:disabled+span{
 
 
 
-.user{
+.content-container Z.user{
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     background-color:white;
-
     padding: 5px 10px;
 }
 
@@ -238,37 +206,8 @@ input:disabled+span{
     margin:0;
 }
 
-#search-wrapper{
-    padding-left:10px
-}
-
-#search-list{
-    margin:30px
-}
-
-#search-list{
-    position:absolute;
-    background-color:rgba(250, 250, 250, 0.96);
-    padding: 0 10px;
-    top:58px;
-    left:-20px;
-    width:82%;
-}
-
-#search-list p:hover{
-    background-color:white
-}
-
-#search-list p{
-    margin:1px;
-    cursor:default;
-    font-size:13px
-}
-
-
-#search-list h4{
-    margin:10px 0 0;
-    font-size:13px
+#group-search-box{
+    width: 12rem;
 }
 
 .user-feedslist-inner .feed, .user-taskslist-inner .task{

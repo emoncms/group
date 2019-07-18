@@ -19,9 +19,9 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 
 function group_controller() {
-    global $session, $route, $mysqli, $redis, $user, $feed_settings, $log;
+    global $session, $route, $mysqli, $redis, $user, $feed_settings, $log, $path;
 
-    $result = false;
+    $mysqlresult = false;
 
     include "Modules/feed/feed_model.php";
     $feed = new Feed($mysqli, $redis, $feed_settings);
@@ -30,7 +30,7 @@ function group_controller() {
     $input = new Input($mysqli, $redis, $feed);
 
     $task = null;
-    $result = $mysqli->query("SHOW TABLES LIKE 'tasks'");
+    $mysqlresult = $mysqli->query("SHOW TABLES LIKE 'tasks'");
     if (is_file("Modules/task/task_model")) {
         require_once "Modules/process/process_model.php";
         $process = new Process($mysqli, $input, $feed, $user->get_timezone($session['userid']));
@@ -51,9 +51,9 @@ function group_controller() {
         if ($route->action == "") {
             $route->format = "html";
             if (is_null($task) === true)
-                $result = view("Modules/group/group_view.php", array('task_support' => false));
+                return view("Modules/group/group_view.php", array('task_support' => false));
             else
-                $result = view("Modules/group/group_view.php", array('task_support' => true));
+                return view("Modules/group/group_view.php", array('task_support' => true));
         }
 
         // group/create?name=test&description=test
@@ -305,6 +305,10 @@ function group_controller() {
     //---------------------------
     // NO SESSION
     //---------------------------
+    if ($route->action == "") {
+        $route->format = "html";
+        return sprintf('<div class="alert alert-error mt-3"><h4>%1$s:</h4> %2$s <a href="%3$s" title="%4$s" class="alert-link">%4$s</a></div>',_('Error'),_('Module requires authorisation.'),$path,_('Login'));
+    }
     if ($route->action == "getfeed") { // When displaying a public feed for example in a public dashboard
         $route->format = "json";
         $result = $group->getfeed($session["userid"], $route->subaction, get('id'), get('start'), get('end'), get('interval'), get('skipmissing'), get('limitinterval'), get('mode'));
