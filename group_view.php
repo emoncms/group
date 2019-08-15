@@ -14,9 +14,8 @@
  */
 
 defined('EMONCMS_EXEC') or die('Restricted access');
-global $path, $fullwidth, $session, $appname;
+global $path, $session, $appname;
 global $groups_email_subject, $groups_email_body;
-$fullwidth = true;
 $v = 1;
 ?>
 <link href="<?php echo $path; ?>Modules/group/group.css?v=<?php echo $v ?>" rel="stylesheet">
