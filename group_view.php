@@ -409,7 +409,6 @@ MODALS
 JAVASCRIPT
 -------------------------------------------------------------------------------------------->
 <script>
-var path = "<?php echo $path; ?>";
 var my_userid = <?php echo $session["userid"]; ?>;
 var selected_groupid = 0;
 var selected_groupindex = 0;
