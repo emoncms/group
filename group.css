@@ -80,12 +80,12 @@ input:disabled+span{
 
 
 
-.content-container Z.user{
+.content-container .user{
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
     background-color:white;
-    padding: 5px 10px;
+    padding: 10px;
 }
 
 /* .user:nth-child(2) {
@@ -98,7 +98,8 @@ input:disabled+span{
 }
 
 .user-feedslist{
-    margin-left: -5px;
+    margin-left: -1px;
+    padding-top:10px;
 }
 
 .user-feedslist input[type="checkbox"] {
