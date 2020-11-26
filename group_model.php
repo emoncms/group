@@ -118,8 +118,10 @@ class Group {
             return array('success' => false, 'message' => _("You haven't got enough permissions to add a member to this group"));
         }
 
+        $timezone = "UTC";
+
         // 2. Check username and password, return
-        $result = $this->user->register($username, $password, $email);
+        $result = $this->user->register($username, $password, $email, $timezone);
         if (!$result["success"]) {
             $this->log->error("Error creating user - " . var_export($result, true));
             return $result;
