@@ -19,12 +19,12 @@
 defined('EMONCMS_EXEC') or die('Restricted access');
 
 function group_controller() {
-    global $session, $route, $mysqli, $redis, $user, $feed_settings, $log, $path;
+    global $session, $route, $mysqli, $redis, $user, $settings, $log, $path;
 
     $mysqlresult = false;
 
     include "Modules/feed/feed_model.php";
-    $feed = new Feed($mysqli, $redis, $feed_settings);
+    $feed = new Feed($mysqli, $redis, $settings['feed']);
 
     include "Modules/input/input_model.php";
     $input = new Input($mysqli, $redis, $feed);
