@@ -42,10 +42,10 @@ class Group {
     public function create($userid, $name, $description, $organization, $area, $visibility, $access) {
         // Input sanitisation
         $userid = (int) $userid;
-        $name = preg_replace('/[^\w\s-:]/', '', $name);
-        $description = preg_replace('/[^\w\s-:]/', '', $description);
-        $organization = preg_replace('/[^\w\s-:]/', '', $organization);
-        $area = preg_replace('/[^\w\s-:]/', '', $area);
+        $name = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $name);
+        $description = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $description);
+        $organization = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $organization);
+        $area = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $area);
         $visibility = $visibility == 'public' ? 'public' : 'private';
         $access = $access == 'open' ? 'open' : 'closed';
 
@@ -77,10 +77,10 @@ class Group {
         // Input sanitisation        
         $groupid = (int) $groupid;
         $admin_userid = (int) $admin_userid;
-        $name = preg_replace('/[^\w\s-:]/', '', $name);
-        $description = preg_replace('/[^\w\s-:]/', '', $description);
-        $organization = preg_replace('/[^\w\s-:]/', '', $organization);
-        $area = preg_replace('/[^\w\s-:]/', '', $area);
+        $name = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $name);
+        $description = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $description);
+        $organization = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $organization);
+        $area = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $area);
         $visibility = $visibility == 'public' ? 'public' : 'private';
         $access = $access == 'open' ? 'open' : 'closed';
 
@@ -317,7 +317,7 @@ class Group {
         // Input sanitisation
         $session_userid = (int) $session_userid;
         $feedid = (int) $feedid;
-        $subaction = preg_replace('/[^\w\s-:]/', '', $subaction);
+        $subaction = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $subaction);
         // other inputs checked in folloing feed methods
         // Load all the groups the user has access (including users and feeds
         $groups = $this->mygroups($session_userid);
@@ -515,7 +515,7 @@ class Group {
     // Used to enforce unique group names
     public function exists_name($group_name) {
         // Input sanitisation
-        $group_name = preg_replace('/[^\w\s-:]/', '', $group_name);
+        $group_name = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $group_name);
 
         $stmt = $this->mysqli->prepare("SELECT * FROM groups WHERE name = ?");
         $stmt->bind_param("s", $group_name);
@@ -740,7 +740,7 @@ class Group {
         $end = (int) $end;
         $interval = (int) $interval;
         $timezone = (int) $timezone;
-        $name = preg_replace('/[^\w\s-:]/', '', $name);
+        $name = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $name);
 
         $myrole = $this->getrole($session_userid, $groupid);
         if ($myrole != 1 && $myrole != 2)
@@ -930,7 +930,7 @@ class Group {
     }
 
     public function get_groupid($group_name) {
-        $group_name = preg_replace('/[^\w\s-:]/', '', $group_name);
+        $group_name = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $group_name);
         $stmt = $this->mysqli->prepare("SELECT id FROM groups WHERE name = ?");
         $stmt->bind_param("s", $group_name);
         if (!$stmt->execute())
@@ -1038,7 +1038,7 @@ class Group {
         // Input sanitisation
         $userid = (int) $userid;
         $groupid = (int) $groupid;
-        $feedname = preg_replace('/[^\w\s-:]/', '', $feedname);
+        $feedname = preg_replace('/[^\p{N}\p{L}_\-:]/u', '', $feedname);
 
         // 1. Check that user is a group administrator
         if (!$this->is_group_admin($groupid, $userid))
